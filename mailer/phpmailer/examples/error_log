@@ -1,0 +1,1 @@
+[30-Apr-2020 14:08:24 UTC] PHP Parse error:  syntax error, unexpected '->' (T_OBJECT_OPERATOR), expecting end of file in /home/kjm7uovhq3z2/public_html/PHPMailer/examples/smtp.php on line 26
