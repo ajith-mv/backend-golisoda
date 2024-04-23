@@ -60,7 +60,7 @@ class CouponController extends Controller
                         $coupon_type = "Category";
                     }
                      if ($row->coupon_type == '5') {
-                        $coupon_type = "Brands";
+                        $coupon_type = "Brand";
                     }
                     return $coupon_type;
                 })
