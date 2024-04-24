@@ -62,7 +62,7 @@ case '1':
         $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
         foreach ($coupon->couponProducts as $items) {
             $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
-            if(!$cartCount){
+            if(is_null($cartCount->id)){
             return '';
             }
             $product_info=Product::find($items->product_id);
@@ -146,7 +146,7 @@ case '4':
         ->where('carts.customer_id', $customer_id)
         // ->groupBy('carts.product_id')
         ->first();
-        if(!$checkCartData){
+       if(is_null($checkCartData->id)){
             return '';
         }
            $product_info=Product::find($checkCartData->product_id);
@@ -229,7 +229,7 @@ case '3':
         ->where('carts.customer_id', $customer_id)
         // ->groupBy('carts.product_id')
         ->first();
-        if(!$checkCartData){
+        if(is_null($checkCartData->id)){
             return '';
         }
         $product_info=Product::find($checkCartData->product_id);
