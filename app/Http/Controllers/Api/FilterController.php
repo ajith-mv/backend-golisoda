@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
+use App\Models\Master\Brands;
 class FilterController extends Controller
 {
 
@@ -113,6 +113,7 @@ class FilterController extends Controller
     public function getFilterStaticSideMenu(Request $request)
     {
         $category_slug = $request->category_slug ?? '';
+        $brand_slug = $request->brand_slug ?? '';
 
         $categories_data = Product::selectRaw('parent.name,parent.slug,parent.id,parent.parent_id')
             ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
@@ -238,7 +239,7 @@ class FilterController extends Controller
 
         $browse = $parent;
 
-        $attr_response = $this->getAttributeFilter($category_slug);
+        $attr_response = $this->getAttributeFilter($category_slug,$brand_slug);
 
         $response['exclusive'] =  [array('id' => null, 'name' => 'Goli Soda', 'slug' => 'goli_soda')];
         $response['categories'] =  $categories;
@@ -257,7 +258,7 @@ class FilterController extends Controller
         $new_array['handpicked'] = $handpicked;
 
         // dd( $attr_response['attributes'] );
-        // dd( $new_array );
+         //dd( $new_array );
         // $response['sort_by'] =  $sort_by;          
 
         return $new_array;
@@ -778,7 +779,7 @@ class FilterController extends Controller
         return $data;
     }
 
-    public function getAttributeFilter($category_slug = '')
+    public function getAttributeFilter($category_slug = '',$brand_slug='')
     {
 
         if ($category_slug) {
@@ -786,6 +787,9 @@ class FilterController extends Controller
         }
 
         $cat_id = $productCategory->id ?? '';
+        if(isset($brand_slug) && !empty($brand_slug)){
+        $brands = Brands::select('brands.id', 'brands.brand_name as name', 'brands.slug')->where('slug',$brand_slug)->get();
+        }else{
         $brands = Product::select('brands.id', 'brands.brand_name as name', 'brands.slug')
             ->join('brands', 'brands.id', '=', 'products.brand_id')
             ->join('product_categories', function ($join) {
@@ -801,7 +805,7 @@ class FilterController extends Controller
             ->whereNull('products.deleted_at')
             ->where('products.status', 'published')->groupBy('products.brand_id')
             ->get()->toArray();
-
+        }
         $productCategory = ProductCategory::where('slug', $category_slug)->first();
         // dump($category_slug);
         // dd( $productCategory );
