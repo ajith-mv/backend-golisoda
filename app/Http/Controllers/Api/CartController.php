@@ -226,7 +226,7 @@ case '1':
 //     break;
 case '4':
     # category ...
-    $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_carts.sub_total) as category_total')
+    $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
         ->join('products', 'products.id', '=', 'carts.product_id')
         ->where('carts.customer_id', $customer_id)
         // ->groupBy('carts.product_id')
@@ -303,7 +303,7 @@ case '4':
     break;
 case '3':
     # category ...
-    $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_carts.sub_total) as category_total')
+    $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
         ->join('products', 'products.id', '=', 'carts.product_id')
         ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
         ->join('coupon_categories', function ($join) {
@@ -387,7 +387,7 @@ case '3':
 case '5':
 
                             # brands ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_carts.sub_total) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('brands', 'brands.id', '=', 'products.brand_id')
                                 ->join('coupon_brands', function ($join) {
