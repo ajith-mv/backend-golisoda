@@ -301,7 +301,7 @@ case '3':
     break;
 case '5':
                             # brands ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_carts.sub_total) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('brands', 'brands.id', '=', 'products.brand_id')
                                 ->join('coupon_brands', function ($join) {
