@@ -313,7 +313,7 @@ case '5':
                                 ->first();
                                 return $checkCartData;
             if(is_null($checkCartData->id)){
-            return '';
+            return 'rr';
             }
  $product_info=Product::find($checkCartData->product_id);
             $checkCartData->sub_total=round($product_info->strike_price * $checkCartData->quantity);
