@@ -311,7 +311,7 @@ case '5':
                                 ->where('carts.customer_id', $customer_id)
                                 //->groupBy('carts.product_id')
                                 ->first();
-                                return $checkCartData;
+                               
             if(is_null($checkCartData->id)){
             return 'rr';
             }
