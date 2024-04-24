@@ -312,7 +312,7 @@ case '5':
                                 //->groupBy('carts.product_id')
                                 ->first();
                                 return $checkCartData;
-            if(!$checkCartData){
+            if(is_null($checkCartData->id)){
             return '';
             }
  $product_info=Product::find($checkCartData->product_id);
