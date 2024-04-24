@@ -62,6 +62,9 @@ case '1':
         $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
         foreach ($coupon->couponProducts as $items) {
             $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
+            if(!$cartCount){
+            return '';
+            }
             $product_info=Product::find($items->product_id);
             $cartCount->sub_total=round($product_info->strike_price * $cartCount->quantity);
             $cartCount->update();
@@ -117,7 +120,7 @@ case '1':
                         'shipping_fee_id' => $shippingfee_info->id ?? null,
                         'shipping_fee' => $shippingfee_info->charges ?? null
                     ];
-                    DB::table('carts')->where('id', $checkCartData->id)->update($update_data);
+                    DB::table('carts')->where('id', $cartCount->id)->update($update_data);
                     $response['cart_info'] = $this->getCartListAll($customer_id, null, null, null, $shipping_fee_id, $response['coupon_amount']);
                 }
             } else {
@@ -143,6 +146,9 @@ case '4':
         ->where('carts.customer_id', $customer_id)
         // ->groupBy('carts.product_id')
         ->first();
+        if(!$checkCartData){
+            return '';
+        }
            $product_info=Product::find($checkCartData->product_id);
             $checkCartData->sub_total=round($product_info->strike_price * $checkCartData->quantity);
             $checkCartData->update();
@@ -223,6 +229,9 @@ case '3':
         ->where('carts.customer_id', $customer_id)
         // ->groupBy('carts.product_id')
         ->first();
+        if(!$checkCartData){
+            return '';
+        }
         $product_info=Product::find($checkCartData->product_id);
             $checkCartData->sub_total=round($product_info->strike_price * $checkCartData->quantity);
             $checkCartData->update();
@@ -302,6 +311,9 @@ case '5':
                                 ->where('carts.customer_id', $customer_id)
                                 //->groupBy('carts.product_id')
                                 ->first();
+            if(!$checkCartData){
+            return '';
+            }
  $product_info=Product::find($checkCartData->product_id);
             $checkCartData->sub_total=round($product_info->strike_price * $checkCartData->quantity);
             $checkCartData->update();
