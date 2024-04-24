@@ -311,6 +311,7 @@ case '5':
                                 ->where('carts.customer_id', $customer_id)
                                 //->groupBy('carts.product_id')
                                 ->first();
+                                dd($checkCartData);
             if(!$checkCartData){
             return '';
             }
