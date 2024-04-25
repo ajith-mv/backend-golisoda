@@ -367,13 +367,7 @@ case '5':
                                     $response['coupon_code'] = $coupon->coupon_code;
                                     $response['status'] = 'success';
                                     $response['message'] = 'Coupon applied';
-                                     $response['cart_info'] = $this->getCartListAll($customer_id, null, null, null, $shipping_fee_id, $response['coupon_amount']);
-                                } else {
-                                    $response['status'] = 'error';
-                                    $response['message'] = 'Cart order does not meet coupon minimum order amount';
-
-                                }
-                                 $update_data = [
+        $update_data = [
                 'coupon_id' => $coupon->id,
                 'coupon_amount' => $product_amount,
                 'coupon_percentage' => $coupon->calculate_value ?? null,
@@ -383,6 +377,13 @@ case '5':
                 'shipping_fee' => $shippingfee_info->charges ?? null
             ];
             DB::table('carts')->where('id',$checkCartData->id)->update($update_data);
+                                     $response['cart_info'] = $this->getCartListAll($customer_id, null, null, null, $shipping_fee_id, $response['coupon_amount']);
+                                } else {
+                                    $response['status'] = 'error';
+                                    $response['message'] = 'Cart order does not meet coupon minimum order amount';
+
+                                }
+                                 
                             } else {
                                 $response['status'] = 'error';
                                 $response['message'] = 'Coupon not applicable';
