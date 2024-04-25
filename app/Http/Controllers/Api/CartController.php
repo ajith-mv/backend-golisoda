@@ -147,9 +147,11 @@ case '1':
         $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
         foreach ($coupon->couponProducts as $items) {
             $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
-           if(is_null($cartCount->id)){
-            return '';
-            }
+        if(isset($cartCount) && is_null($cartCount->id)){
+        $response['status'] = 'error';
+        $response['message'] = 'Coupon not applicable';
+            return $response??'';
+        }
             $product_info=Product::find($items->product_id);
             $cartCount->sub_total=round($product_info->strike_price * $cartCount->quantity);
             $cartCount->update();
@@ -231,8 +233,10 @@ case '4':
         ->where('carts.customer_id', $customer_id)
         // ->groupBy('carts.product_id')
         ->first();
-       if(is_null($checkCartData->id)){
-            return '';
+       if(isset($checkCartData) && is_null($checkCartData->id)){
+        $response['status'] = 'error';
+        $response['message'] = 'Coupon not applicable';
+            return $response??'';
         }
            $product_info=Product::find($checkCartData->product_id);
             $checkCartData->sub_total=round($product_info->strike_price * $checkCartData->quantity);
@@ -314,8 +318,10 @@ case '3':
         ->where('carts.customer_id', $customer_id)
         // ->groupBy('carts.product_id')
         ->first();
-       if(is_null($checkCartData->id)){
-            return '';
+       if(isset($checkCartData) && is_null($checkCartData->id)){
+        $response['status'] = 'error';
+        $response['message'] = 'Coupon not applicable';
+            return $response??'';
         }
         $product_info=Product::find($checkCartData->product_id);
             $checkCartData->sub_total=round($product_info->strike_price * $checkCartData->quantity);
@@ -397,8 +403,10 @@ case '5':
                                 ->where('carts.customer_id', $customer_id)
                                 //->groupBy('carts.product_id')
                                 ->first();
-     if(is_null($checkCartData->id)){
-            return '';
+     if(isset($checkCartData) && is_null($checkCartData->id)){
+        $response['status'] = 'error';
+        $response['message'] = 'Coupon not applicable';
+            return $response??'';
         }
  $product_info=Product::find($checkCartData->product_id);
             $checkCartData->sub_total=round($product_info->strike_price * $checkCartData->quantity);
