@@ -36,6 +36,13 @@ class Brands extends Model
                     ->join( DB::raw('gbs_product_categories as p'), DB::raw('p.id'),'=','product_categories.parent_id')
                     ->groupBy(DB::raw('p.id'));
     }
+    public function childCategory() {
+        return $this->hasMany(Product::class, 'brand_id', 'id')   
+                    ->selectRaw('p.*')                 
+                    ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
+                    ->join( DB::raw('gbs_product_categories as p'), DB::raw('p.id'),'=','product_categories.parent_id')->where('product_categories.parent_id','!=',0)
+                    ->groupBy(DB::raw('p.id'));
+    }
     public function storeLocator()
     {
         return $this->hasMany(StoreLocator::class,'brand_id','id');

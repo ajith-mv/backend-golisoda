@@ -23,11 +23,12 @@ class FilterController extends Controller
     {
 
         $category_slug = $request->category_slug ?? '';
+        $brand_slug = $request->brand_slug ?? '';
         /**
          * top menu
          */
         $response = [];
-        if ($category_slug) {
+        if (isset($category_slug) && !empty($category_slug)) {
             $category = ProductCategory::select('id', 'name', 'parent_id', 'slug', 'image','banner_image')->with('childCategory')->where('slug', $category_slug)->first();
             $top_slide_menu = [];
             if ($category) {
@@ -85,6 +86,15 @@ class FilterController extends Controller
                     $top_slide_menu['child_category'] = $tmp_cat;
                 }
             } 
+        }else if (isset($brand_slug) && !empty($brand_slug)) {
+        $array = explode('_', $brand_slug);
+        $brands = Brands::select('brands.id', 'brands.brand_name as name', 'brands.slug')->whereIn('slug',$array)->get();
+        if(count($brands)>0){
+            foreach($brands->childCategory as $sub_item){
+            $tmp_cat[] = array('id' => $sub_item->id, 'name' => $sub_item->name, 'slug' => $sub_item->slug);
+            }
+             $top_slide_menu['child_category'] = $tmp_cat;
+        }      
         } else {
 
             $top_category = ProductCategory::select('id', 'name', 'parent_id', 'slug', 'image','banner_image')
