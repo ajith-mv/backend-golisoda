@@ -109,7 +109,7 @@ class FilterController extends Controller
 $serializedObjects = array_map('serialize', $tmp_cat);
 $uniqueSerializedObjects = array_unique($serializedObjects);
 $uniqueObjects = array_map('unserialize', $uniqueSerializedObjects);
-$top_slide_menu['child_category'][] = $uniqueObjects;
+$top_slide_menu['child_category']= array_values($uniqueObjects);
           }
          }  else {
 
