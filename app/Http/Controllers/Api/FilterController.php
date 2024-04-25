@@ -788,10 +788,8 @@ class FilterController extends Controller
 
         $cat_id = $productCategory->id ?? '';
         if(isset($brand_slug) && !empty($brand_slug)){
-        $replacedStrings = array_map(function ($str) {
-            return str_replace('_', ',', $str);
-        }, $brand_slug);
-        $whereInClause = implode(',', $replacedStrings);
+        $array = explode('_', $brand_slug);
+        $whereInClause = implode(',', $array);
         $brands = Brands::select('brands.id', 'brands.brand_name as name', 'brands.slug')->whereIn('slug',$whereInClause)->get();
         }else{
         $brands = Product::select('brands.id', 'brands.brand_name as name', 'brands.slug')
