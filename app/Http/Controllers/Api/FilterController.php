@@ -27,6 +27,7 @@ class FilterController extends Controller
         /**
          * top menu
          */
+        $top_slide_menu=[];
         $response = [];
         if (isset($category_slug) && !empty($category_slug)) {
             $category = ProductCategory::select('id', 'name', 'parent_id', 'slug', 'image','banner_image')->with('childCategory')->where('slug', $category_slug)->first();
@@ -90,12 +91,27 @@ class FilterController extends Controller
         $array = explode('_', $brand_slug);
         $brands = Brands::select('brands.id', 'brands.brand_name as name', 'brands.slug')->whereIn('slug',$array)->get();
         if(count($brands)>0){
-            foreach($brands->childCategory as $sub_item){
-            $tmp_cat[] = array('id' => $sub_item->id, 'name' => $sub_item->name, 'slug' => $sub_item->slug);
-            }
-             $top_slide_menu['child_category'] = $tmp_cat;
-        }      
-        } else {
+
+        foreach($brands as $brand){
+           $products=Product::where('brand_id',$brand->id)                 
+            ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
+           ->where('product_categories.parent_id', '!=', 0)
+            ->groupBy('products.category_id')
+            ->distinct()
+            ->get();
+        foreach($products as $product){
+            if($product->productCategory){
+                $child_data=$product->productCategory;
+            $tmp_cat[] = array('id' => $child_data->id, 'name' => $child_data->name, 'slug' => $child_data->slug);
+            } 
+           }
+          }
+$serializedObjects = array_map('serialize', $tmp_cat);
+$uniqueSerializedObjects = array_unique($serializedObjects);
+$uniqueObjects = array_map('unserialize', $uniqueSerializedObjects);
+$top_slide_menu['child_category'][] = $uniqueObjects;
+          }
+         }  else {
 
             $top_category = ProductCategory::select('id', 'name', 'parent_id', 'slug', 'image','banner_image')
                 ->where('status', 'published')
