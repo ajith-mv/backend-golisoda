@@ -62,8 +62,9 @@
                                     <select name="calculate_type" id="calculate_type" aria-label="Select a Coupon Type"
                                         data-control="select2" data-placeholder="Select Coupon Type ..."
                                         class="form-select mb-2">
-                                        <option value="percentage">Percentage</option>
-                                        <option value="fixed_amount">Fixed Amount</option>
+                                        <option value="percentage"  @if (isset($info->calculate_type) && $info->calculate_type == 'percentage') selected="selected" @endif >Percentage</option>
+                                        <option value="fixed_amount" 
+                                         @if (isset($info->calculate_type) && $info->calculate_type == 'fixed_amount') selected="selected" @endif >Fixed Amount</option>
                                     </select>
                                 </div>
                             </div>

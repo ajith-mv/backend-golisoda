@@ -207,7 +207,10 @@ class CouponController extends Controller
             $error                  = 0;
 
             $info                   = Coupons::updateOrCreate(['id' => $id], $ins);
-
+        $info->couponProducts()->delete();
+        $info->couponCustomers()->delete();
+        $info->couponCategory()->delete();
+        $info->couponBrandData()->delete();
             if ($request->coupon_type == "1" || $request->coupon_type == "4") {
 
                 CouponProduct::where('coupon_id', $info->id)->forceDelete();
@@ -275,7 +278,7 @@ class CouponController extends Controller
                 }
             }else if ($request->coupon_type == "5") {
 
-                CouponBrand::where('coupon_id', $info->id)->forceDelete();
+                CouponBrand::where('coupon_id',$info->id)->forceDelete();
                 if ($isAll) {
                     $couponUseable = DB::table('brands')->select('id', 'brand_name')->where('status', 'published')->get();
                     if (isset($couponUseable) && !empty($couponUseable)) {
