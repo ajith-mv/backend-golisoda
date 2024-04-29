@@ -27,9 +27,8 @@ class FilterController extends Controller
         /**
          * top menu
          */
-        $top_slide_menu=[];
         $response = [];
-        if (isset($category_slug) && !empty($category_slug)) {
+        if ($category_slug) {
             $category = ProductCategory::select('id', 'name', 'parent_id', 'slug', 'image','banner_image')->with('childCategory')->where('slug', $category_slug)->first();
             $top_slide_menu = [];
             if ($category) {
@@ -111,7 +110,7 @@ $uniqueSerializedObjects = array_unique($serializedObjects);
 $uniqueObjects = array_map('unserialize', $uniqueSerializedObjects);
 $top_slide_menu['child_category']= array_values($uniqueObjects);
           }
-         }  else {
+        } else {
 
             $top_category = ProductCategory::select('id', 'name', 'parent_id', 'slug', 'image','banner_image')
                 ->where('status', 'published')
@@ -284,7 +283,7 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
         $new_array['handpicked'] = $handpicked;
 
         // dd( $attr_response['attributes'] );
-         //dd( $new_array );
+        // dd( $new_array );
         // $response['sort_by'] =  $sort_by;          
 
         return $new_array;
@@ -805,7 +804,7 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
         return $data;
     }
 
-    public function getAttributeFilter($category_slug = '',$brand_slug='')
+    public function getAttributeFilter($category_slug = '',$brand_slug = '')
     {
 
         if ($category_slug) {
@@ -833,6 +832,7 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
             ->where('products.status', 'published')->groupBy('products.brand_id')
             ->get()->toArray();
         }
+
         $productCategory = ProductCategory::where('slug', $category_slug)->first();
         // dump($category_slug);
         // dd( $productCategory );
