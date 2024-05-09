@@ -42,6 +42,24 @@
                     'pdf': "{{ route('country.export.pdf') }}",
                 }
             },
+            'variation': {
+            'delete': "{{ route('variation.delete') }}",
+            'status': "{{ route('variation.status') }}",
+            'add': "{{ route('variation.add.edit') }}",
+            'export': {
+                'excel': "{{ route('variation.export.excel') }}",
+                'pdf': "{{ route('variation.export.pdf') }}",
+            }
+            },
+            'variation-group': {
+            'delete': "{{ route('variation-group.delete') }}",
+            'status': "{{ route('variation-group.status') }}",
+            'add': "{{ route('variation-group.add.edit') }}",
+            'export': {
+                'excel': "{{ route('variation-group.export.excel') }}",
+                'pdf': "{{ route('variation-group.export.pdf') }}",
+            }
+            },
             'state': {
 
                 'delete': "{{ route('state.delete') }}",
