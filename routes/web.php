@@ -74,8 +74,6 @@ Route::middleware(['auth'])->group(function(){
         'city' => App\Http\Controllers\Master\CityController::class,
         'state' => App\Http\Controllers\Master\StateController::class,
         'country' => App\Http\Controllers\Master\CountryController::class,
-        'variation' => App\Http\Controllers\Master\VariationController::class,
-        'variation-group' => App\Http\Controllers\Master\VariationGroupController::class,
         'order-status' => App\Http\Controllers\Master\OrderStatusController::class,
         'users' => App\Http\Controllers\UserController::class,
         'sms-template' => App\Http\Controllers\SmsTemplateController::class,
@@ -155,12 +153,7 @@ Route::middleware(['auth'])->group(function(){
         Route::get('/export/excel', [App\Http\Controllers\Product\ProductController::class, 'export'])->name('products.export.excel')->middleware(['checkAccess:export']);
         Route::get('/export/pdf', [App\Http\Controllers\Product\ProductController::class, 'exportPdf'])->name('products.export.pdf')->middleware(['checkAccess:export']);
 
-        Route::post('/variation/row', [App\Http\Controllers\Product\ProductVariationController::class, 'getAttributeRow'])->name('products.variation.row'); 
-        Route::get('/variation/value', [App\Http\Controllers\Product\ProductVariationController::class, 'getvariationvalue'])->name('products.variation.value'); 
-
-        /***** Attribute set values */
         Route::post('/attribute/row', [App\Http\Controllers\Product\ProductAttributeSetController::class, 'getAttributeRow'])->name('products.attribute.row'); 
-
         /***** Attribute set values */
         Route::get('/attribute', [App\Http\Controllers\Product\ProductAttributeSetController::class, 'index'])->name('product-attribute')->middleware(['checkAccess:visible']); 
         Route::post('/attribute/addOrEdit', [App\Http\Controllers\Product\ProductAttributeSetController::class, 'modalAddEdit'])->name('product-attribute.add.edit')->middleware(['checkAccess:editable']);
