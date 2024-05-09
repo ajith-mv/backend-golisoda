@@ -799,6 +799,28 @@
                                 </a>
                             </div>
                         @endif
+                        @if (access()->hasAccess(['variation']))
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->routeIs(['variation'])) active @endif"
+                                href="{{ route('variation') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title"> Variation </span>
+                            </a>
+                        </div>
+                    @endif
+                    @if (access()->hasAccess(['variation-group']))
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->routeIs(['variation-group'])) active @endif"
+                                href="{{ route('variation-group') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title"> Variation Group</span>
+                            </a>
+                        </div>
+                    @endif
                     </div>
                 </div>
             @endif
