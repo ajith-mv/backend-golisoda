@@ -179,4 +179,9 @@ class Product extends Model
         return $this->hasOne(ProductCategory::class, 'id', 'category_id');
     }
 
+    public function productVariationOption()
+    {
+        return $this->hasMany(ProductVariationOption::class, 'product_id', 'id');
+    }
+
 }

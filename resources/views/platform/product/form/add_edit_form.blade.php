@@ -9,14 +9,16 @@
         label.error {
             color: red;
         }
-    .dropzone .dz-preview.lp-preview {
-        width: 150px !important;
-    }
-    .dropzone {
-        width: 740px !important;
-        overflow: auto !important;
-        white-space: nowrap !important;
-    }
+
+        .dropzone .dz-preview.lp-preview {
+            width: 150px !important;
+        }
+
+        .dropzone {
+            width: 740px !important;
+            overflow: auto !important;
+            white-space: nowrap !important;
+        }
     </style>
 @endsection
 @section('content')
@@ -47,6 +49,10 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-active-primary product-tab pb-4" data-bs-toggle="tab"
+                                    href="#kt_ecommerce_add_product_variation">Variation</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-active-primary product-tab pb-4" data-bs-toggle="tab"
                                     href="#kt_ecommerce_add_product_meta">Meta Tags</a>
                             </li>
                             <li class="nav-item">
@@ -71,7 +77,9 @@
                             <div class="tab-pane fade" id="kt_ecommerce_add_product_filter" role="tab-panel">
                                 @include('platform.product.form.filter.filter')
                             </div>
-
+                            <div class="tab-pane fade" id="kt_ecommerce_add_product_variation" role="tab-panel">
+                                @include('platform.product.form.variation.variation')
+                            </div>
                             <div class="tab-pane fade" id="kt_ecommerce_add_product_meta" role="tab-panel">
                                 @include('platform.product.form.meta.meta')
                             </div>
@@ -173,7 +181,7 @@
                                 // Enable button
                                 submitButton.disabled = false;
                                 var fileInput = document.getElementById("gallery_image");
-                                 fileInput.value = "";
+                                fileInput.value = "";
                                 setTimeout(() => {
                                     if (res.isUpdate) {
                                         setTimeout(() => {
@@ -238,7 +246,7 @@
         var remove_image_url = "{{ route('products.remove.image') }}";
         var gallery_upload_url = "{{ route('products.upload.gallery') }}";
 
-        
+
 
 
         function removeGalleryImage(productImageId) {
@@ -259,6 +267,89 @@
                 }
             });
 
+        }
+        $(document).on('change', '#category_id', function(e) {
+            var category_id = $(this).val();
+            var id = '';
+            addProductVariationRow(id, category_id);
+        });
+
+        // $(document).on('change', 'select[name="kt_docs_repeater_nested_outer[0][select2_input]"]', function(e) {
+        //     var length = $('#kt_docs_repeater_nested').length;
+        //     console.log(length);
+        //     var variation = $(this).val();
+        //     var currentRepeaterItem = $(this).closest('[data-repeater-item]');
+        //     var variationValueSelect = currentRepeaterItem.find(
+        //         'select[name="kt_docs_repeater_nested_outer[0][kt_docs_repeater_nested_inner][0][variation_value]"]'
+        //         );
+        //     console.log(currentRepeaterItem);
+        //     $.ajax({
+        //         url: "{{ route('products.variation.value') }}",
+        //         type: "GET",
+        //         data: {
+        //             variation: variation,
+        //         },
+        //         success: function(res) {
+        //             if (res.values) {
+        //                 $.each(res.values, function(key, data) {
+        //                     variationValueSelect.append('<option value="' + data.value + '">' +
+        //                         data.value + '</option>');
+        //                 });
+        //             }
+        //         },
+        //         error: function(error) {
+        //             console.log('Error fetching variation_value:', error);
+        //         }
+        //     });
+        // });
+
+
+
+        @if (isset($info->id) && !empty($info->id))
+            var info_id = '{{ $info->id }}';
+            addProductVariationRow(info_id, category_id);
+        @endif
+
+        function addProductVariationRow(id, category_id) {
+            var category_id = $('#category_id').val();
+            console.log(category_id);
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                url: "{{ route('products.variation.row') }}",
+                type: "POST",
+                data: {
+                    product_id: id,
+                    category_id: category_id
+                },
+                success: function(res) {
+                    $('#formRepeaterIds').append(res);
+
+                },
+                error: function(error) {
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-left",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    };
+                    toastr.error(error.responseJSON.message);
+                }
+            });
         }
 
 

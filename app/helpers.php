@@ -659,6 +659,18 @@ function getProductApiData($product_data, $customer_id = '')
         }
     }
 
+    $variation_option = [];
+    if(isset($product_data->productVariationOption) && !empty($product_data->productVariationOption)){
+        foreach($product_data->productVariationOption as $product_variation_option){
+            $variation_option[$product_variation_option->variation->title][] = [
+                'variation_id' => $product_variation_option->variation_id,
+                'variation_name' => $product_variation_option->variation->title,
+                'variation_value' => $product_variation_option->value,
+                'variation_amount' => $product_variation_option->amount,
+            ];
+        }
+    }
+    $pro['variation_option'] = $variation_option;
     $pro['addons'] = $addon_arr;
     $pro['description_products'] = $description_arr;
     $pro['frequently_purchased'] = $frequently_purchased;
