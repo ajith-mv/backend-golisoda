@@ -2,7 +2,7 @@
         <!--begin::Form group-->
         <div class="form-group">
             <div data-repeater-list="kt_docs_repeater_nested_outer">
-                @if (isset($info->productVariationOption) && !empty($info->productVariationOption))
+                @if (isset($info->productVariationOption) && count($info->productVariationOption) > 0)
                 @php
                    $tempIds = [];
                    $tempArr = [];
@@ -138,7 +138,7 @@
                                             <div class="col-md-2">
                                                 <label class=" form-label fs-6 mb-2">Is Default</label>
                                                     <div class="input-group pb-3" style="margin-top: 13px">
-                                                        <input   type="checkbox" class="is-default-checkbox" name="is_default" value="1" @if (isset($info->is_overview) && $info->is_overview == 'yes') checked @endif>
+                                                        <input type="checkbox" class="is-default-checkbox" name="is_default" value="0">
                                                     </div>
                                             </div>
                                         </div>
@@ -197,13 +197,12 @@
    
 });
 
-    function repeter() {
+function repeter() {
     $("[data-repeater-list='kt_docs_repeater_nested_inner']").closest('div').each(function() {
         var $row = $(this);
         $row.find('.is-default-checkbox').click(function() {
             $row.find('.is-default-checkbox').not(this).prop('checked', false);
-            var isChecked = $(this).is(':checked');
-        $(this).val(isChecked ? '1' : '0');
+            $(this).val($(this).is(':checked') ? '1' : '0');
         });
     });
 
