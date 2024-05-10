@@ -24,6 +24,8 @@ class Cart extends Model
         return $this->hasMany(CartProductAddon::class, 'cart_id', 'id');
     }
 
-
+    public function variationOptions(){
+        return $this->hasMany(CartProductVariationOption::class, 'cart_id', 'id');
+    }
     
 }

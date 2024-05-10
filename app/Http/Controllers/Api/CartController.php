@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Order;
 use App\Models\Offers\CouponCategory;
 use App\Models\Offers\Coupons;
+use App\Models\Product\ProductVariationOption;
 use Illuminate\Support\Facades\DB;
 class CartController extends Controller
 {
@@ -27,6 +28,7 @@ class CartController extends Controller
         $guest_token = $request->guest_token;
         $addon_id = $request->addon_id;
         $product_id = $request->product_id;
+        $variation_option_ids =  $request->variation_option_ids;
         $quantity = $request->quantity ?? 1;
         $type = $request->type;
 
@@ -84,6 +86,17 @@ class CartController extends Controller
                 $ins['cart_order_no']   = 'ORD' . date('ymdhis');
 
                 $cart_id = Cart::create($ins)->id;
+                if(isset($variation_option_ids) && !empty($variation_option_ids)){
+                    foreach($variation_option_ids as $variation_option_id){
+                        $product_variation_option = ProductVariationOption::find($variation_option_id);
+                        $cart_product_variation_ins['cart_id'] = $cart_id;
+                        $cart_product_variation_ins['product_id'] = $product_variation_option->product_id;
+                        $cart_product_variation_ins['variation_id'] = $product_variation_option->variation_id;
+                        $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
+                        $cart_product_variation_ins['value'] = $product_variation_option->value;
+                        $cart_product_variation_ins['amount'] = $product_variation_option->amount;
+                    }
+                }
                 $error = 0;
                 $message = 'Cart added successful';
                 $data = $this->getCartListAll($customer_id, $guest_token);
@@ -581,6 +594,7 @@ return $response??'';
         // $checkCart      = Cart::find($cart_id);
         if ($checkCart) {
             $checkCart->addons()->delete();
+            $checkCart->variationOptions()->delete();
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;
             $checkCart->delete();
@@ -613,6 +627,7 @@ return $response??'';
             if (isset($data) && count($data) > 0) {
                 foreach ($data as $item) {
                     $item->addons()->delete();
+                    $item->variationOptions()->delete();
                 }
             }
 
@@ -648,12 +663,12 @@ return $response??'';
     function getCartListAll($customer_id = null, $guest_token = null,  $shipping_info = null, $shipping_type = null, $selected_shipping = null, $coupon_data = null)
     {
         // dd( $coupon_data );
-        $checkCart          = Cart::with(['products', 'products.productCategory'])->when($customer_id != '', function ($q) use ($customer_id) {
+        $checkCart          = Cart::with(['products', 'products.productCategory', 'variationOptions'])->when($customer_id != '', function ($q) use ($customer_id) {
             $q->where('customer_id', $customer_id);
         })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
             $q->where('guest_token', $guest_token);
         })->get();
-
+        $globel= GlobalSettings::find(1);
         $tmp                = [];
         $grand_total        = 0;
         $tax_total          = 0;
@@ -823,7 +838,6 @@ return $response??'';
             $charges        = ShippingCharge::select('id', 'shipping_title', 'minimum_order_amount', 'charges', 'is_free')->where('status', 'published')->where('minimum_order_amount', '<', $amount)->get();
 
             $tmp['shipping_charges']    = $charges;
-              $globel= GlobalSettings::find(1);
              
               $is_cod=0;
               $cod_amount=0;

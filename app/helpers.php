@@ -680,6 +680,7 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
                 'variation_name' => $product_variation_option->variation->title,
                 'variation_value' => $product_variation_option->value,
                 'variation_amount' => $product_variation_option->amount,
+                'is_default' => $product_variation_option->is_default,
             ];
         }
     }
