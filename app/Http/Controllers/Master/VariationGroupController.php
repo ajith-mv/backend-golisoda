@@ -88,7 +88,7 @@ class VariationGroupController extends Controller
             'title' => 'required|string|unique:variation_groups,title,' . $id . ',id,deleted_at,NULL',
             'collection_variation' => 'required|array',
             'sort' => 'required',
-            'collection_category' => 'required',
+            'collection_category' => 'required|unique:variation_groups,category_id,' . $id . ',id,deleted_at,NULL',
         ]);
     
         if ($validator->fails()) {

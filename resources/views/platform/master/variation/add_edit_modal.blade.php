@@ -40,7 +40,7 @@
 
 
 <!--begin::Repeater-->
-<div id="kt_docs_repeater_nested">
+{{-- <div id="kt_docs_repeater_nested">
     <!--begin::Form group-->
     <div class="form-group">
         <div data-repeater-list="kt_docs_repeater_nested_outer">
@@ -81,7 +81,7 @@
             <i class="la la-plus"></i>Add Value
         </a>
     </div>
-</div>
+</div> --}}
 
 <!--end::Repeater-->
 

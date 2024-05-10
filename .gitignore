@@ -15,3 +15,5 @@ yarn-error.log
 /.vscode
 today.md
 storage/
+.env
+.env

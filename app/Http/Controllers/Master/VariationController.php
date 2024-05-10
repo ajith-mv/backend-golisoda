@@ -73,7 +73,7 @@ class VariationController extends Controller
         $id= $request->id;
         $validator= Validator::make($request->all(), [
                                 'title' => 'required|string|unique:variations,title,' . $id . ',id,deleted_at,NULL',
-                                'tag_line' => 'required|string|unique:variations,tag_line,' . $id . ',id,deleted_at,NULL',
+                                // 'tag_line' => 'required|string|unique:variations,tag_line,' . $id . ',id,deleted_at,NULL',
                                 'sort' => 'required',
                                 'kt_docs_repeater_nested_outer.*.value' => 'required',
                             ],[
@@ -82,7 +82,7 @@ class VariationController extends Controller
 
         if ($validator->passes()) {
             $ins['title'] = $request->title;
-            $ins['value'] = json_encode($request->kt_docs_repeater_nested_outer);
+            // $ins['value'] = json_encode($request->kt_docs_repeater_nested_outer);
             $ins['tag_line']                        = $request->tag_line;
             $ins['sort']                    = $request->sort;
             $ins['added_by']        = Auth::id();
