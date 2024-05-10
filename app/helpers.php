@@ -6,6 +6,7 @@ use App\Models\CartProductAddon;
 use App\Models\Master\Customer;
 use App\Models\Order;
 use App\Models\Product\Product;
+use App\Models\Product\ProductVariationOption;
 use App\Models\Product\Review;
 use App\Models\ProductAddon;
 use App\Models\SmsTemplate;
@@ -60,10 +61,8 @@ function sendGBSSms($sms_type, $details)
     //     // dd( $params );
     //     sendSMS($mobile_no, $templateMessage, $params);
     // }
-    
+
     return true;
-    
-    
 }
 
 function sendSMS($numbers, $msg, $params)
@@ -89,7 +88,7 @@ function sendSMS($numbers, $msg, $params)
     // // echo $response;
     // curl_close($ch);
     // return $response;
-    
+
     return true;
 }
 
@@ -184,7 +183,6 @@ if (!function_exists('getCustomerNo')) {
 
                 $customer_no =  'GS' . $ord;
             }
-            
         }
         return $customer_no;
     }
@@ -230,7 +228,7 @@ if (!function_exists('percentage')) {
 if (!function_exists('percentageAmountOnly')) {
     function percentageAmountOnly($amount, $percent)
     {
-        return round(( round($amount) * ($percent / 100)));
+        return round((round($amount) * ($percent / 100)));
     }
 }
 
@@ -254,52 +252,66 @@ if (!function_exists('getSaleProductPrices')) {
         }
 
         #condition 2:
-        if (isset($couponsInfo) && !empty($couponsInfo)){
-        if($couponsInfo->quantity > $couponsInfo->used_quantity) {
+        if (isset($couponsInfo) && !empty($couponsInfo)) {
+            if ($couponsInfo->quantity > $couponsInfo->used_quantity) {
 
-            #check product amount greater than minimum order value
-            if ($couponsInfo->minimum_order_value <= $price) {
-                #then do percentage or fixed amount discount
-                switch ($couponsInfo->calculate_type) {
-                    case 'percentage':
-                        $strike_rate    = $price;
-                        $price          = percentage($price, $couponsInfo->calculate_value);
-                        $has_discount   = 'yes';
-                        break;
-                    case 'fixed_amount':
-                        $strike_rate    = $price;
-                        $price          = $price - $couponsInfo->calculate_value;
-                        $has_discount   = 'yes';
-                        break;
-                    default:
-                        # code...
-                        break;
+                #check product amount greater than minimum order value
+                if ($couponsInfo->minimum_order_value <= $price) {
+                    #then do percentage or fixed amount discount
+                    switch ($couponsInfo->calculate_type) {
+                        case 'percentage':
+                            $strike_rate    = $price;
+                            $price          = percentage($price, $couponsInfo->calculate_value);
+                            $has_discount   = 'yes';
+                            break;
+                        case 'fixed_amount':
+                            $strike_rate    = $price;
+                            $price          = $price - $couponsInfo->calculate_value;
+                            $has_discount   = 'yes';
+                            break;
+                        default:
+                            # code...
+                            break;
+                    }
                 }
             }
-          }
         }
 
         return array('strike_rate' => $strike_rate, 'price' => $price, 'has_discount' => $has_discount);
     }
 }
 
-function getProductApiData($product_data, $customer_id = '')
+function getProductApiData($product_data, $customer_id = '', $variation_option_id = null)
 {
     //    dd( $product_data->productCategory->name );
 
     $category               = $product_data->productCategory;
-    $price_data=getProductPrices($product_data);
-    
+    $price_data = getProductPrices($product_data);
+
     $pro                    = [];
-    if($price_data['overall_discount_percentage'] !=0){
-          $pro['price']           = $price_data['price'];
-          $pro['discount_percentage'] =$price_data['overall_discount_percentage'];
-          $pro['strike_price']    = $price_data['strike_rate'];
-         $pro['save_price']      = round( $price_data['strike_rate'] -$price_data['price']);
-    }else{
-         $pro['price']           = $product_data->mrp;
-         $pro['discount_percentage'] = $product_data->discount_percentage != 0 ? abs($product_data->discount_percentage): getDiscountPercentage($product_data->mrp, $product_data->strike_price);
-         $pro['strike_price']    = $product_data->strike_price;
+    $total_variation_amount = 0;
+    if (isset($variation_option_id) && !empty($variation_option_id)) {
+        $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
+            ->where('product_id', $product_data->id)
+            ->selectRaw("SUM(amount) AS total_amount")
+            ->groupBy('product_id')
+            ->get();
+        if(isset($variation_option_data)){
+        $total_variation_amount = $variation_option_data[0]->total_amount;
+
+        }
+
+    }
+    $pro['total_variation_amount'] = $total_variation_amount;
+    if ($price_data['overall_discount_percentage'] != 0) {
+        $pro['price']           = $price_data['price'] + $total_variation_amount;
+        $pro['discount_percentage'] = $price_data['overall_discount_percentage'];
+        $pro['strike_price']    = $price_data['strike_rate'];
+        $pro['save_price']      = round($price_data['strike_rate'] - $price_data['price']);
+    } else {
+        $pro['price']           = $product_data->mrp + $total_variation_amount;
+        $pro['discount_percentage'] = $product_data->discount_percentage != 0 ? abs($product_data->discount_percentage) : getDiscountPercentage($product_data->mrp, $product_data->strike_price);
+        $pro['strike_price']    = $product_data->strike_price;
         $pro['save_price']      = round($product_data->strike_price - $product_data->mrp);
     }
     $pro['id']              = $product_data->id;
@@ -428,8 +440,8 @@ function getProductApiData($product_data, $customer_id = '')
             $tmp2['price']           = $productInfo->mrp;
             $tmp2['strike_price']    = $productInfo->strike_price;
             $tmp2['save_price']      = $productInfo->strike_price - $productInfo->mrp;
-            $tmp2['discount_percentage'] = $productInfo->discount_percentage != 0 ? abs($productInfo->discount_percentage): getDiscountPercentage($productInfo->mrp, $productInfo->strike_price);
-            
+            $tmp2['discount_percentage'] = $productInfo->discount_percentage != 0 ? abs($productInfo->discount_percentage) : getDiscountPercentage($productInfo->mrp, $productInfo->strike_price);
+
             $tmp2['image']           = $productInfo->base_image;
 
             $imagePath              = $productInfo->base_image;
@@ -452,7 +464,7 @@ function getProductApiData($product_data, $customer_id = '')
             $productInfo            = Product::find($related->to_product_id);
 
             $category               = $productInfo->productCategory;
-            if( $productInfo->stock_status == 'in_stock' ) {
+            if ($productInfo->stock_status == 'in_stock') {
 
                 $tmp2                    = [];
                 $tmp2['id']              = $productInfo->id;
@@ -469,18 +481,18 @@ function getProductApiData($product_data, $customer_id = '')
                 $tmp2['price']           = $productInfo->mrp;
                 $tmp2['strike_price']    = $productInfo->strike_price;
                 $tmp2['save_price']      = $productInfo->strike_price - $productInfo->mrp;
-                $tmp2['discount_percentage'] = $productInfo->discount_percentage != 0 ? abs($productInfo->discount_percentage): getDiscountPercentage($productInfo->mrp, $productInfo->strike_price);
+                $tmp2['discount_percentage'] = $productInfo->discount_percentage != 0 ? abs($productInfo->discount_percentage) : getDiscountPercentage($productInfo->mrp, $productInfo->strike_price);
                 $tmp2['image']           = $productInfo->base_image;
-    
+
                 $imagePath              = $productInfo->base_image;
-    
+
                 if (!Storage::exists($imagePath)) {
                     $path               = asset('assets/logo/no_Image.jpg');
                 } else {
                     $url                = Storage::url($imagePath);
                     $path               = asset($url);
                 }
-                
+
                 $tmp2['image']           = $path;
                 $frequently_purchased[]  = $tmp2;
             }
@@ -600,7 +612,7 @@ function getProductApiData($product_data, $customer_id = '')
 
             $addon_arr[] = $temp;
         }
-    } 
+    }
     if (isset($product_data->productCategory->parent->productAddonsByCategory) && count($product_data->productCategory->parent->productAddonsByCategory) > 0) {
 
         $product_addons = $product_data->productCategory->parent->productAddonsByCategory;
@@ -647,7 +659,7 @@ function getProductApiData($product_data, $customer_id = '')
         }
     }
 
-    
+
 
     $video_link = [];
     if (isset($product_data->productUrl) && count($product_data->productUrl) > 0) {
@@ -660,9 +672,10 @@ function getProductApiData($product_data, $customer_id = '')
     }
 
     $variation_option = [];
-    if(isset($product_data->productVariationOption) && !empty($product_data->productVariationOption)){
-        foreach($product_data->productVariationOption as $product_variation_option){
+    if (isset($product_data->productVariationOption) && !empty($product_data->productVariationOption)) {
+        foreach ($product_data->productVariationOption as $product_variation_option) {
             $variation_option[$product_variation_option->variation->title][] = [
+                'variation_option_id' => $product_variation_option->id,
                 'variation_id' => $product_variation_option->variation_id,
                 'variation_name' => $product_variation_option->variation->title,
                 'variation_value' => $product_variation_option->value,
@@ -874,22 +887,22 @@ if (!function_exists('getProductPrices')) {
         $has_discount           = 'no';
 
         #condition 1:
-        if(isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type== 'percentage'){
-        if ($today >= $productsObjects->sale_start_date && $today <= $productsObjects->sale_end_date) {
+        if (isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type == 'percentage') {
+            if ($today >= $productsObjects->sale_start_date && $today <= $productsObjects->sale_end_date) {
 
-            $strike_rate        = $productsObjects->mrp;
-            $price              = $productsObjects->sale_price;
-            $has_discount       = 'yes';
-            if (isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type == 'percentage') {
-                $overall_discount_percentage += $productsObjects->productDiscount->discount_value;
+                $strike_rate        = $productsObjects->mrp;
+                $price              = $productsObjects->sale_price;
+                $has_discount       = 'yes';
+                if (isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type == 'percentage') {
+                    $overall_discount_percentage += $productsObjects->productDiscount->discount_value;
+                }
+                $discount[]         = array('discount_type' => $productsObjects->productDiscount->discount_type, 'discount_value' => $productsObjects->productDiscount->discount_value, 'discount_name' => '');
             }
-            $discount[]         = array('discount_type' => $productsObjects->productDiscount->discount_type, 'discount_value' => $productsObjects->productDiscount->discount_value, 'discount_name' => '');
-        }
-        }elseif(isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type== 'fixed_amount'){
+        } elseif (isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type == 'fixed_amount') {
             $strike_rate        = $productsObjects->mrp;
             $price              = $productsObjects->sale_price;
             $has_discount       = 'yes';
-            $overall_discount_percentage=round($productsObjects->productDiscount->amount) ?? 0;
+            $overall_discount_percentage = round($productsObjects->productDiscount->amount) ?? 0;
             $discount[]         =  $productsObjects->productDiscount->amount;
         }
 
@@ -1046,8 +1059,8 @@ function getIndianCurrency(float $number)
 
 function getDiscountPercentage($mop, $mrp)
 {
-    if($mop!=0.0 && $mrp !=0.0){
-    return abs(round((($mop / $mrp) * 100) - 100));
+    if ($mop != 0.0 && $mrp != 0.0) {
+        return abs(round((($mop / $mrp) * 100) - 100));
     }
     return 0;
 }

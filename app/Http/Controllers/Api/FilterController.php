@@ -717,9 +717,10 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
     {
         $product_url = $request->product_url;
         $customer_id = $request->customer_id;
+        $variation_option_ids = $request->variation_option_ids;
         $items = Product::where('product_url', $product_url)->first();
         if ($items) {
-            $return = getProductApiData($items, $customer_id);
+            $return = getProductApiData($items, $customer_id, $variation_option_ids);
         }
         return $return ?? [];
     }
