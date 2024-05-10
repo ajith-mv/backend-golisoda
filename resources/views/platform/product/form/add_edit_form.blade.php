@@ -327,7 +327,7 @@
                 },
                 success: function(res) {
                     $('#formRepeaterIds').append(res);
-
+                   $('#title').remove(); 
                 },
                 error: function(error) {
                     toastr.options = {

@@ -13,6 +13,7 @@ class ProductVariationOption extends Model
         'product_id',
         'variation_id',
         'value',
+        'is_default',
         'amount',
     ];
 
