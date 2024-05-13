@@ -477,6 +477,7 @@ class ProductController extends Controller
             if (isset($request->kt_docs_repeater_nested_outer) && !empty($request->kt_docs_repeater_nested_outer)) {
                 ProductVariationOption::where('product_id', $product_id)->delete();
                 $kt_docs_repeater_nested_outer = $request->kt_docs_repeater_nested_outer;
+           
                 $product_option_ins['product_id']                  = $product_id;
                 for ($i = 0; $i < count($kt_docs_repeater_nested_outer); $i++) {
                     $product_option_ins['variation_id'] = $kt_docs_repeater_nested_outer[$i]['variation_id'];
@@ -484,7 +485,7 @@ class ProductController extends Controller
                     for ($j = 0; $j < count($kt_docs_repeater_nested_inner); $j++) {
                         $product_option_ins['value'] = $kt_docs_repeater_nested_inner[$j]['variation_value'];
                         $product_option_ins['amount'] = $kt_docs_repeater_nested_inner[$j]['amount'];
-                        $product_option_ins['is_default'] = $kt_docs_repeater_nested_inner[$j]['is_default'];
+                        $product_option_ins['is_default'] = $kt_docs_repeater_nested_inner[$j]['is_default'][0] ?? 0;
                         ProductVariationOption::create($product_option_ins);
                     }
                 }
