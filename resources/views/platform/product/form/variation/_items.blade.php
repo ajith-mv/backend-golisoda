@@ -2,6 +2,10 @@
         <!--begin::Form group-->
         <div class="form-group">
             <div data-repeater-list="kt_docs_repeater_nested_outer">
+                @php
+                $count =count($variations);
+                @endphp
+                <input type="hidden" name="count" value="{{$count ?? ''}}">
                 @if (isset($info->productVariationOption) && count($info->productVariationOption) > 0)
                 @php
                    $tempIds = [];
@@ -20,7 +24,7 @@
                 @endphp
                 @foreach ($tempArr as $key => $attr)
                 <div data-repeater-item>
-                    <div class="form-group row mb-5">
+                    <div class="form-group row mb-5 test">
                         <div class="col-md-3">
                             <label class="required form-label fs-6 mb-2">Variation</label>
                             <select class="form-select  product-attr-select required" name="variation_id"
@@ -97,8 +101,8 @@
                 </div>
                 @endforeach
         @else
-                <div data-repeater-item>
-                    <div class="form-group row mb-5">
+                <div data-repeater-item >
+                    <div class="form-group row mb-5 test">
                         <div class="col-md-3">
                             <label class="required form-label fs-6 mb-2">Variation</label>
                             <select class="form-select  product-attr-select required" name="variation_id"
@@ -175,7 +179,7 @@
         </div>
         <!--end::Form group-->
         <!--begin::Form group-->
-        <div class="form-group">
+        <div class="form-group" id="adddiv">
             <a href="javascript:;" data-repeater-create class="btn btn-flex btn-light-primary">
                 <span class="svg-icon svg-icon-2">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -191,12 +195,23 @@
         <!--end::Form group-->
     </div>
 <script>
-    $(document).ready(function() {
+$(document).ready(function() {
      repeter() ;
- 
-   
+     length();
 });
-
+function length() {
+    var length = $('.test').length; 
+    var data = parseInt($('input[name="count"]').val()); 
+        if (data >= length) {
+            if(data === length){
+                $('#adddiv').hide();
+            }
+            return true;
+        } else {
+            $('#adddiv').hide();
+            return false;
+        } 
+}
 function repeter() {
     $("[data-repeater-list='kt_docs_repeater_nested_inner']").closest('div').each(function() {
         var $row = $(this);
@@ -205,9 +220,7 @@ function repeter() {
             $(this).val($(this).is(':checked') ? '1' : '0');
         });
     });
-
-    }
-
+ }
     setTimeout(() => {
         $('.product-attr-select').select2();
     }, 200);
@@ -223,19 +236,21 @@ function repeter() {
         }
     }],
     show: function() {
-        repeter();
-        let row_length = $(this).closest('div').find('.inner-repeater').find(
-            "[data-repeater-list='kt_docs_repeater_nested_inner']").find('.repeater_div');
-          
-        if (row_length.length > 1) {
-
-            row_length.not(':first').remove();
-        }
+    repeter();
+    let row_length = $(this).closest('div').find('.inner-repeater').find("[data-repeater-list='kt_docs_repeater_nested_inner']").find('.repeater_div');     
+    if (row_length.length > 1) {
+        row_length.not(':first').remove();
+    }
+    if (length()) {
         $(this).slideDown();
-    },
-
+        setTimeout(() => {
+        $('.product-attr-select').select2();
+    }, 200);
+    }
+},
     hide: function(deleteElement) {
         $(this).slideUp(deleteElement);
+        $('#adddiv').show(); 
     }
 });
 </script>
