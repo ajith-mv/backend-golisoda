@@ -312,7 +312,7 @@
 
         function addProductVariationRow(id, category_id) {
             var category_id = $('#category_id').val();
-            console.log(category_id);
+            // console.log(category_id);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -332,7 +332,7 @@
                 error: function(error) {
                     toastr.options = {
                         "closeButton": false,
-                        "debug": false,
+                        "debug": false, 
                         "newestOnTop": false,
                         "progressBar": false,
                         "positionClass": "toast-top-left",
