@@ -61,6 +61,57 @@ class CartController extends Controller
             } else {
                 $error = 0;
                 $message = 'Cart added successful';
+                $check_cart_variation_option = CartProductVariationOption::where('cart_id', $checkCart->id)->whereNotIn('variation_option_id', $variation_option_ids)->exists();
+                if ($check_cart_variation_option) {
+                    $customer_info = Customer::find($request->customer_id);
+                    $total_variation_amount = 0;
+                    if (isset($customer_info) && !empty($customer_info) || !empty($request->guest_token)) {
+
+                        if ($product_info->quantity <= $quantity) {
+                            $quantity = $product_info->quantity;
+                        }
+                        if (isset($variation_option_ids) && !empty($variation_option_ids)) {
+                            $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_ids)
+                                ->where('product_id', $product_id)
+                                ->selectRaw("SUM(amount) AS total_amount")
+                                ->groupBy('product_id')
+                                ->get();
+                            if (isset($variation_option_data)) {
+                                $total_variation_amount = $variation_option_data[0]->total_amount;
+                            }
+                        }
+                        $ins['customer_id']     = $request->customer_id;
+                        $ins['product_id']      = $product_id;
+                        $ins['guest_token']     = $request->guest_token ?? null;
+                        $ins['quantity']        = $quantity ?? 1;
+                        $ins['price']           = (float)$product_info->mrp + $total_variation_amount;
+                        $ins['sub_total']       = $ins['price'] * $quantity ?? 1;
+                        $ins['cart_order_no']   = 'ORD' . date('ymdhis');
+
+                        $cart_id = Cart::create($ins)->id;
+                        if (isset($variation_option_ids) && !empty($variation_option_ids)) {
+                            foreach ($variation_option_ids as $variation_option_id) {
+                                $product_variation_option = ProductVariationOption::find($variation_option_id);
+                                $cart_product_variation_ins['cart_id'] = $cart_id;
+                                $cart_product_variation_ins['product_id'] = $product_variation_option->product_id;
+                                $cart_product_variation_ins['variation_id'] = $product_variation_option->variation_id;
+                                $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
+                                $cart_product_variation_ins['value'] = $product_variation_option->value;
+                                $cart_product_variation_ins['amount'] = $product_variation_option->amount;
+                                CartProductVariationOption::create($cart_product_variation_ins);
+                            }
+                        }
+
+                        $error = 0;
+                        $message = 'Cart added successful';
+                        $data = $this->getCartListAll($customer_id, $guest_token);
+                    } else {
+                        $error = 1;
+                        $message = 'Customer Data not available';
+                        $data = [];
+                    }
+                }
+
                 $product_quantity = $checkCart->quantity + $quantity;
                 if ($product_info->quantity <= $product_quantity) {
                     $product_quantity = $product_info->quantity;
