@@ -332,6 +332,7 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
         }
     }
     $price_data = getProductPrices($product_data, $total_variation_amount);
+    dd($price_data);
 
     $pro['default_value'] = (object)$default_value;
     $pro['total_variation_amount'] = $total_variation_amount;
