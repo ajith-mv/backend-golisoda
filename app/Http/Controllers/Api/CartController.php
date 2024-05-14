@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use App\Models\GlobalSettings;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Order;
+use App\Models\CartProductVariationOption;
 use App\Models\Offers\CouponCategory;
 use App\Models\Offers\Coupons;
 use App\Models\Product\ProductVariationOption;
@@ -84,7 +85,7 @@ class CartController extends Controller
                 $ins['price']           = (float)$product_info->mrp;
                 $ins['sub_total']       = $product_info->mrp * $quantity ?? 1;
                 $ins['cart_order_no']   = 'ORD' . date('ymdhis');
-
+                  
                 $cart_id = Cart::create($ins)->id;
                 if(isset($variation_option_ids) && !empty($variation_option_ids)){
                     foreach($variation_option_ids as $variation_option_id){
@@ -95,8 +96,10 @@ class CartController extends Controller
                         $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
                         $cart_product_variation_ins['value'] = $product_variation_option->value;
                         $cart_product_variation_ins['amount'] = $product_variation_option->amount;
+                         CartProductVariationOption::create($cart_product_variation_ins);
                     }
                 }
+            
                 $error = 0;
                 $message = 'Cart added successful';
                 $data = $this->getCartListAll($customer_id, $guest_token);

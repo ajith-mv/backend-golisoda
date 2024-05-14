@@ -12,6 +12,7 @@ use App\Models\ProductAddon;
 use App\Models\SmsTemplate;
 use App\Models\User;
 use App\Models\Wishlist;
+use App\Models\Master\Variation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -301,7 +302,25 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
 
         }
 
+    }else{
+        $variation_option_data = ProductVariationOption::where('product_id', $product_data->id)
+        ->where('is_default', 1)
+        ->get();   
+    if(isset($variation_option_data)){
+       
+        $default_value = [];
+        foreach ($variation_option_data as $value) {
+          
+            $variation = Variation::where('id', $value->variation_id)->first();
+            if($variation){
+                $title = $variation->title ?? '';
+                $id = $value->id ?? '';           
+                $default_value[$title] = $id;
+            }   
+        }
+    } 
     }
+    $pro['default_value ']= $default_value;
     $pro['total_variation_amount'] = $total_variation_amount;
     if ($price_data['overall_discount_percentage'] != 0) {
         $pro['price']           = $price_data['price'] + $total_variation_amount;
