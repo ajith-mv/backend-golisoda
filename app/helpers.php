@@ -907,7 +907,7 @@ if (!function_exists('getProductPrice')) {
 if (!function_exists('getProductPrices')) {
     function getProductPrices($productsObjects, $total_variation_amount)
     { // this function not used check all files confirm and delete it
-
+dd('works here'.$total_variation_amount);
         $strike_rate            = 0;
         $price                  = $productsObjects->mrp + $total_variation_amount;
         $today                  = date('Y-m-d');
