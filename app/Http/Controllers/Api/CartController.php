@@ -94,7 +94,7 @@ class CartController extends Controller
                 $ins['guest_token']     = $request->guest_token ?? null;
                 $ins['quantity']        = $quantity ?? 1;
                 $ins['price']           = (float)$product_info->mrp + $total_variation_amount;
-                $ins['sub_total']       = ((float)$product_info->mrp + $total_variation_amount) * $quantity ?? 1;
+                $ins['sub_total']       = $ins['price'] * $quantity ?? 1;
                 $ins['cart_order_no']   = 'ORD' . date('ymdhis');
 
                 $cart_id = Cart::create($ins)->id;
