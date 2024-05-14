@@ -814,6 +814,7 @@ class CartController extends Controller
                     $pro['discount_percentage'] = abs($items->discount_percentage);
                     $pro['image']           = $items->base_image;
                     $pro['max_quantity']    = $items->quantity;
+                    $pro['chosen_variation_option_ids'] = $variation_option_id;
                     $imagePath              = $items->base_image;
 
                     $brand_array[] = $items->brand_id;
