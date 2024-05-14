@@ -39,16 +39,15 @@
                         <input type="hidden" name="id" value="{{ $info->id ?? '' }}">
                         <div class="fv-row mb-7">
                             <label class=" required fw-bold fs-6 mb-2">Category</label>
-                            <select name="collection_category" id="collection_category" aria-label="Select a Category" data-placeholder="Select a category..." class="form-select mb-2" required>
+                            <select name="collection_category[]" id="collection_category" aria-label="Select a Category" multiple="multiple" data-placeholder="Select a category..." class="form-select mb-2" required>
                                 <option value=""></option>
                                 @isset($categories)
                                 @foreach ($categories as $item)
-                                    <option value="{{ $item->id }}" @if(isset($info->category_id) && $info->category_id == $item->id) selected="selected" @endif>
+                                    <option value="{{ $item->id }}" @if(isset($selectedCategoryIds) && in_array($item->id, $selectedCategoryIds))selected="selected" @endif>
                                         {{ $item->name }} 
                                     </option>
                                 @endforeach
-                            @endisset
-                                                     
+                            @endisset              
                             </select>
                         </div>
                         <div class="fv-row mb-7">

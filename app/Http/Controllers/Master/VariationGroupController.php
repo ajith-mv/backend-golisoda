@@ -68,6 +68,7 @@ class VariationGroupController extends Controller
         $variations = Variation::where('status', '1')->get();
         $categories = ProductCategory::where('status', 'published')->get();
         $selectedVariationIds = [];
+        $selectedCategoryIds = [];
     
         if (isset($id) && !empty($id)) {
             $info = VariationGroup::find($id);
@@ -75,10 +76,12 @@ class VariationGroupController extends Controller
             $variations = Variation::where('status', '1')->get();
             if (!empty($info->variation_id)) {
                 $selectedVariationIds = json_decode($info->variation_id, true);
+                $selectedCategoryIds = json_decode($info->category_id, true);
+              
             }
         }
     
-        return view('platform.master.variation-group.add_edit_modal', compact('info', 'modal_title', 'variations','categories', 'selectedVariationIds'));
+        return view('platform.master.variation-group.add_edit_modal', compact('info', 'modal_title', 'variations','categories', 'selectedVariationIds','selectedCategoryIds'));
     }
     
     public function saveForm(Request $request, $id = null)
@@ -88,17 +91,17 @@ class VariationGroupController extends Controller
             'title' => 'required|string|unique:variation_groups,title,' . $id . ',id,deleted_at,NULL',
             'collection_variation' => 'required|array',
             'sort' => 'required',
-            'collection_category' => 'required|unique:variation_groups,category_id,' . $id . ',id,deleted_at,NULL',
+            'collection_category' => 'required',
         ]);
     
         if ($validator->fails()) {
             return response()->json(['error' => 1, 'message' => $validator->errors()], 422);
         }
-    
+ 
         $ins['title'] = $request->title;
         $ins['variation_id'] = json_encode($request->collection_variation);
         $ins['sort'] = $request->sort;
-        $ins['category_id'] = $request->collection_category;
+        $ins['category_id'] = json_encode($request->collection_category);
         $ins['added_by'] = Auth::id();
         $ins['status'] = $request->status == "1" ? 1 : 2;
     
