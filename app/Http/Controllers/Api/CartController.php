@@ -16,6 +16,7 @@ use App\Models\GlobalSettings;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Order;
 use App\Models\CartProductVariationOption;
+use App\Models\Master\Variation;
 use App\Models\Offers\CouponCategory;
 use App\Models\Offers\Coupons;
 use App\Models\Product\ProductVariationOption;
@@ -722,11 +723,22 @@ class CartController extends Controller
                     if (isset($variation_option_id) && !empty($variation_option_id)) {
                         $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
                             ->where('product_id', $product_info->id)
-                            ->selectRaw("SUM(amount) AS total_amount")
-                            ->groupBy('product_id')
+                            // ->selectRaw("SUM(amount) AS total_amount")
+                            // ->groupBy('product_id')
                             ->get();
-                        if (isset($variation_option_data)) {
-                            $total_variation_amount = $variation_option_data[0]->total_amount;
+                        // if (isset($variation_option_data)) {
+                        //     $total_variation_amount = $variation_option_data[0]->total_amount;
+                        // }
+
+                        foreach ($variation_option_data as $value) {
+
+                            $variation = Variation::where('id', $value->variation_id)->first();
+                            if ($variation) {
+                                $title = $variation->title ?? '';
+                                // $id = $value->id ?? '';
+                                $default_value[$title] = $value->value ?? '';
+                                $total_variation_amount = $total_variation_amount + $value->amount;
+                            }
                         }
                     }
                     $category               = $items->productCategory;
