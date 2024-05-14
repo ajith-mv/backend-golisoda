@@ -793,10 +793,6 @@ class CartController extends Controller
                     }
                     $total_addon_amount += $addon_total;
 
-                    foreach ($items->variationOptions as $variationids) {
-                        $variation_option_id[] = $variationids->variation_option_id;
-                    }
-
                     $pro                    = [];
                     $pro['id']              = $items->id;
                     $pro['tax']             = $tax;
@@ -818,8 +814,7 @@ class CartController extends Controller
                     $pro['discount_percentage'] = abs($items->discount_percentage);
                     $pro['image']           = $items->base_image;
                     $pro['max_quantity']    = $items->quantity;
-                    $pro['variation_option_ids']    = $items->quantity;
-                    $imagePath              = $variation_option_id;
+                    $imagePath              = $items->base_image;
 
                     $brand_array[] = $items->brand_id;
 
