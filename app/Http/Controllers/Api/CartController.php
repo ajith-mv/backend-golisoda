@@ -658,19 +658,26 @@ return $response??'';
     public function getCarts(Request $request)
     {
         $guest_token = $request->guest_token;
-        $customer_id    = $request->customer_id;
+        $customer_id    = $request->customer_id;     
         $selected_shipping = $request->selected_shipping ?? '';
-        return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping);
+        return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping,null);
     }
 
     function getCartListAll($customer_id = null, $guest_token = null,  $shipping_info = null, $shipping_type = null, $selected_shipping = null, $coupon_data = null)
     {
+       
         // dd( $coupon_data );
         $checkCart          = Cart::with(['products', 'products.productCategory', 'variationOptions'])->when($customer_id != '', function ($q) use ($customer_id) {
             $q->where('customer_id', $customer_id);
         })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
             $q->where('guest_token', $guest_token);
         })->get();
+          $variation_option_id=[];
+           foreach ($checkCart as $cartItem) {   
+            foreach ($cartItem->variationOptions as $variationids) { 
+                $variation_option_id[]=$variationids->variation_option_id;
+            }
+            }
         $globel= GlobalSettings::find(1);
         $tmp                = [];
         $grand_total        = 0;
@@ -692,6 +699,7 @@ return $response??'';
                 try {
                     $category               = $items->productCategory;
                     $product_info=Product::find($citems->product_id);
+                
                     // if($citems){
                     // $product_info=Product::find($citems->product_id);
                     //  if(isset($product_info->productCategory->tax)){
@@ -702,6 +710,19 @@ return $response??'';
                     //         $tax_data=(0 / 100);
                     //     }
                     // }
+                    $pro                    = [];
+                    $total_variation_amount = 0;
+                    if (isset($variation_option_id) && !empty($variation_option_id)) {
+                        $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
+                            ->where('product_id', $product_info->id)
+                            ->selectRaw("SUM(amount) AS total_amount")
+                            ->groupBy('product_id')
+                            ->get();
+                        if(isset($variation_option_data)){
+                        $total_variation_amount = $variation_option_data[0]->total_amount;
+                        }
+                
+                    }
                     $category               = $items->productCategory;
                       if(isset($citems->coupon_id)){
                         // $price=$items->strike_price /(1+$tax_data);
@@ -781,7 +802,8 @@ return $response??'';
                     $pro['stock_status']    = $items->stock_status;
                     $pro['is_featured']     = $items->is_featured;
                     $pro['is_best_selling'] = $items->is_best_selling;
-                    $pro['price']           = $items->mrp;
+                    $pro['price']           = $items->mrp + $total_variation_amount;
+                    $pro['total_variation_amount'] = $total_variation_amount;
                     $pro['strike_price']    = $items->strike_price;
                     $pro['save_price']      = $items->strike_price - $items->mrp;
                     $pro['discount_percentage'] = abs($items->discount_percentage);
@@ -802,7 +824,7 @@ return $response??'';
                     $pro['customer_id']     = $customer_id;
                     $pro['guest_token']     = $citems->guest_token;
                     $pro['cart_id']         = $citems->id;
-                    $pro['price']           = $citems->price;
+                    $pro['price']           = $citems->price  + $total_variation_amount;
                     $pro['quantity']        = $citems->quantity;
                     $pro['sub_total']       = $citems->sub_total;
                     $pro['addons']          = $used_addons;
