@@ -321,7 +321,7 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
             }
         }
     }
-    $pro['default_value '] = $default_value;
+    $pro['default_value'] = (object)$default_value;
     $pro['total_variation_amount'] = $total_variation_amount;
     if ($price_data['overall_discount_percentage'] != 0) {
         $pro['price']           = $price_data['price'] + $total_variation_amount;
