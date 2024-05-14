@@ -18,6 +18,8 @@ use App\Models\Product\OrderProductAddon;
 use App\Models\Product\Product;
 use App\Models\ShippingCharge;
 use App\Models\Master\CustomerAddress;
+use App\Models\OrderProductVariationOption;
+use App\Models\Product\ProductVariationOption;
 use App\Models\Warranty;
 use Exception;
 use Illuminate\Http\Request;
@@ -191,6 +193,21 @@ class CheckoutController extends Controller
                 $items_ins['sub_total'] = $item['sub_total'];
 
                 $order_product_info = OrderProduct::create($items_ins);
+
+                //insert variations
+                if (isset($variation_option_ids) && !empty($variation_option_ids)) {
+                    foreach ($variation_option_ids as $variation_option_id) {
+                        $product_variation_option = ProductVariationOption::find($variation_option_id);
+                        $cart_product_variation_ins['order_id'] = $order_id;
+                        $cart_product_variation_ins['order_product_id'] = $order_product_info->id;
+                        $cart_product_variation_ins['variation_id'] = $product_variation_option->variation_id;
+                        $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
+                        $cart_product_variation_ins['value'] = $product_variation_option->value;
+                        $cart_product_variation_ins['amount'] = $product_variation_option->amount;
+                        OrderProductVariationOption::create($cart_product_variation_ins);
+                    }
+                }
+                
                 if (isset($product_info->warranty_id) && !empty($product_info->warranty_id)) {
                     $warranty_info = Warranty::find($product_info->warranty_id);
                     if ($warranty_info) {
@@ -517,7 +534,19 @@ class CheckoutController extends Controller
                         OrderProductWarranty::create($war);
                     }
                 }
-
+                //insert variations
+                if (isset($variation_option_ids) && !empty($variation_option_ids)) {
+                    foreach ($variation_option_ids as $variation_option_id) {
+                        $product_variation_option = ProductVariationOption::find($variation_option_id);
+                        $cart_product_variation_ins['order_id'] = $order_id;
+                        $cart_product_variation_ins['order_product_id'] = $order_product_info->id;
+                        $cart_product_variation_ins['variation_id'] = $product_variation_option->variation_id;
+                        $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
+                        $cart_product_variation_ins['value'] = $product_variation_option->value;
+                        $cart_product_variation_ins['amount'] = $product_variation_option->amount;
+                        OrderProductVariationOption::create($cart_product_variation_ins);
+                    }
+                }
                 /**
                  * insert addons data
                  */

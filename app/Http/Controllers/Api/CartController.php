@@ -680,11 +680,6 @@ class CartController extends Controller
             $q->where('guest_token', $guest_token);
         })->get();
         $variation_option_id = [];
-        foreach ($checkCart as $cartItem) {
-            foreach ($cartItem->variationOptions as $variationids) {
-                $variation_option_id[] = $variationids->variation_option_id;
-            }
-        }
         $globel = GlobalSettings::find(1);
         $tmp                = [];
         $grand_total        = 0;
@@ -793,6 +788,10 @@ class CartController extends Controller
                     }
                     $total_addon_amount += $addon_total;
 
+                    foreach ($items->variationOptions as $variationids) {
+                        $variation_option_id[] = $variationids->variation_option_id;
+                    }
+
                     $pro                    = [];
                     $pro['id']              = $items->id;
                     $pro['tax']             = $tax;
@@ -814,7 +813,8 @@ class CartController extends Controller
                     $pro['discount_percentage'] = abs($items->discount_percentage);
                     $pro['image']           = $items->base_image;
                     $pro['max_quantity']    = $items->quantity;
-                    $imagePath              = $items->base_image;
+                    $pro['variation_option_ids']    = $items->quantity;
+                    $imagePath              = $variation_option_id;
 
                     $brand_array[] = $items->brand_id;
 
