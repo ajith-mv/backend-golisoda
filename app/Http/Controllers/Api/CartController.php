@@ -750,7 +750,7 @@ class CartController extends Controller
                     if (isset($tax_info) && !empty($tax_info)) {
                         $tax = getAmountExclusiveTax($price_with_tax, $product_info->productCategory->tax->pecentage ?? 12);
                         $tax_total =  $tax_total + ($tax['gstAmount'] * $citems->quantity) ?? 0;
-                        $product_tax_exclusive_total = $product_tax_exclusive_total + ($tax['basePrice'] + $total_variation_amount * $citems->quantity);
+                        $product_tax_exclusive_total = $product_tax_exclusive_total + ($tax['basePrice'] * $citems->quantity);
                         // print_r( $product_tax_exclusive_total );
                         $tax_percentage         = $tax['tax_percentage'] ?? 0;
                     } else {
