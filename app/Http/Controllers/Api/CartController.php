@@ -809,7 +809,7 @@ class CartController extends Controller
                     $pro['is_best_selling'] = $items->is_best_selling;
                     $pro['price']           = $items->mrp + $total_variation_amount;
                     $pro['total_variation_amount'] = $total_variation_amount;
-                    $pro['strike_price']    = $items->strike_price;
+                    $pro['strike_price']    = number_format($items->strike_price + $total_variation_amount, 2);
                     $pro['save_price']      = ($items->strike_price + $total_variation_amount) - ($items->mrp + $total_variation_amount);
                     $pro['discount_percentage'] = abs($items->discount_percentage);
                     $pro['image']           = $items->base_image;
