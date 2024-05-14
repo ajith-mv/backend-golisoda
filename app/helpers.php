@@ -291,6 +291,8 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
 
     $pro                    = [];
     $total_variation_amount = 0;
+    $default_value = [];
+
     if (isset($variation_option_id) && !empty($variation_option_id)) {
         $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
             ->where('product_id', $product_data->id)
@@ -304,7 +306,6 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
         $variation_option_data = ProductVariationOption::where('product_id', $product_data->id)
             ->where('is_default', 1)
             ->get();
-        $default_value = [];
 
         if (isset($variation_option_data)) {
 
