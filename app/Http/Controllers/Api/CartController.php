@@ -732,12 +732,12 @@ class CartController extends Controller
                     $category               = $items->productCategory;
                     if (isset($citems->coupon_id)) {
                         // $price=$items->strike_price /(1+$tax_data);
-                        $price_with_tax         = $items->strike_price;
+                        $price_with_tax         = $items->strike_price + $total_variation_amount;
                         $citems->sub_total = round($price_with_tax * $citems->quantity);
                         $citems->update();
                     } else {
                         // $price=$items->mrp /(1+$tax_data);
-                        $price_with_tax         = $items->mrp;
+                        $price_with_tax         = $items->mrp + $total_variation_amount;
                         $citems->sub_total = round($price_with_tax * $citems->quantity);
                         $citems->update();
                     }
@@ -750,7 +750,7 @@ class CartController extends Controller
                     if (isset($tax_info) && !empty($tax_info)) {
                         $tax = getAmountExclusiveTax($price_with_tax, $product_info->productCategory->tax->pecentage ?? 12);
                         $tax_total =  $tax_total + ($tax['gstAmount'] * $citems->quantity) ?? 0;
-                        $product_tax_exclusive_total = $product_tax_exclusive_total + ($tax['basePrice'] * $citems->quantity);
+                        $product_tax_exclusive_total = $product_tax_exclusive_total + ($tax['basePrice'] + $total_variation_amount * $citems->quantity);
                         // print_r( $product_tax_exclusive_total );
                         $tax_percentage         = $tax['tax_percentage'] ?? 0;
                     } else {
@@ -829,7 +829,7 @@ class CartController extends Controller
                     $pro['customer_id']     = $customer_id;
                     $pro['guest_token']     = $citems->guest_token;
                     $pro['cart_id']         = $citems->id;
-                    $pro['price']           = $citems->price  + $total_variation_amount;
+                    $pro['price']           = $citems->price;
                     $pro['quantity']        = $citems->quantity;
                     $pro['sub_total']       = $citems->sub_total;
                     $pro['addons']          = $used_addons;
@@ -908,6 +908,7 @@ class CartController extends Controller
                 'shipping_charge' => $shipping_info->charges ?? 0,
                 'addon_amount' => $total_addon_amount,
                 'coupon_amount' => $coupon_amount ?? 0,
+                'total_variation_amount' => $total_variation_amount,
                 'has_pickup_store' => $has_pickup_store,
                 'brand_id' => $brand_array[0] ?? '',
                 'is_cod' => $is_cod,
