@@ -337,12 +337,12 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
     if ($price_data['overall_discount_percentage'] != 0) {
         $pro['price']           = $price_data['price'] + $total_variation_amount;
         $pro['discount_percentage'] = $price_data['overall_discount_percentage'];
-        $pro['strike_price']    = (float)($price_data['strike_rate'] + $total_variation_amount);
+        $pro['strike_price']    = $price_data['strike_rate'];
         $pro['save_price']      = round($price_data['strike_rate'] - $price_data['price']);
     } else {
         $pro['price']           = $product_data->mrp + $total_variation_amount;
         $pro['discount_percentage'] = $product_data->discount_percentage != 0 ? abs($product_data->discount_percentage) : getDiscountPercentage($product_data->mrp, $product_data->strike_price);
-        $pro['strike_price']    = (float)($product_data->strike_price + $total_variation_amount);
+        $pro['strike_price']    = $product_data->strike_price;
         $pro['save_price']      = round($product_data->strike_price - $product_data->mrp);
     }
     $pro['id']              = $product_data->id;
