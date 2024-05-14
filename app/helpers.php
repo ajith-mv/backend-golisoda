@@ -340,6 +340,7 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
         $pro['discount_percentage'] = $price_data['overall_discount_percentage'];
         $pro['strike_price']    = $price_data['strike_rate'];
         $pro['save_price']      = round($price_data['strike_rate'] - $pro['price']);
+        dd('works here');
     } else {
         $pro['price']           = $product_data->mrp + $total_variation_amount;
         $pro['discount_percentage'] = $product_data->discount_percentage != 0 ? abs($product_data->discount_percentage) : getDiscountPercentage($product_data->mrp, $product_data->strike_price + $total_variation_amount);
