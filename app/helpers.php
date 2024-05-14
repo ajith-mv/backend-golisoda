@@ -909,7 +909,7 @@ if (!function_exists('getProductPrices')) {
     { // this function not used check all files confirm and delete it
 
         $strike_rate            = 0;
-        $price                  = $productsObjects->mrp;
+        $price                  = $productsObjects->mrp + $total_variation_amount;
         $today                  = date('Y-m-d');
         /****
          * 1.check product discount is applied via product add/edit
@@ -923,7 +923,7 @@ if (!function_exists('getProductPrices')) {
         if (isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type == 'percentage') {
             if ($today >= $productsObjects->sale_start_date && $today <= $productsObjects->sale_end_date) {
 
-                $strike_rate        = $productsObjects->mrp;
+                $strike_rate        = $productsObjects->mrp + $total_variation_amount;
                 $price              = $productsObjects->sale_price;
                 $has_discount       = 'yes';
                 if (isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type == 'percentage') {
@@ -932,7 +932,7 @@ if (!function_exists('getProductPrices')) {
                 $discount[]         = array('discount_type' => $productsObjects->productDiscount->discount_type, 'discount_value' => $productsObjects->productDiscount->discount_value, 'discount_name' => '');
             }
         } elseif (isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type == 'fixed_amount') {
-            $strike_rate        = $productsObjects->mrp;
+            $strike_rate        = $productsObjects->mrp + $total_variation_amount;
             $price              = $productsObjects->sale_price;
             $has_discount       = 'yes';
             $overall_discount_percentage = round($productsObjects->productDiscount->amount) ?? 0;
