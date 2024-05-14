@@ -20,6 +20,7 @@ use App\Models\Offers\CouponCategory;
 use App\Models\Offers\Coupons;
 use App\Models\Product\ProductVariationOption;
 use Illuminate\Support\Facades\DB;
+
 class CartController extends Controller
 {
     public function addToCart(Request $request)
@@ -72,23 +73,33 @@ class CartController extends Controller
             }
         } else {
             $customer_info = Customer::find($request->customer_id);
-
+            $total_variation_amount = 0;
             if (isset($customer_info) && !empty($customer_info) || !empty($request->guest_token)) {
 
                 if ($product_info->quantity <= $quantity) {
                     $quantity = $product_info->quantity;
                 }
+                if (isset($variation_option_ids) && !empty($variation_option_ids)) {
+                    $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_ids)
+                        ->where('product_id', $product_id)
+                        ->selectRaw("SUM(amount) AS total_amount")
+                        ->groupBy('product_id')
+                        ->get();
+                    if (isset($variation_option_data)) {
+                        $total_variation_amount = $variation_option_data[0]->total_amount;
+                    }
+                }
                 $ins['customer_id']     = $request->customer_id;
                 $ins['product_id']      = $product_id;
                 $ins['guest_token']     = $request->guest_token ?? null;
                 $ins['quantity']        = $quantity ?? 1;
-                $ins['price']           = (float)$product_info->mrp;
-                $ins['sub_total']       = $product_info->mrp * $quantity ?? 1;
+                $ins['price']           = (float)$product_info->mrp + $total_variation_amount;
+                $ins['sub_total']       = ($product_info->mrp + $total_variation_amount) * $quantity ?? 1;
                 $ins['cart_order_no']   = 'ORD' . date('ymdhis');
-                  
+
                 $cart_id = Cart::create($ins)->id;
-                if(isset($variation_option_ids) && !empty($variation_option_ids)){
-                    foreach($variation_option_ids as $variation_option_id){
+                if (isset($variation_option_ids) && !empty($variation_option_ids)) {
+                    foreach ($variation_option_ids as $variation_option_id) {
                         $product_variation_option = ProductVariationOption::find($variation_option_id);
                         $cart_product_variation_ins['cart_id'] = $cart_id;
                         $cart_product_variation_ins['product_id'] = $product_variation_option->product_id;
@@ -96,10 +107,10 @@ class CartController extends Controller
                         $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
                         $cart_product_variation_ins['value'] = $product_variation_option->value;
                         $cart_product_variation_ins['amount'] = $product_variation_option->amount;
-                         CartProductVariationOption::create($cart_product_variation_ins);
+                        CartProductVariationOption::create($cart_product_variation_ins);
                     }
                 }
-            
+
                 $error = 0;
                 $message = 'Cart added successful';
                 $data = $this->getCartListAll($customer_id, $guest_token);
@@ -116,317 +127,147 @@ class CartController extends Controller
         return array('error' => $error, 'message' => $message, 'data' => $data);
     }
 
-public function applyCoupon($coupon_code,$customer_id,$shipping_fee_id='')
-{
-$coupon_code = $coupon_code;
-$customer_id = $customer_id;
-$shipping_fee_id = $shipping_fee_id ?? '';
-$carts     = Cart::where('customer_id', $customer_id)->get();
+    public function applyCoupon($coupon_code, $customer_id, $shipping_fee_id = '')
+    {
+        $coupon_code = $coupon_code;
+        $customer_id = $customer_id;
+        $shipping_fee_id = $shipping_fee_id ?? '';
+        $carts     = Cart::where('customer_id', $customer_id)->get();
 
-$isApplied = Order::where('customer_id', $customer_id)->where('coupon_code', $coupon_code)->first();
-if (!is_null($isApplied)) {
-return response([
-"status" => 'error',
-"message" => 'You have already used the coupon.'
-]);
-}
-
-if ($carts) {
-$coupon = Coupons::where('coupon_code', $coupon_code)
-->where('is_discount_on', 'no')
-->whereDate('coupons.start_date', '<=', date('Y-m-d'))
-->whereDate('coupons.end_date', '>=', date('Y-m-d'))
-->first();
-
-if (isset($coupon) && !empty($coupon)) {
-/**
-* 1. check quantity is available to use
-* 2. check coupon can apply for cart products
-* 3. get percentage or fixed amount
-* 4. get percentage or fixed amount For Total Order Amount
-* 
-* coupon type 1- product, 2-customer, 3-category
-*/
-$has_product = 0;
-$product_amount = 0;
-$has_product_error = 0;
-$overall_discount_percentage = 0;
-$couponApplied = [];
-
-if ($coupon->quantity > 0) {
-
-switch ($coupon->coupon_type) {
-
-case '1':
-    # product ...
-    if (isset($coupon->couponProducts) && !empty($coupon->couponProducts)) {
-        $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
-        foreach ($coupon->couponProducts as $items) {
-            $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
-        if(isset($cartCount) && is_null($cartCount->id)){
-        $response['status'] = 'error';
-        $response['message'] = 'Coupon not applicable';
-            return $response??'';
+        $isApplied = Order::where('customer_id', $customer_id)->where('coupon_code', $coupon_code)->first();
+        if (!is_null($isApplied)) {
+            return response([
+                "status" => 'error',
+                "message" => 'You have already used the coupon.'
+            ]);
         }
-            $product_info=Product::find($items->product_id);
-            $cartCount->sub_total=round($product_info->strike_price * $cartCount->quantity);
-            $cartCount->update();
-            if ($cartCount) {
-                if ($cartCount->sub_total >= $coupon->minimum_order_value) {
-                    /**
-                     * Check percentage or fixed amount
-                     */
-                    switch ($coupon->calculate_type) {
 
-                        case 'percentage':
-                            $product_amount += percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
-                            $tmp['discount_amount'] = percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
-                            $tmp['product_id'] = $cartCount->product_id;
-                            $tmp['coupon_applied_amount'] = $cartCount->sub_total;
-                            // $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
-                            $overall_discount_percentage += $coupon->calculate_value;
-                            $has_product++;
-                            $couponApplied[] = $tmp;
+        if ($carts) {
+            $coupon = Coupons::where('coupon_code', $coupon_code)
+                ->where('is_discount_on', 'no')
+                ->whereDate('coupons.start_date', '<=', date('Y-m-d'))
+                ->whereDate('coupons.end_date', '>=', date('Y-m-d'))
+                ->first();
+
+            if (isset($coupon) && !empty($coupon)) {
+                /**
+                 * 1. check quantity is available to use
+                 * 2. check coupon can apply for cart products
+                 * 3. get percentage or fixed amount
+                 * 4. get percentage or fixed amount For Total Order Amount
+                 * 
+                 * coupon type 1- product, 2-customer, 3-category
+                 */
+                $has_product = 0;
+                $product_amount = 0;
+                $has_product_error = 0;
+                $overall_discount_percentage = 0;
+                $couponApplied = [];
+
+                if ($coupon->quantity > 0) {
+
+                    switch ($coupon->coupon_type) {
+
+                        case '1':
+                            # product ...
+                            if (isset($coupon->couponProducts) && !empty($coupon->couponProducts)) {
+                                $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
+                                foreach ($coupon->couponProducts as $items) {
+                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
+                                    if (isset($cartCount) && is_null($cartCount->id)) {
+                                        $response['status'] = 'error';
+                                        $response['message'] = 'Coupon not applicable';
+                                        return $response ?? '';
+                                    }
+                                    $product_info = Product::find($items->product_id);
+                                    $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
+                                    $cartCount->update();
+                                    if ($cartCount) {
+                                        if ($cartCount->sub_total >= $coupon->minimum_order_value) {
+                                            /**
+                                             * Check percentage or fixed amount
+                                             */
+                                            switch ($coupon->calculate_type) {
+
+                                                case 'percentage':
+                                                    $product_amount += percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
+                                                    $tmp['discount_amount'] = percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
+                                                    $tmp['product_id'] = $cartCount->product_id;
+                                                    $tmp['coupon_applied_amount'] = $cartCount->sub_total;
+                                                    // $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
+                                                    $overall_discount_percentage += $coupon->calculate_value;
+                                                    $has_product++;
+                                                    $couponApplied[] = $tmp;
+                                                    break;
+                                                case 'fixed_amount':
+                                                    $product_amount += $coupon->calculate_value;
+                                                    $tmp['discount_amount'] = $coupon->calculate_value;
+                                                    $tmp['product_id'] = $cartCount->product_id;
+                                                    $tmp['coupon_applied_amount'] = $cartCount->sub_total;
+                                                    // $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
+                                                    $has_product++;
+                                                    $couponApplied[] = $tmp;
+
+                                                    break;
+                                                default:
+
+                                                    break;
+                                            }
+
+                                            $response['coupon_info'] = $couponApplied;
+                                            $response['overall_applied_discount'] = $overall_discount_percentage;
+                                            $response['coupon_amount'] = $product_amount;
+                                            $response['coupon_id'] = $coupon->id;
+                                            $response['coupon_code'] = $coupon->coupon_code;
+                                            $response['status'] = 'success';
+                                            $response['message'] = 'Coupon applied';
+                                            /** upddate cart coupon amount */
+                                            if (isset($shipping_fee_id) && !empty($shipping_fee_id)) {
+                                                $shippingfee_info = ShippingCharge::select('id', 'shipping_title', 'minimum_order_amount', 'charges', 'is_free')->find($shipping_fee_id);
+                                            }
+                                            $update_data = [
+                                                'coupon_id' => $coupon->id,
+                                                'coupon_amount' => $product_amount,
+                                                'coupon_percentage' => $coupon->calculate_value ?? null,
+                                                'coupon_code' => $coupon->coupon_code ?? null,
+                                                'coupon_type' => $coupon->calculate_type ?? null,
+                                                'shipping_fee_id' => $shippingfee_info->id ?? null,
+                                                'shipping_fee' => $shippingfee_info->charges ?? null
+                                            ];
+                                            DB::table('carts')->where('id', $cartCount->id)->update($update_data);
+                                            return $response['coupon_amount'];
+                                        }
+                                    } else {
+                                        $has_product_error++;
+                                    }
+                                }
+                                if ($has_product == 0 && $has_product_error > 0) {
+                                    $response['status'] = 'error';
+                                    $response['message'] = 'Cart order does not meet coupon minimum order amount';
+                                }
+                            } else {
+                                $response['status'] = 'error';
+                                $response['message'] = 'Coupon not applicable';
+                            }
                             break;
-                        case 'fixed_amount':
-                            $product_amount += $coupon->calculate_value;
-                            $tmp['discount_amount'] = $coupon->calculate_value;
-                            $tmp['product_id'] = $cartCount->product_id;
-                            $tmp['coupon_applied_amount'] = $cartCount->sub_total;
-                            // $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
-                            $has_product++;
-                            $couponApplied[] = $tmp;
-
-                            break;
-                        default:
-
-                            break;
-                    }
-
-                    $response['coupon_info'] = $couponApplied;
-                    $response['overall_applied_discount'] = $overall_discount_percentage;
-                    $response['coupon_amount'] = $product_amount;
-                    $response['coupon_id'] = $coupon->id;
-                    $response['coupon_code'] = $coupon->coupon_code;
-                    $response['status'] = 'success';
-                    $response['message'] = 'Coupon applied';
-                    /** upddate cart coupon amount */
-                    if (isset($shipping_fee_id) && !empty($shipping_fee_id)) {
-                        $shippingfee_info = ShippingCharge::select('id', 'shipping_title', 'minimum_order_amount', 'charges', 'is_free')->find($shipping_fee_id);
-                    }
-                    $update_data = [
-                        'coupon_id' => $coupon->id,
-                        'coupon_amount' => $product_amount,
-                        'coupon_percentage' => $coupon->calculate_value ?? null,
-                        'coupon_code' => $coupon->coupon_code ?? null,
-                        'coupon_type' => $coupon->calculate_type ?? null,
-                        'shipping_fee_id' => $shippingfee_info->id ?? null,
-                        'shipping_fee' => $shippingfee_info->charges ?? null
-                    ];
-                    DB::table('carts')->where('id', $cartCount->id)->update($update_data);
-                      return $response['coupon_amount'];
-                }
-            } else {
-                $has_product_error++;
-            }
-        }
-        if ($has_product == 0 && $has_product_error > 0) {
-            $response['status'] = 'error';
-            $response['message'] = 'Cart order does not meet coupon minimum order amount';
-        }
-    } else {
-        $response['status'] = 'error';
-        $response['message'] = 'Coupon not applicable';
-    }
-    break;
-// case '2':
-//     # customer ...
-//     break;
-case '4':
-    # category ...
-    $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
-        ->join('products', 'products.id', '=', 'carts.product_id')
-        ->where('carts.customer_id', $customer_id)
-        // ->groupBy('carts.product_id')
-        ->first();
-       if(isset($checkCartData) && is_null($checkCartData->id)){
-        $response['status'] = 'error';
-        $response['message'] = 'Coupon not applicable';
-            return $response??'';
-        }
-           $product_info=Product::find($checkCartData->product_id);
-            $checkCartData->sub_total=round($product_info->strike_price * $checkCartData->quantity);
-            $checkCartData->update();
-    if (isset($checkCartData) && !empty($checkCartData)) {
-
-        if ($checkCartData->category_total >= $coupon->minimum_order_value) {
-            /**
-             * check percentage or fixed amount
-             */
-            switch ($coupon->calculate_type) {
-
-                case 'percentage':
-                    $product_amount = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
-                    $tmp['discount_amount'] = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
-                    $tmp['coupon_id'] = $coupon->id;
-                    $tmp['coupon_code'] = $coupon->coupon_code;
-                    $tmp['coupon_applied_amount'] = number_format((float)$checkCartData->category_total, 2, '.', '');
-                    $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
-                    $overall_discount_percentage = $coupon->calculate_value;
-                    $couponApplied = $tmp;
-                    break;
-                case 'fixed_amount':
-                    $product_amount += $coupon->calculate_value;
-                    $tmp['discount_amount'] = $coupon->calculate_value;
-                    $tmp['coupon_id'] = $coupon->id;
-                    $tmp['coupon_code'] = $coupon->coupon_code;
-                    $tmp['coupon_applied_amount'] = number_format((float)$checkCartData->sub_total, 2, '.', '');
-                    $tmp['coupon_type']         = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
-                    $has_product++;
-                    $couponApplied[] = $tmp;
-
-                    break;
-                default:
-
-                    break;
-            }
-
-            $response['coupon_info'] = $couponApplied;
-            $response['overall_applied_discount'] = $overall_discount_percentage;
-            $response['coupon_amount'] = number_format((float)$product_amount, 2, '.', '');
-            $response['coupon_id'] = $coupon->id;
-            $response['coupon_code'] = $coupon->coupon_code;
-            $response['status'] = 'success';
-            $response['message'] = 'Coupon applied';
-
-            /** upddate cart coupon amount */
-            if (isset($shipping_fee_id) && !empty($shipping_fee_id)) {
-                $shippingfee_info = ShippingCharge::select('id', 'shipping_title', 'minimum_order_amount', 'charges', 'is_free')->find($shipping_fee_id);
-            }
-            $update_data = [
-                'coupon_id' => $coupon->id,
-                'coupon_amount' => $product_amount,
-                'coupon_percentage' => $coupon->calculate_value ?? null,
-                'coupon_code' => $coupon->coupon_code ?? null,
-                'coupon_type' => $coupon->calculate_type ?? null,
-                'shipping_fee_id' => $shippingfee_info->id ?? null,
-                'shipping_fee' => $shippingfee_info->charges ?? null
-            ];
-            DB::table('carts')->where('id', $checkCartData->id)->update($update_data);
-
-             return $response['coupon_amount'];
-        }
-    } else {
-        $response['status'] = 'error';
-        $response['message'] = 'Cart order does not meet coupon minimum order amount';
-    }
-    break;
-case '3':
-    # category ...
-    $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
-        ->join('products', 'products.id', '=', 'carts.product_id')
-        ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
-        ->join('coupon_categories', function ($join) {
-            $join->on('coupon_categories.category_id', '=', 'product_categories.id');
-            // $join->orOn('coupon_categories.category_id', '=', 'product_categories.parent_id');
-        })
-        ->where('coupon_categories.coupon_id', $coupon->id)
-        ->where('carts.customer_id', $customer_id)
-        // ->groupBy('carts.product_id')
-        ->first();
-       if(isset($checkCartData) && is_null($checkCartData->id)){
-        $response['status'] = 'error';
-        $response['message'] = 'Coupon not applicable';
-            return $response??'';
-        }
-        $product_info=Product::find($checkCartData->product_id);
-            $checkCartData->sub_total=round($product_info->strike_price * $checkCartData->quantity);
-            $checkCartData->update();
-    if (isset($checkCartData) && !empty($checkCartData)) {
-
-        if ($checkCartData->category_total >= $coupon->minimum_order_value) {
-            /**
-             * check percentage or fixed amount
-             */
-            switch ($coupon->calculate_type) {
-
-                case 'percentage':
-                    $product_amount = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
-                    $tmp['discount_amount'] = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
-                    $tmp['coupon_id'] = $coupon->id;
-                    $tmp['coupon_code'] = $coupon->coupon_code;
-                    $tmp['coupon_applied_amount'] = number_format((float)$checkCartData->category_total, 2, '.', '');
-                    $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
-                    $overall_discount_percentage = $coupon->calculate_value;
-                    $couponApplied = $tmp;
-                    break;
-                case 'fixed_amount':
-                    $product_amount += $coupon->calculate_value;
-                    $tmp['discount_amount'] = $coupon->calculate_value;
-                    $tmp['coupon_id'] = $coupon->id;
-                    $tmp['coupon_code'] = $coupon->coupon_code;
-                    $tmp['coupon_applied_amount'] = number_format((float)$checkCartData->sub_total, 2, '.', '');
-                    $tmp['coupon_type']         = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
-                    $has_product++;
-                    $couponApplied[] = $tmp;
-
-                    break;
-                default:
-
-                    break;
-            }
-
-            $response['coupon_info'] = $couponApplied;
-            $response['overall_applied_discount'] = $overall_discount_percentage;
-            $response['coupon_amount'] = number_format((float)$product_amount, 2, '.', '');
-            $response['coupon_id'] = $coupon->id;
-            $response['coupon_code'] = $coupon->coupon_code;
-            $response['status'] = 'success';
-            $response['message'] = 'Coupon applied';
-
-            /** upddate cart coupon amount */
-            if (isset($shipping_fee_id) && !empty($shipping_fee_id)) {
-                $shippingfee_info = ShippingCharge::select('id', 'shipping_title', 'minimum_order_amount', 'charges', 'is_free')->find($shipping_fee_id);
-            }
-            $update_data = [
-                'coupon_id' => $coupon->id,
-                'coupon_amount' => $product_amount,
-                'coupon_percentage' => $coupon->calculate_value ?? null,
-                'coupon_code' => $coupon->coupon_code ?? null,
-                'coupon_type' => $coupon->calculate_type ?? null,
-                'shipping_fee_id' => $shippingfee_info->id ?? null,
-                'shipping_fee' => $shippingfee_info->charges ?? null
-            ];
-            DB::table('carts')->where('id',$checkCartData->id)->update($update_data);
-
-             return $response['coupon_amount'];
-        }
-    } else {
-        $response['status'] = 'error';
-        $response['message'] = 'Cart order does not meet coupon minimum order amount';
-    }
-    break;
-case '5':
-
-                            # brands ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                            // case '2':
+                            //     # customer ...
+                            //     break;
+                        case '4':
+                            # category ...
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
-                                ->join('brands', 'brands.id', '=', 'products.brand_id')
-                                ->join('coupon_brands', function ($join) {
-                                    $join->on('coupon_brands.brand_id', '=', 'brands.id');
-                                })
-                                ->where('coupon_brands.coupon_id', $coupon->id)
                                 ->where('carts.customer_id', $customer_id)
-                                //->groupBy('carts.product_id')
+                                // ->groupBy('carts.product_id')
                                 ->first();
-     if(isset($checkCartData) && is_null($checkCartData->id)){
-        $response['status'] = 'error';
-        $response['message'] = 'Coupon not applicable';
-            return $response??'';
-        }
- $product_info=Product::find($checkCartData->product_id);
-            $checkCartData->sub_total=round($product_info->strike_price * $checkCartData->quantity);
-            $checkCartData->update();
+                            if (isset($checkCartData) && is_null($checkCartData->id)) {
+                                $response['status'] = 'error';
+                                $response['message'] = 'Coupon not applicable';
+                                return $response ?? '';
+                            }
+                            $product_info = Product::find($checkCartData->product_id);
+                            $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
+                            $checkCartData->update();
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
                                 if ($checkCartData->category_total >= $coupon->minimum_order_value) {
@@ -468,24 +309,191 @@ case '5':
                                     $response['coupon_code'] = $coupon->coupon_code;
                                     $response['status'] = 'success';
                                     $response['message'] = 'Coupon applied';
-                                 $update_data = [
-                'coupon_id' => $coupon->id,
-                'coupon_amount' => $product_amount,
-                'coupon_percentage' => $coupon->calculate_value ?? null,
-                'coupon_code' => $coupon->coupon_code ?? null,
-                'coupon_type' => $coupon->calculate_type ?? null,
-                'shipping_fee_id' => $shippingfee_info->id ?? null,
-                'shipping_fee' => $shippingfee_info->charges ?? null
-            ];
-            DB::table('carts')->where('id',$checkCartData->id)->update($update_data);
-              return $response['coupon_amount'];
-                                    
+
+                                    /** upddate cart coupon amount */
+                                    if (isset($shipping_fee_id) && !empty($shipping_fee_id)) {
+                                        $shippingfee_info = ShippingCharge::select('id', 'shipping_title', 'minimum_order_amount', 'charges', 'is_free')->find($shipping_fee_id);
+                                    }
+                                    $update_data = [
+                                        'coupon_id' => $coupon->id,
+                                        'coupon_amount' => $product_amount,
+                                        'coupon_percentage' => $coupon->calculate_value ?? null,
+                                        'coupon_code' => $coupon->coupon_code ?? null,
+                                        'coupon_type' => $coupon->calculate_type ?? null,
+                                        'shipping_fee_id' => $shippingfee_info->id ?? null,
+                                        'shipping_fee' => $shippingfee_info->charges ?? null
+                                    ];
+                                    DB::table('carts')->where('id', $checkCartData->id)->update($update_data);
+
+                                    return $response['coupon_amount'];
+                                }
+                            } else {
+                                $response['status'] = 'error';
+                                $response['message'] = 'Cart order does not meet coupon minimum order amount';
+                            }
+                            break;
+                        case '3':
+                            # category ...
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                                ->join('products', 'products.id', '=', 'carts.product_id')
+                                ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
+                                ->join('coupon_categories', function ($join) {
+                                    $join->on('coupon_categories.category_id', '=', 'product_categories.id');
+                                    // $join->orOn('coupon_categories.category_id', '=', 'product_categories.parent_id');
+                                })
+                                ->where('coupon_categories.coupon_id', $coupon->id)
+                                ->where('carts.customer_id', $customer_id)
+                                // ->groupBy('carts.product_id')
+                                ->first();
+                            if (isset($checkCartData) && is_null($checkCartData->id)) {
+                                $response['status'] = 'error';
+                                $response['message'] = 'Coupon not applicable';
+                                return $response ?? '';
+                            }
+                            $product_info = Product::find($checkCartData->product_id);
+                            $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
+                            $checkCartData->update();
+                            if (isset($checkCartData) && !empty($checkCartData)) {
+
+                                if ($checkCartData->category_total >= $coupon->minimum_order_value) {
+                                    /**
+                                     * check percentage or fixed amount
+                                     */
+                                    switch ($coupon->calculate_type) {
+
+                                        case 'percentage':
+                                            $product_amount = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
+                                            $tmp['discount_amount'] = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
+                                            $tmp['coupon_id'] = $coupon->id;
+                                            $tmp['coupon_code'] = $coupon->coupon_code;
+                                            $tmp['coupon_applied_amount'] = number_format((float)$checkCartData->category_total, 2, '.', '');
+                                            $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
+                                            $overall_discount_percentage = $coupon->calculate_value;
+                                            $couponApplied = $tmp;
+                                            break;
+                                        case 'fixed_amount':
+                                            $product_amount += $coupon->calculate_value;
+                                            $tmp['discount_amount'] = $coupon->calculate_value;
+                                            $tmp['coupon_id'] = $coupon->id;
+                                            $tmp['coupon_code'] = $coupon->coupon_code;
+                                            $tmp['coupon_applied_amount'] = number_format((float)$checkCartData->sub_total, 2, '.', '');
+                                            $tmp['coupon_type']         = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
+                                            $has_product++;
+                                            $couponApplied[] = $tmp;
+
+                                            break;
+                                        default:
+
+                                            break;
+                                    }
+
+                                    $response['coupon_info'] = $couponApplied;
+                                    $response['overall_applied_discount'] = $overall_discount_percentage;
+                                    $response['coupon_amount'] = number_format((float)$product_amount, 2, '.', '');
+                                    $response['coupon_id'] = $coupon->id;
+                                    $response['coupon_code'] = $coupon->coupon_code;
+                                    $response['status'] = 'success';
+                                    $response['message'] = 'Coupon applied';
+
+                                    /** upddate cart coupon amount */
+                                    if (isset($shipping_fee_id) && !empty($shipping_fee_id)) {
+                                        $shippingfee_info = ShippingCharge::select('id', 'shipping_title', 'minimum_order_amount', 'charges', 'is_free')->find($shipping_fee_id);
+                                    }
+                                    $update_data = [
+                                        'coupon_id' => $coupon->id,
+                                        'coupon_amount' => $product_amount,
+                                        'coupon_percentage' => $coupon->calculate_value ?? null,
+                                        'coupon_code' => $coupon->coupon_code ?? null,
+                                        'coupon_type' => $coupon->calculate_type ?? null,
+                                        'shipping_fee_id' => $shippingfee_info->id ?? null,
+                                        'shipping_fee' => $shippingfee_info->charges ?? null
+                                    ];
+                                    DB::table('carts')->where('id', $checkCartData->id)->update($update_data);
+
+                                    return $response['coupon_amount'];
+                                }
+                            } else {
+                                $response['status'] = 'error';
+                                $response['message'] = 'Cart order does not meet coupon minimum order amount';
+                            }
+                            break;
+                        case '5':
+
+                            # brands ...
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                                ->join('products', 'products.id', '=', 'carts.product_id')
+                                ->join('brands', 'brands.id', '=', 'products.brand_id')
+                                ->join('coupon_brands', function ($join) {
+                                    $join->on('coupon_brands.brand_id', '=', 'brands.id');
+                                })
+                                ->where('coupon_brands.coupon_id', $coupon->id)
+                                ->where('carts.customer_id', $customer_id)
+                                //->groupBy('carts.product_id')
+                                ->first();
+                            if (isset($checkCartData) && is_null($checkCartData->id)) {
+                                $response['status'] = 'error';
+                                $response['message'] = 'Coupon not applicable';
+                                return $response ?? '';
+                            }
+                            $product_info = Product::find($checkCartData->product_id);
+                            $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
+                            $checkCartData->update();
+                            if (isset($checkCartData) && !empty($checkCartData)) {
+
+                                if ($checkCartData->category_total >= $coupon->minimum_order_value) {
+                                    /**
+                                     * check percentage or fixed amount
+                                     */
+                                    switch ($coupon->calculate_type) {
+
+                                        case 'percentage':
+                                            $product_amount = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
+                                            $tmp['discount_amount'] = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
+                                            $tmp['coupon_id'] = $coupon->id;
+                                            $tmp['coupon_code'] = $coupon->coupon_code;
+                                            $tmp['coupon_applied_amount'] = number_format((float)$checkCartData->category_total, 2, '.', '');
+                                            $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
+                                            $overall_discount_percentage = $coupon->calculate_value;
+                                            $couponApplied = $tmp;
+                                            break;
+                                        case 'fixed_amount':
+                                            $product_amount += $coupon->calculate_value;
+                                            $tmp['discount_amount'] = $coupon->calculate_value;
+                                            $tmp['coupon_id'] = $coupon->id;
+                                            $tmp['coupon_code'] = $coupon->coupon_code;
+                                            $tmp['coupon_applied_amount'] = number_format((float)$checkCartData->sub_total, 2, '.', '');
+                                            $tmp['coupon_type']         = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
+                                            $has_product++;
+                                            $couponApplied[] = $tmp;
+
+                                            break;
+                                        default:
+
+                                            break;
+                                    }
+
+                                    $response['coupon_info'] = $couponApplied;
+                                    $response['overall_applied_discount'] = $overall_discount_percentage;
+                                    $response['coupon_amount'] = number_format((float)$product_amount, 2, '.', '');
+                                    $response['coupon_id'] = $coupon->id;
+                                    $response['coupon_code'] = $coupon->coupon_code;
+                                    $response['status'] = 'success';
+                                    $response['message'] = 'Coupon applied';
+                                    $update_data = [
+                                        'coupon_id' => $coupon->id,
+                                        'coupon_amount' => $product_amount,
+                                        'coupon_percentage' => $coupon->calculate_value ?? null,
+                                        'coupon_code' => $coupon->coupon_code ?? null,
+                                        'coupon_type' => $coupon->calculate_type ?? null,
+                                        'shipping_fee_id' => $shippingfee_info->id ?? null,
+                                        'shipping_fee' => $shippingfee_info->charges ?? null
+                                    ];
+                                    DB::table('carts')->where('id', $checkCartData->id)->update($update_data);
+                                    return $response['coupon_amount'];
                                 } else {
                                     $response['status'] = 'error';
                                     $response['message'] = 'Cart order does not meet coupon minimum order amount';
-
                                 }
-                                
                             } else {
                                 $response['status'] = 'error';
                                 $response['message'] = 'Coupon not applicable';
@@ -493,23 +501,23 @@ case '5':
                             break;
 
                         default:
-    # code...
-    break;
-}
-} else {
-$response['status'] = 'error';
-$response['message'] = 'Coupon Limit reached';
-}
-} else {
-$response['status'] = 'error';
-$response['message'] = 'Coupon code not available';
-}
-} else {
-$response['status'] = 'error';
-$response['message'] = 'There is no products on the cart';
-}
-return $response??'';
-} 
+                            # code...
+                            break;
+                    }
+                } else {
+                    $response['status'] = 'error';
+                    $response['message'] = 'Coupon Limit reached';
+                }
+            } else {
+                $response['status'] = 'error';
+                $response['message'] = 'Coupon code not available';
+            }
+        } else {
+            $response['status'] = 'error';
+            $response['message'] = 'There is no products on the cart';
+        }
+        return $response ?? '';
+    }
     public function updateCart(Request $request)
     {
 
@@ -562,24 +570,23 @@ return $response??'';
         $customer_id    = $request->customer_id;
         $guest_token    = $request->guest_token;
         $checkCarts      = Cart::where('customer_id', $customer_id)->get();
-        
-
-        if (count($checkCarts)>0){
 
 
-           foreach($checkCarts as $checkCart){
-              $cart_data=Cart::find($checkCart->id);
-              $cart_data->is_cod=$request->is_cod;
-              $cart_data->cod_amount=($request->is_cod==1)? $request->cod_amount : NULL;
-              $cart_data->update();
-              
-           }
+        if (count($checkCarts) > 0) {
+
+
+            foreach ($checkCarts as $checkCart) {
+                $cart_data = Cart::find($checkCart->id);
+                $cart_data->is_cod = $request->is_cod;
+                $cart_data->cod_amount = ($request->is_cod == 1) ? $request->cod_amount : NULL;
+                $cart_data->update();
+            }
         }
-            $error = 0;
-            $message = 'Cod updated successful';
-            $data = $this->getCartListAll($request->customer_id, $request->guest_token);
+        $error = 0;
+        $message = 'Cod updated successful';
+        $data = $this->getCartListAll($request->customer_id, $request->guest_token);
         return array('error' => $error, 'message' => $message, 'data' => $data);
-      }
+    }
     public function deleteCart(Request $request)
     {
 
@@ -653,32 +660,32 @@ return $response??'';
 
         return array('error' => $error, 'message' => $message, 'data' => $data);
     }
-    
+
 
     public function getCarts(Request $request)
     {
         $guest_token = $request->guest_token;
-        $customer_id    = $request->customer_id;     
+        $customer_id    = $request->customer_id;
         $selected_shipping = $request->selected_shipping ?? '';
-        return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping,null);
+        return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null);
     }
 
     function getCartListAll($customer_id = null, $guest_token = null,  $shipping_info = null, $shipping_type = null, $selected_shipping = null, $coupon_data = null)
     {
-       
+
         // dd( $coupon_data );
         $checkCart          = Cart::with(['products', 'products.productCategory', 'variationOptions'])->when($customer_id != '', function ($q) use ($customer_id) {
             $q->where('customer_id', $customer_id);
         })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
             $q->where('guest_token', $guest_token);
         })->get();
-          $variation_option_id=[];
-           foreach ($checkCart as $cartItem) {   
-            foreach ($cartItem->variationOptions as $variationids) { 
-                $variation_option_id[]=$variationids->variation_option_id;
+        $variation_option_id = [];
+        foreach ($checkCart as $cartItem) {
+            foreach ($cartItem->variationOptions as $variationids) {
+                $variation_option_id[] = $variationids->variation_option_id;
             }
-            }
-        $globel= GlobalSettings::find(1);
+        }
+        $globel = GlobalSettings::find(1);
         $tmp                = [];
         $grand_total        = 0;
         $tax_total          = 0;
@@ -689,7 +696,7 @@ return $response??'';
         $total_addon_amount = 0;
         $has_pickup_store = true;
         $brand_array = [];
-        if (isset($checkCart) && !empty($checkCart) && count($checkCart)>0) {
+        if (isset($checkCart) && !empty($checkCart) && count($checkCart) > 0) {
             foreach ($checkCart as $citems) {
                 $used_addons = [];
                 $items = $citems->products;
@@ -698,8 +705,8 @@ return $response??'';
                 $tax_percentage = 0;
                 try {
                     $category               = $items->productCategory;
-                    $product_info=Product::find($citems->product_id);
-                
+                    $product_info = Product::find($citems->product_id);
+
                     // if($citems){
                     // $product_info=Product::find($citems->product_id);
                     //  if(isset($product_info->productCategory->tax)){
@@ -718,25 +725,23 @@ return $response??'';
                             ->selectRaw("SUM(amount) AS total_amount")
                             ->groupBy('product_id')
                             ->get();
-                        if(isset($variation_option_data)){
-                        $total_variation_amount = $variation_option_data[0]->total_amount;
+                        if (isset($variation_option_data)) {
+                            $total_variation_amount = $variation_option_data[0]->total_amount;
                         }
-                
                     }
                     $category               = $items->productCategory;
-                      if(isset($citems->coupon_id)){
+                    if (isset($citems->coupon_id)) {
                         // $price=$items->strike_price /(1+$tax_data);
                         $price_with_tax         = $items->strike_price;
-                         $citems->sub_total=round($price_with_tax * $citems->quantity);
-                          $citems->update();
-                    }else{
+                        $citems->sub_total = round($price_with_tax * $citems->quantity);
+                        $citems->update();
+                    } else {
                         // $price=$items->mrp /(1+$tax_data);
                         $price_with_tax         = $items->mrp;
-                        $citems->sub_total=round($price_with_tax * $citems->quantity);
+                        $citems->sub_total = round($price_with_tax * $citems->quantity);
                         $citems->update();
-                        
                     }
-                  
+
                     if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
                         $tax_info = Tax::find($category->parent->tax_id);
                     } else if (isset($category->tax_id) && !empty($category->tax_id)) {
@@ -810,16 +815,16 @@ return $response??'';
                     $pro['image']           = $items->base_image;
                     $pro['max_quantity']    = $items->quantity;
                     $imagePath              = $items->base_image;
-    
+
                     $brand_array[] = $items->brand_id;
-    
+
                     if (!Storage::exists($imagePath)) {
                         $path               = asset('assets/logo/no_Image.jpg');
                     } else {
                         $url                = Storage::url($imagePath);
                         $path               = asset($url);
                     }
-    
+
                     $pro['image']           = $path;
                     $pro['customer_id']     = $customer_id;
                     $pro['guest_token']     = $citems->guest_token;
@@ -836,8 +841,6 @@ return $response??'';
                 } catch (\Throwable $th) {
                     //throw $th;
                 }
- 
-             
             }
 
             $tmp['carts'] = $cartTemp;
@@ -863,40 +866,39 @@ return $response??'';
             $charges        = ShippingCharge::select('id', 'shipping_title', 'minimum_order_amount', 'charges', 'is_free')->where('status', 'published')->where('minimum_order_amount', '<', $amount)->get();
 
             $tmp['shipping_charges']    = $charges;
-             
-              $is_cod=0;
-              $cod_amount=0;
-              $coupon_data=Cart::where('customer_id',$customer_id)->whereNotNull('coupon_id')->first();
-                 if(isset($coupon_data) && isset($coupon_data->coupon_id)){
-                 $new_coupon_amount=$this->applyCoupon($coupon_data->coupon_code,$customer_id,$selected_shipping);
-                 if (filter_var($new_coupon_amount, FILTER_VALIDATE_INT) !== false || filter_var($new_coupon_amount, FILTER_VALIDATE_FLOAT) !== false) {
-                 $grand_total=(float)$grand_total- (float)$new_coupon_amount;
-                    }
-                     
-                    //  $grand_total=$grand_total+round($tax_total);
-                 }
-                if(isset($checkCart[0]) && $checkCart[0]->is_cod==1){
-                $grand_total=$grand_total+$checkCart[0]->cod_amount;
-                $is_cod=$checkCart[0]->is_cod;
-                $cod_amount=($checkCart[0]->is_cod==1)? $checkCart[0]->cod_amount : 0;
-                }
-                $is_coupon=0;
-                $coupon_code='';
-                $coupon_percentage='';
-                $coupon_type='';
-                $coupon_amount=0;
-                 if(isset($coupon_data) && isset($coupon_data->coupon_id)){
-                $is_coupon=1;
-                $coupon_code=$coupon_data->coupon_code;
-                $coupon_percentage=$coupon_data->coupon_percentage;
-                $coupon_type=$coupon_data->coupon_type;
+
+            $is_cod = 0;
+            $cod_amount = 0;
+            $coupon_data = Cart::where('customer_id', $customer_id)->whereNotNull('coupon_id')->first();
+            if (isset($coupon_data) && isset($coupon_data->coupon_id)) {
+                $new_coupon_amount = $this->applyCoupon($coupon_data->coupon_code, $customer_id, $selected_shipping);
                 if (filter_var($new_coupon_amount, FILTER_VALIDATE_INT) !== false || filter_var($new_coupon_amount, FILTER_VALIDATE_FLOAT) !== false) {
-                 $coupon_amount=$new_coupon_amount;
-                    }else{
-                        $coupon_amount=$coupon_data->coupon_amount;
-                    }
-                
+                    $grand_total = (float)$grand_total - (float)$new_coupon_amount;
                 }
+
+                //  $grand_total=$grand_total+round($tax_total);
+            }
+            if (isset($checkCart[0]) && $checkCart[0]->is_cod == 1) {
+                $grand_total = $grand_total + $checkCart[0]->cod_amount;
+                $is_cod = $checkCart[0]->is_cod;
+                $cod_amount = ($checkCart[0]->is_cod == 1) ? $checkCart[0]->cod_amount : 0;
+            }
+            $is_coupon = 0;
+            $coupon_code = '';
+            $coupon_percentage = '';
+            $coupon_type = '';
+            $coupon_amount = 0;
+            if (isset($coupon_data) && isset($coupon_data->coupon_id)) {
+                $is_coupon = 1;
+                $coupon_code = $coupon_data->coupon_code;
+                $coupon_percentage = $coupon_data->coupon_percentage;
+                $coupon_type = $coupon_data->coupon_type;
+                if (filter_var($new_coupon_amount, FILTER_VALIDATE_INT) !== false || filter_var($new_coupon_amount, FILTER_VALIDATE_FLOAT) !== false) {
+                    $coupon_amount = $new_coupon_amount;
+                } else {
+                    $coupon_amount = $coupon_data->coupon_amount;
+                }
+            }
             $tmp['cart_total']          = array(
                 'total' => number_format(round($grand_total), 2),
                 'product_tax_exclusive_total' => number_format(round($product_tax_exclusive_total), 2),
@@ -908,46 +910,46 @@ return $response??'';
                 'coupon_amount' => $coupon_amount ?? 0,
                 'has_pickup_store' => $has_pickup_store,
                 'brand_id' => $brand_array[0] ?? '',
-                'is_cod' =>$is_cod,
+                'is_cod' => $is_cod,
                 'cod_amount' => $cod_amount,
-                'is_coupon'=>$is_coupon,
-                'coupon_code'=>$coupon_code,
-                'coupon_percentage'=>$coupon_percentage,
-                'coupon_type'=>$coupon_type
-                
+                'is_coupon' => $is_coupon,
+                'coupon_code' => $coupon_code,
+                'coupon_percentage' => $coupon_percentage,
+                'coupon_type' => $coupon_type
+
             );
-             $tmp['is_pickup_from_store']=$globel->is_pickup_from_store ?? 0;
-             $tmp['is_cod']=$globel->is_cod ?? 0;
-             $tmp['cod_amount']=$globel->cod_amount ?? 0;
-              return $tmp;
-        }else{
-              $tmp['cart_total']          = array(
+            $tmp['is_pickup_from_store'] = $globel->is_pickup_from_store ?? 0;
+            $tmp['is_cod'] = $globel->is_cod ?? 0;
+            $tmp['cod_amount'] = $globel->cod_amount ?? 0;
+            return $tmp;
+        } else {
+            $tmp['cart_total']          = array(
                 'total' => 0,
                 'product_tax_exclusive_total' => 0,
                 'product_tax_exclusive_total_without_format' => 0,
-                'tax_total' =>0,
+                'tax_total' => 0,
                 'tax_percentage' => 0,
-                'shipping_charge' =>0,
+                'shipping_charge' => 0,
                 'addon_amount' => 0,
-                'coupon_amount' =>0,
+                'coupon_amount' => 0,
                 'has_pickup_store' => 0,
                 'brand_id' => '',
                 'is_cod' => 0,
                 'cod_amount' => 0,
-                'is_coupon'=>0,
-                'coupon_code'=>0,
-                'coupon_percentage'=>0,
-                'coupon_type'=>0
-                
+                'is_coupon' => 0,
+                'coupon_code' => 0,
+                'coupon_percentage' => 0,
+                'coupon_type' => 0
+
             );
-             $tmp['is_pickup_from_store']=$globel->is_pickup_from_store ?? 0;
-             $tmp['is_cod']=$globel->is_cod ?? 0;
-             $tmp['cod_amount']=$globel->cod_amount ?? 0;
-             $tmp['cart_count'] = 0;
-             $tmp['carts'] = 0;
-               return $tmp;
+            $tmp['is_pickup_from_store'] = $globel->is_pickup_from_store ?? 0;
+            $tmp['is_cod'] = $globel->is_cod ?? 0;
+            $tmp['cod_amount'] = $globel->cod_amount ?? 0;
+            $tmp['cart_count'] = 0;
+            $tmp['carts'] = 0;
+            return $tmp;
         }
-        
+
 
         return $tmp;
     }
