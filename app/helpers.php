@@ -296,11 +296,22 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
     if (isset($variation_option_id) && !empty($variation_option_id)) {
         $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
             ->where('product_id', $product_data->id)
-            ->selectRaw("SUM(amount) AS total_amount")
-            ->groupBy('product_id')
+            // ->selectRaw("SUM(amount) AS total_amount")
+            // ->groupBy('product_id')
             ->get();
-        if (isset($variation_option_data)) {
-            $total_variation_amount = $variation_option_data[0]->total_amount;
+        // if (isset($variation_option_data)) {
+        //     $total_variation_amount = $variation_option_data[0]->total_amount;
+        // }
+
+        foreach ($variation_option_data as $value) {
+
+            $variation = Variation::where('id', $value->variation_id)->first();
+            if ($variation) {
+                $title = $variation->title ?? '';
+                $id = $value->id ?? '';
+                $default_value[$title] = $id;
+                $total_variation_amount = $total_variation_amount + $value->amount;
+            }
         }
     } else {
         $variation_option_data = ProductVariationOption::where('product_id', $product_data->id)
