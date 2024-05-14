@@ -700,6 +700,7 @@ class CartController extends Controller
         if (isset($checkCart) && !empty($checkCart) && count($checkCart) > 0) {
             foreach ($checkCart as $citems) {
                 $used_addons = [];
+                $selected_value = [];
                 $items = $citems->products;
                 $tax = [];
                 $tax_data = 0;
@@ -736,7 +737,7 @@ class CartController extends Controller
                             if ($variation) {
                                 $title = $variation->title ?? '';
                                 // $id = $value->id ?? '';
-                                $default_value[$title] = $value->value ?? '';
+                                $selected_value[$title] = $value->value ?? '';
                                 $total_variation_amount = $total_variation_amount + $value->amount;
                             }
                         }
@@ -827,6 +828,7 @@ class CartController extends Controller
                     $pro['image']           = $items->base_image;
                     $pro['max_quantity']    = $items->quantity;
                     $pro['chosen_variation_option_ids'] = $variation_option_id;
+                    $pro['chosen_variation'] = $selected_value;
                     $imagePath              = $items->base_image;
 
                     $brand_array[] = $items->brand_id;
