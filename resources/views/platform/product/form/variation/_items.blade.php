@@ -66,7 +66,7 @@
                                             <div class="col-md-2">
                                                 <label class=" form-label fs-6 mb-2">Is Default</label>
                                                     <div class="input-group pb-3" style="margin-top: 13px">
-                                                        <input   type="checkbox" class="is-default-checkbox" name="is_default" value="0" @if (isset($data['is_default']) && $data['is_default'] == 1) checked @endif>
+                                                        <input   type="checkbox" class="is-default-checkbox" name="is_default" value="{{$data['is_default'] ?? ''}}" @if (isset($data['is_default']) && $data['is_default'] == 1) checked @endif>
                                                     </div>
                                             </div>
                                         </div>
