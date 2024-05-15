@@ -146,7 +146,7 @@ class Couponcontroller extends Controller
                             # category ...
                             $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total, SUM(cart_product_variation_options.amount * gbs_carts.quantity) as variation_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
-                                ->join('cart_product_variation_options', 'cart_product_variation_options.cart_id', '=', 'carts.id')
+                                ->join('cart_product_variation_options', 'cart_produc_variation_options.cart_id', '=', 'carts.id')
                                 ->where('carts.customer_id', $customer_id)
                                 // ->groupBy('carts.product_id')
                                 ->first();
