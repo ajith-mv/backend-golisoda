@@ -734,11 +734,9 @@ class CartController extends Controller
             $q->where('guest_token', $guest_token);
         })->get();
         $variation_option_id = [];
-        foreach ($checkCart as $cartItem) {
-            foreach ($cartItem->variationOptions as $variationids) {
-                $variation_option_id[] = $variationids->variation_option_id;
-            }
-        }
+        // foreach ($checkCart as $cartItem) {
+            
+        // }
         $globel = GlobalSettings::find(1);
         $tmp                = [];
         $grand_total        = 0;
@@ -774,6 +772,9 @@ class CartController extends Controller
                     // }
                     $pro                    = [];
                     $total_variation_amount = 0;
+                    foreach ($citems->variationOptions as $variationids) {
+                        $variation_option_id[] = $variationids->variation_option_id;
+                    }
                     if (isset($variation_option_id) && !empty($variation_option_id)) {
                         $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
                             ->where('product_id', $product_info->id)
