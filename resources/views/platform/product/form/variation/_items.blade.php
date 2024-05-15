@@ -44,16 +44,15 @@
                                         <div class="row" >
                                             <div class="col-md-4">
                                                 <label class="required form-label fs-6 mb-2">Variation value</label>
-                                                <input type="text" value="{{ $data['value'] }}" name="variation_value" class="form-control"
+                                                <input type="text" value="{{ $data['value'] }}" name="variation_value" class="form-control required"
                                                     placeholder="Enter Variation value" />
                                             </div>
                                             <div class="col-md-4">
-                                                <label class="form-label">Amount:</label>
+                                                <label class="form-label required">Amount:</label>
                                                 <div class="input-group pb-3">
-                                                    <input type="text" name="amount" value="{{ $data['amount'] }}" class="form-control"
+                                                    <input type="text" style="width: 145px" name="amount" value="{{ $data['amount'] }}" class="form-control amount required"
                                                         placeholder="Enter Amount" />
-                                                    <button
-                                                        class="border border-secondary btn btn-icon btn-flex btn-light-danger"
+                                                    <button style="margin-top: -42px;margin-left:100px;"  class=" amount border border-secondary btn btn-icon btn-flex btn-light-danger"
                                                         data-repeater-delete type="button">
                                                         <i class="fa fa-trash"><span class="path1"></span><span
                                                                 class="path2"></span><span class="path3"></span><span
@@ -121,22 +120,20 @@
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <label class="required form-label fs-6 mb-2">Variation value</label>
-                                                <input type="text" name="variation_value" class="form-control"
+                                                <input type="text" name="variation_value" class="form-control  required"
                                                     placeholder="Enter Variation value" />
                                             </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label">Amount:</label>
-                                                <div class="input-group pb-6">
-                                                    <input type="text" name="amount" class="form-control"
+                                            <div class="col-md-6 amount">
+                                                <label class="form-label required">Amount:</label>
+                                                <div class="input-group pb-6 ">
+                                                    <input style="width: 145px" type="text" name="amount" class="form-control amount required"
                                                         placeholder="Enter Amount" />
-                                                    <button
-                                                        class="border border-secondary btn btn-icon btn-flex btn-light-danger"
+                                                    <button style="margin-top: -42px;margin-left:100px;" class=" amount border border-secondary btn btn-icon btn-flex btn-light-danger"
                                                         data-repeater-delete type="button">
                                                         <i class="fa fa-trash"><span class="path1"></span><span
                                                                 class="path2"></span><span class="path3"></span><span
                                                                 class="path4"></span><span class="path5"></span></i>
                                                     </button>
-                                                 
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
@@ -198,7 +195,26 @@
 $(document).ready(function() {
      repeter() ;
      length();
+     remove();
+     classadd();
 });
+function classadd(){
+    $("[data-repeater-list='kt_docs_repeater_nested_inner']").closest('div').each(function() {
+    var $row = $(this);
+    $row.on("keyup", '.form-control.amount.required.error', function() {
+        var value =$('.form-control.amount').val();
+            $('.form-control.amount.required').css('width', '145px');
+            $('.amount.border.border-secondary.btn.btn-icon.btn-flex.btn-light-danger').css({
+                'margin-top': '-42px',
+                'margin-left': '230px'
+            }); 
+    });
+});
+}
+function remove(){
+$('.form-control.amount.required').removeAttr('style');
+$('.amount.border.border-secondary.btn.btn-icon.btn-flex.btn-light-danger').removeAttr('style');
+}
 function length() {
     var length = $('.test').length; 
     var data = parseInt($('input[name="count"]').val()); 
@@ -217,6 +233,7 @@ function repeter() {
         var $row = $(this);
         $row.find('.is-default-checkbox').click(function() {
             $row.find('.is-default-checkbox').not(this).prop('checked', false);
+            $row.addClass('required');
             $(this).val($(this).is(':checked') ? '1' : '0');
         });
     });
@@ -229,6 +246,8 @@ function repeter() {
         selector: '.inner-repeater',
         show: function() {
             repeter();
+            remove();
+            classadd();
             $(this).slideDown();
         },
         hide: function(deleteElement) {
@@ -243,6 +262,7 @@ function repeter() {
     }
     if (length()) {
         $(this).slideDown();
+        remove();
         setTimeout(() => {
         $('.product-attr-select').select2();
     }, 200);

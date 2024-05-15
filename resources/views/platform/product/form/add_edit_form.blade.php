@@ -109,16 +109,42 @@
 @endsection
 @section('add_on_script')
     <script src="{{ asset('assets/js/jquery.validate.min.js') }}"></script>
-    <script>
-        $(document).ready(function() {
+<script>
+ $(document).ready(function() {
+    $('#kt_ecommerce_add_product_submit').click(function() {
+    $("[data-repeater-list='kt_docs_repeater_nested_inner']").closest('div').each(function() {
+        var $row = $(this);
+        var $checkbox = $row.find('.is-default-checkbox:first');
+        var $checkboxes = $row.find('.is-default-checkbox');
+        var hasChecked = false;
+        $checkboxes.each(function() {
+            if ($(this).prop('checked')) {
+                hasChecked = true;
+                return false;
+            }
+        });
+        if (!hasChecked) {
+            $checkbox.addClass('required');
+        }else{
+            $checkbox.removeClass('required');
+        }
+
+        // Apply CSS styles to other elements within the row
+        $row.find('.form-control.amount.required').css('width', '145px');
+        $row.find('.amount.border.border-secondary.btn.btn-icon.btn-flex.btn-light-danger').css({
+            'margin-top': '-61px',
+            'margin-left': '230px'
+        });
+    });
+});
 
             $('#kt_ecommerce_add_product_form').validate({
                 rules: {
-                    product_name: "required",
-                    sku: "required",
-                    category_id: "required",
-                    brand_id: "required",
-                    base_price: "required",
+                        product_name: "required",
+                        sku: "required",
+                        category_id: "required",
+                        brand_id: "required",
+                        base_price: "required",
                 },
                 messages: {
                     product_name: "Product Name is required",
