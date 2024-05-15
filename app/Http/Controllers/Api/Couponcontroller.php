@@ -54,7 +54,7 @@ class Couponcontroller extends Controller
                 $has_product_error = 0;
                 $overall_discount_percentage = 0;
                 $couponApplied = [];
-
+                $total_variation_amount = 0;
                 if ($coupon->quantity > 0) {
                     switch ($coupon->coupon_type) {
                         case '1':
@@ -144,8 +144,9 @@ class Couponcontroller extends Controller
                             //     break;
                         case '4':
                             # category ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total, SUM(cart_product_variation_options.amount * gbs_carts.quantity) as variation_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
+                                ->join('cart_product_variation_options', 'cart_product_variation_options.cart_id', '=', 'carts.id')
                                 ->where('carts.customer_id', $customer_id)
                                 // ->groupBy('carts.product_id')
                                 ->first();
@@ -155,22 +156,22 @@ class Couponcontroller extends Controller
                                 return $response ?? '';
                             }
                             $product_info = Product::find($checkCartData->product_id);
-                            $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
+                            $checkCartData->sub_total = round(($product_info->strike_price * $checkCartData->quantity) + $checkCartData->variation_total);
                             $checkCartData->update();
                             if (isset($checkCartData) && !empty($checkCartData)) {
-
-                                if ($checkCartData->category_total >= $coupon->minimum_order_value) {
+                                $check_cart_data_category_total = $checkCartData->category_total + $checkCartData->variation_total;
+                                if ( $check_cart_data_category_total >= $coupon->minimum_order_value) {
                                     /**
                                      * check percentage or fixed amount
                                      */
                                     switch ($coupon->calculate_type) {
 
                                         case 'percentage':
-                                            $product_amount = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
+                                            $product_amount = percentageAmountOnly($check_cart_data_category_total, $coupon->calculate_value);
                                             $tmp['discount_amount'] = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
                                             $tmp['coupon_id'] = $coupon->id;
                                             $tmp['coupon_code'] = $coupon->coupon_code;
-                                            $tmp['coupon_applied_amount'] = number_format((float)$checkCartData->category_total, 2, '.', '');
+                                            $tmp['coupon_applied_amount'] = number_format((float)$check_cart_data_category_total, 2, '.', '');
                                             $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                             $overall_discount_percentage = $coupon->calculate_value;
                                             $couponApplied = $tmp;

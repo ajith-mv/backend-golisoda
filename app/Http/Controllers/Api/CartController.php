@@ -774,8 +774,10 @@ class CartController extends Controller
                     $variation_option_id = [];
 
                     $total_variation_amount = 0;
-                    foreach ($citems->variationOptions as $variationids) {
-                        $variation_option_id[] = $variationids->variation_option_id;
+                    if (isset($citems->variationOptions) && !empty($citems->variationOptions)) {
+                        foreach ($citems->variationOptions as $variationids) {
+                            $variation_option_id[] = $variationids->variation_option_id;
+                        }
                     }
                     if (isset($variation_option_id) && !empty($variation_option_id)) {
                         $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
