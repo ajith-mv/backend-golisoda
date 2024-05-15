@@ -205,7 +205,13 @@
                     <td>
                         <div>
 
-                            {{ $item->product_name }}
+                            {{ $item->product_name }}<br>
+                            @php
+                                $data = $order_info->Variation;
+                            @endphp
+                            @foreach($variations as $key => $value)
+                            {{ $value['title']}} : {{$data[$key]['value']}}<br>
+                            @endforeach
                         </div>
                         <div>
                             {{-- Warranty-15-02-2024 --}}

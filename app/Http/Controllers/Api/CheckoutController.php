@@ -18,6 +18,7 @@ use App\Models\Product\OrderProductAddon;
 use App\Models\Product\Product;
 use App\Models\ShippingCharge;
 use App\Models\Master\CustomerAddress;
+use App\Models\Master\Variation;
 use App\Models\OrderProductVariationOption;
 use App\Models\Product\ProductVariationOption;
 use App\Models\Warranty;
@@ -29,8 +30,9 @@ use Razorpay\Api\Api;
 use PDF;
 use Mail;
 use Illuminate\Support\Facades\Validator;
+
 class CheckoutController extends Controller
-{   
+{
     public function proceedCod(Request $request)
     {
 
@@ -44,12 +46,12 @@ class CheckoutController extends Controller
          * 2.INSERT IN Order Products
          * 
          */
-       
-        
-        $billing_id=$request->billing_address_id?? $request->customer_id;
-        $shipping_id=$request->shipping_method['address_id'] ?? $request->customer_id;
-        $billing_address=CustomerAddress::find($billing_id);
-        $shipping_address=CustomerAddress::find($shipping_id);
+
+
+        $billing_id = $request->billing_address_id ?? $request->customer_id;
+        $shipping_id = $request->shipping_method['address_id'] ?? $request->customer_id;
+        $billing_address = CustomerAddress::find($billing_id);
+        $shipping_address = CustomerAddress::find($shipping_id);
         $customer_id            = $request->customer_id;
         $order_status           = OrderStatus::where('status', 'published')->where('order', 1)->first();
         $shipping_method        = $request->shipping_method;
@@ -58,21 +60,21 @@ class CheckoutController extends Controller
         $cart_items             = $request->cart_items;
         $shipping_address       = $shipping_address;
         $billing_address        = $billing_address;
-        $coupon_data            = $request->coupon_info??'';
-        $pickup_store_address   = $request->pickup_store_address??'';
+        $coupon_data            = $request->coupon_info ?? '';
+        $pickup_store_address   = $request->pickup_store_address ?? '';
 
         $coupon_details = '';
         $coupon_code = '';
         $coupon_amount = 0;
-        $coupon_percentage='';
-        $coupon_type='';
+        $coupon_percentage = '';
+        $coupon_type = '';
         $coupon_id = 0;
-        if (isset($checkout_data) && $checkout_data['is_coupon']==1) {
+        if (isset($checkout_data) && $checkout_data['is_coupon'] == 1) {
             $coupon_code = $checkout_data['coupon_code'];
             $coupon_amount = $checkout_data['coupon_amount'];
-            $coupon_percentage=$checkout_data['coupon_percentage'];
-            $coupon_type=$checkout_data['coupon_type'];
-            $coupon_details =$coupon_data['coupon_type']?? NULL;
+            $coupon_percentage = $checkout_data['coupon_percentage'];
+            $coupon_type = $checkout_data['coupon_type'];
+            $coupon_details = $coupon_data['coupon_type'] ?? NULL;
         }
 
         $pickup_address_details = '';
@@ -84,11 +86,11 @@ class CheckoutController extends Controller
         $errors                 = [];
         if (isset($cart_items) && !empty($cart_items)) {
             foreach ($cart_items as $citem) {
-               
+
                 $product_id = $citem['id'];
                 $product_info = Product::find($product_id);
-                if ($product_info->quantity < $citem['quantity'] || $product_info->stock_status == 'out_of_stock' || $product_info->status =='unpublished') {
-                    $errors[]     ='Due to Out of Stock, Kindly remove the product '.$citem['product_name'];
+                if ($product_info->quantity < $citem['quantity'] || $product_info->stock_status == 'out_of_stock' || $product_info->status == 'unpublished') {
+                    $errors[]     = 'Due to Out of Stock, Kindly remove the product ' . $citem['product_name'];
                     $response['error'] = $errors;
                 }
             }
@@ -154,9 +156,9 @@ class CheckoutController extends Controller
         $order_ins['shipping_state'] = $shipping_address->states->state_name ?? $billing_address->states->state_name ?? null;
         $order_ins['shipping_city'] = $shipping_address->city ?? $billing_address->city ?? null;
         $order_ins['is_cod'] = $checkout_data['is_cod'] ?? 0;
-        $order_ins['cod_amount'] = $checkout_data['cod_amount']?? NULL;
-        
-        
+        $order_ins['cod_amount'] = $checkout_data['cod_amount'] ?? NULL;
+
+
 
         if (isset($shipping_method) && $shipping_method != 'PICKUP_FROM_STORE' && isset($shipping_address) && !empty($shipping_address)) {
 
@@ -207,7 +209,7 @@ class CheckoutController extends Controller
                         OrderProductVariationOption::create($cart_product_variation_ins);
                     }
                 }
-                
+
                 if (isset($product_info->warranty_id) && !empty($product_info->warranty_id)) {
                     $warranty_info = Warranty::find($product_info->warranty_id);
                     if ($warranty_info) {
@@ -253,110 +255,118 @@ class CheckoutController extends Controller
         $his['action'] = 'Order Placed';
         $his['description'] = 'Order has been Placed successfully';
         OrderHistory::create($his);
-         Cart::where('customer_id', $customer_id)->delete();
-     if ($order_info) {
-                    $order_status    = OrderStatus::where('status', 'published')->where('order', 2)->first();
+        Cart::where('customer_id', $customer_id)->delete();
+        if ($order_info) {
+            $order_status    = OrderStatus::where('status', 'published')->where('order', 2)->first();
 
-                    $order_info->status = 'placed';
-                    $order_info->order_status_id = $order_status->id;
-                    $order_info->save();
+            $order_info->status = 'placed';
+            $order_info->order_status_id = $order_status->id;
+            $order_info->save();
 
-                    $order_items = OrderProduct::where('order_id', $order_info->id)->get();
+            $order_items = OrderProduct::where('order_id', $order_info->id)->get();
 
-                    if(!is_null($order_info->coupon_code)) {
-                        $AppliedCoupon =  Coupons::where('coupon_code', $order_info->coupon_code)->first();
-                        if($AppliedCoupon){
-                            $AppliedCoupon->quantity = $AppliedCoupon->quantity??0 - 1;
-                            $AppliedCoupon->save();
-                        }
-                        
-                    }
-
-                    if (isset($order_items) && !empty($order_items)) {
-                        foreach ($order_items as $product) {
-                            $product_info = Product::find($product->product_id);
-                            $pquantity = $product_info->quantity - $product->quantity;
-                            $product_info->quantity = $pquantity;
-                            if ($pquantity == 0) {
-                                $product_info->stock_status = 'out_of_stock';
-                                $product_info->status = 'unpublished';
-                            }
-                            $product_info->save();
-                        }
-                    }
-                    $pay_ins['order_id'] = $order_info->id;
-                    $pay_ins['payment_no'] = Null;
-                    $pay_ins['amount'] = $order_info->amount;
-                    $pay_ins['paid_amount'] = $order_info->amount;
-                    $pay_ins['payment_type'] = 'cod';
-                    $pay_ins['payment_mode'] = 'cod';
-                    $pay_ins['response'] = Null;
-                    $pay_ins['status'] = 'pending';
-
-                    Payment::create($pay_ins);
-
-                    /**** order history */
-                    $his['order_id'] = $order_info->id;
-                    $his['action'] = 'Order Placed';
-                    $his['description'] = 'Order has been placed successfully';
-                    OrderHistory::create($his);
-                    #generate invoice
-                    $globalInfo = GlobalSettings::first();
-                    $pickup_details = [];
-                    if (isset($order_info->pickup_store_id) && !empty($order_info->pickup_store_id) && !empty($order_info->pickup_store_details)) {
-                        $pickup = unserialize($order_info->pickup_store_details);
-
-                        $pickup_details = $pickup;
-                    }
-                    $pdf = PDF::loadView('platform.invoice.index', compact('order_info', 'globalInfo', 'pickup_details'));
-                    Storage::put('public/invoice_order/' . $order_info->order_no . '.pdf', $pdf->output());
-                    #send mail
-                    $emailTemplate = EmailTemplate::select('email_templates.*')
-                        ->join('sub_categories', 'sub_categories.id', '=', 'email_templates.type_id')
-                        ->where('sub_categories.slug', 'new-order')->first();
-
-                    $globalInfo = GlobalSettings::first();
-
-                    $extract = array(
-                        'name' => $order_info->billing_name,
-                        'regards' => $globalInfo->site_name,
-                        'company_website' => '',
-                        'company_mobile_no' => $globalInfo->site_mobile_no,
-                        'company_address' => $globalInfo->address,
-                        'dynamic_content' => '',
-                        'order_id' => $order_info->order_no
-                    );
-                    $templateMessage = $emailTemplate->message;
-                    $templateMessage = str_replace("{", "", addslashes($templateMessage));
-                    $templateMessage = str_replace("}", "", $templateMessage);
-                    extract($extract);
-                    eval("\$templateMessage = \"$templateMessage\";");
-
-                    $title = $emailTemplate->title;
-                    $title = str_replace("{", "", addslashes($title));
-                    $title = str_replace("}", "", $title);
-                    eval("\$title = \"$title\";");
-
-                    $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
-                    $send_mail = new OrderMail($templateMessage, $title, $filePath);
-                    // return $send_mail->render();
-                    try {
-                         $bccEmails = explode(',', env('ORDER_EMAILS'));
-                        Mail::to($order_info->billing_email)->bcc($bccEmails)->send($send_mail);
-                    } catch (\Throwable $th) {
-                        Log::info($th->getMessage());
-                    }
-
-                    #send sms for notification
-                    $sms_params = array(
-                        'company_name' => env('APP_NAME'),
-                        'order_no' => $order_info->order_no,
-                        'reference_no' => '',
-                        'mobile_no' => [$order_info->billing_mobile_no]
-                    );
-                    sendGBSSms('confirm_order', $sms_params);
+            if (!is_null($order_info->coupon_code)) {
+                $AppliedCoupon =  Coupons::where('coupon_code', $order_info->coupon_code)->first();
+                if ($AppliedCoupon) {
+                    $AppliedCoupon->quantity = $AppliedCoupon->quantity ?? 0 - 1;
+                    $AppliedCoupon->save();
                 }
-     return  array('success' => true, 'message' => 'Order has been placed successfully');
+            }
+
+            if (isset($order_items) && !empty($order_items)) {
+                foreach ($order_items as $product) {
+                    $product_info = Product::find($product->product_id);
+                    $pquantity = $product_info->quantity - $product->quantity;
+                    $product_info->quantity = $pquantity;
+                    if ($pquantity == 0) {
+                        $product_info->stock_status = 'out_of_stock';
+                        $product_info->status = 'unpublished';
+                    }
+                    $product_info->save();
+                }
+            }
+            $pay_ins['order_id'] = $order_info->id;
+            $pay_ins['payment_no'] = Null;
+            $pay_ins['amount'] = $order_info->amount;
+            $pay_ins['paid_amount'] = $order_info->amount;
+            $pay_ins['payment_type'] = 'cod';
+            $pay_ins['payment_mode'] = 'cod';
+            $pay_ins['response'] = Null;
+            $pay_ins['status'] = 'pending';
+
+            Payment::create($pay_ins);
+
+            /**** order history */
+            $his['order_id'] = $order_info->id;
+            $his['action'] = 'Order Placed';
+            $his['description'] = 'Order has been placed successfully';
+            OrderHistory::create($his);
+            #generate invoice
+            $globalInfo = GlobalSettings::first();
+            $pickup_details = [];
+            if (isset($order_info->pickup_store_id) && !empty($order_info->pickup_store_id) && !empty($order_info->pickup_store_details)) {
+                $pickup = unserialize($order_info->pickup_store_details);
+
+                $pickup_details = $pickup;
+            }
+            $variation_id = [];
+            if (isset($order_info->Variation) && !empty($order_info->Variation)) {
+                $data = $order_info->Variation;
+                foreach ($data as $value) {
+                    $variation_id[] = $value->variation_id;
+                }
+                $variations = Variation::whereIn('id', $variation_id)->get();
+            }
+
+            $pdf = PDF::loadView('platform.invoice.index', compact('order_info', 'globalInfo', 'pickup_details', 'variations'));
+            Storage::put('public/invoice_order/' . $order_info->order_no . '.pdf', $pdf->output());
+            #send mail
+            $emailTemplate = EmailTemplate::select('email_templates.*')
+                ->join('sub_categories', 'sub_categories.id', '=', 'email_templates.type_id')
+                ->where('sub_categories.slug', 'new-order')->first();
+
+            $globalInfo = GlobalSettings::first();
+
+            $extract = array(
+                'name' => $order_info->billing_name,
+                'regards' => $globalInfo->site_name,
+                'company_website' => '',
+                'company_mobile_no' => $globalInfo->site_mobile_no,
+                'company_address' => $globalInfo->address,
+                'dynamic_content' => '',
+                'order_id' => $order_info->order_no
+            );
+            $templateMessage = $emailTemplate->message;
+            $templateMessage = str_replace("{", "", addslashes($templateMessage));
+            $templateMessage = str_replace("}", "", $templateMessage);
+            extract($extract);
+            eval("\$templateMessage = \"$templateMessage\";");
+
+            $title = $emailTemplate->title;
+            $title = str_replace("{", "", addslashes($title));
+            $title = str_replace("}", "", $title);
+            eval("\$title = \"$title\";");
+
+            $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
+            $send_mail = new OrderMail($templateMessage, $title, $filePath);
+            // return $send_mail->render();
+            try {
+                $bccEmails = explode(',', env('ORDER_EMAILS'));
+                Mail::to($order_info->billing_email)->bcc($bccEmails)->send($send_mail);
+            } catch (\Throwable $th) {
+                Log::info($th->getMessage());
+            }
+
+            #send sms for notification
+            $sms_params = array(
+                'company_name' => env('APP_NAME'),
+                'order_no' => $order_info->order_no,
+                'reference_no' => '',
+                'mobile_no' => [$order_info->billing_mobile_no]
+            );
+            sendGBSSms('confirm_order', $sms_params);
+        }
+        return  array('success' => true, 'message' => 'Order has been placed successfully');
     }
     public function proceedCheckout(Request $request)
     {
@@ -374,10 +384,10 @@ class CheckoutController extends Controller
          * 2.INSERT IN Order Products
          * 
          */
-        $billing_id=$request->billing_address_id?? $request->customer_id;
-        $shipping_id=$request->shipping_method['address_id'] ?? $request->customer_id;
-        $billing_address=CustomerAddress::find($billing_id);
-        $shipping_address=CustomerAddress::find($shipping_id);
+        $billing_id = $request->billing_address_id ?? $request->customer_id;
+        $shipping_id = $request->shipping_method['address_id'] ?? $request->customer_id;
+        $billing_address = CustomerAddress::find($billing_id);
+        $shipping_address = CustomerAddress::find($shipping_id);
         $customer_id            = $request->customer_id;
         $order_status           = OrderStatus::where('status', 'published')->where('order', 1)->first();
         $shipping_method        = $request->shipping_method;
@@ -386,21 +396,21 @@ class CheckoutController extends Controller
         $cart_items             = $request->cart_items;
         $shipping_address       = $shipping_address;
         $billing_address        = $billing_address;
-        $coupon_data            = $request->coupon_info??'';
-        $pickup_store_address   = $request->pickup_store_address??'';
+        $coupon_data            = $request->coupon_info ?? '';
+        $pickup_store_address   = $request->pickup_store_address ?? '';
 
         $coupon_details = '';
         $coupon_code = '';
         $coupon_amount = 0;
-        $coupon_percentage='';
-        $coupon_type='';
+        $coupon_percentage = '';
+        $coupon_type = '';
         $coupon_id = 0;
-        if (isset($checkout_data) && $checkout_data['is_coupon']==1) {
+        if (isset($checkout_data) && $checkout_data['is_coupon'] == 1) {
             $coupon_code = $checkout_data['coupon_code'];
             $coupon_amount = $checkout_data['coupon_amount'];
-            $coupon_percentage=$checkout_data['coupon_percentage'];
-            $coupon_type=$checkout_data['coupon_type'];
-            $coupon_details =$coupon_data['coupon_type']?? NULL;
+            $coupon_percentage = $checkout_data['coupon_percentage'];
+            $coupon_type = $checkout_data['coupon_type'];
+            $coupon_details = $coupon_data['coupon_type'] ?? NULL;
         }
 
         $pickup_address_details = '';
@@ -412,11 +422,11 @@ class CheckoutController extends Controller
         $errors                 = [];
         if (isset($cart_items) && !empty($cart_items)) {
             foreach ($cart_items as $citem) {
-               
+
                 $product_id = $citem['id'];
                 $product_info = Product::find($product_id);
-                if ($product_info->quantity < $citem['quantity'] || $product_info->stock_status == 'out_of_stock' || $product_info->status =='unpublished') {
-                    $errors[]     ='Due to Out of Stock, Kindly remove the product '.$citem['product_name'];
+                if ($product_info->quantity < $citem['quantity'] || $product_info->stock_status == 'out_of_stock' || $product_info->status == 'unpublished') {
+                    $errors[]     = 'Due to Out of Stock, Kindly remove the product ' . $citem['product_name'];
                     $response['error'] = $errors;
                 }
             }
@@ -677,13 +687,12 @@ class CheckoutController extends Controller
 
                     $order_items = OrderProduct::where('order_id', $order_info->id)->get();
 
-                    if(!is_null($order_info->coupon_code)) {
+                    if (!is_null($order_info->coupon_code)) {
                         $AppliedCoupon =  Coupons::where('coupon_code', $order_info->coupon_code)->first();
-                        if($AppliedCoupon){
-                            $AppliedCoupon->quantity = $AppliedCoupon->quantity??0 - 1;
+                        if ($AppliedCoupon) {
+                            $AppliedCoupon->quantity = $AppliedCoupon->quantity ?? 0 - 1;
                             $AppliedCoupon->save();
                         }
-                        
                     }
 
                     if (isset($order_items) && !empty($order_items)) {
@@ -761,7 +770,7 @@ class CheckoutController extends Controller
                     $send_mail = new OrderMail($templateMessage, $title, $filePath);
                     // return $send_mail->render();
                     try {
-                         $bccEmails = explode(',', env('ORDER_EMAILS'));
+                        $bccEmails = explode(',', env('ORDER_EMAILS'));
                         Mail::to($order_info->billing_email)->bcc($bccEmails)->send($send_mail);
                     } catch (\Throwable $th) {
                         Log::info($th->getMessage());
@@ -805,26 +814,25 @@ class CheckoutController extends Controller
                     $order_items = OrderProduct::where('order_id', $order_info->id)->get();
 
 
-                    if(!is_null($order_info->coupon_code)) {
+                    if (!is_null($order_info->coupon_code)) {
                         $AppliedCoupon =  Coupons::where('coupon_code', $order_info->coupon_code)->first();
-                        if( $AppliedCoupon){
-                         $AppliedCoupon->quantity = $AppliedCoupon->quantity??0 - 1;
-                         $AppliedCoupon->save();   
+                        if ($AppliedCoupon) {
+                            $AppliedCoupon->quantity = $AppliedCoupon->quantity ?? 0 - 1;
+                            $AppliedCoupon->save();
                         }
-                        
                     }
 
                     if (isset($order_items) && !empty($order_items)) {
                         foreach ($order_items as $product) {
                             $product_info = Product::find($product->id);
-                            if($product_info){
-                            $pquantity = $product_info->quantity??0 - $product->quantity??0; // reduce product Qty
-                            $product_info->quantity = $pquantity??0;
-                            if ($pquantity == 0) {
-                                $product_info->stock_status = 'out_of_stock';
-                                 $product_info->status = 'unpublished';
-                            }
-                            $product_info->save();
+                            if ($product_info) {
+                                $pquantity = $product_info->quantity ?? 0 - $product->quantity ?? 0; // reduce product Qty
+                                $product_info->quantity = $pquantity ?? 0;
+                                if ($pquantity == 0) {
+                                    $product_info->stock_status = 'out_of_stock';
+                                    $product_info->status = 'unpublished';
+                                }
+                                $product_info->save();
                             }
                         }
                     }
