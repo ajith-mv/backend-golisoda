@@ -110,16 +110,18 @@ class CartController extends Controller
                         $message = 'Customer Data not available';
                         $data = [];
                     }
+                }else{
+                    $product_quantity = $checkCart->quantity + $quantity;
+                    if ($product_info->quantity <= $product_quantity) {
+                        $product_quantity = $product_info->quantity;
+                    }
+    
+                    $checkCart->quantity  = $product_quantity;
+                    $checkCart->sub_total = $product_quantity * $checkCart->price;
+                    $checkCart->update();
                 }
 
-                $product_quantity = $checkCart->quantity + $quantity;
-                if ($product_info->quantity <= $product_quantity) {
-                    $product_quantity = $product_info->quantity;
-                }
-
-                $checkCart->quantity  = $product_quantity;
-                $checkCart->sub_total = $product_quantity * $checkCart->price;
-                $checkCart->update();
+                
 
                 $data = $this->getCartListAll($customer_id, $guest_token);
             }
