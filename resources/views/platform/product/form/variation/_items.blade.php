@@ -47,12 +47,12 @@
                                                 <input type="text" value="{{ $data['value'] }}" name="variation_value" class="form-control required"
                                                     placeholder="Enter Variation value" />
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-6 amount">
                                                 <label class="form-label required">Amount:</label>
                                                 <div class="input-group pb-3">
-                                                    <input type="text" style="width: 145px" name="amount" value="{{ $data['amount'] }}" class="form-control amount required"
+                                                    <input type="text" style="width:145px" name="amount" value="{{ $data['amount'] }}" class="form-control amount required"
                                                         placeholder="Enter Amount" />
-                                                    <button style="margin-top: -42px;margin-left:100px;"  class=" amount border border-secondary btn btn-icon btn-flex btn-light-danger"
+                                                    <button style="margin-top:-42px;margin-left:100px;"  class="amount border border-secondary btn btn-icon btn-flex btn-light-danger"
                                                         data-repeater-delete type="button">
                                                         <i class="fa fa-trash"><span class="path1"></span><span
                                                                 class="path2"></span><span class="path3"></span><span
