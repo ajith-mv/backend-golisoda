@@ -228,7 +228,7 @@ class Couponcontroller extends Controller
                                 ->join('cart_product_variation_options', 'cart_product_variation_options.cart_id', '=', 'carts.id')
                                 ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
                                 ->join('coupon_categories', function ($join) {
-                                    $join->on('coupon_categories.category_id', '=', 'product_categories.id');
+                                    $join->on('coupon_categories.category_id', '=', 'product_categories.i');
                                     // $join->orOn('coupon_categories.category_id', '=', 'product_categories.parent_id');
                                 })
                                 ->where('coupon_categories.coupon_id', $coupon->id)
