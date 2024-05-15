@@ -207,11 +207,15 @@
 
                             {{ $item->product_name }}<br>
                             @php
-                                $data = $order_info->Variation;
+                                // $data = $order_info->Variation;
                             @endphp
-                            @if(isset($variations) && !empty($variations))
-                                @foreach($variations as $key => $value)
-                                {{ $value['title']}} : {{$data[$key]['value']}}<br>
+                            @if(isset($item->chosenVariation) && !empty($item->chosenVariation))
+                                @foreach($item->chosenVariation as $value)
+                                {{ $value['value']}} : 
+                                @php
+                                    $variation = Variation::find($value['variation_id']);
+                                @endphp
+                                {{$variation->title}}<br>
                                 @endforeach
                             @endif
                            
