@@ -310,6 +310,7 @@ class CheckoutController extends Controller
                 $pickup_details = $pickup;
             }
             $variation_id = [];
+            $variations = [];
             if (isset($order_info->Variation) && !empty($order_info->Variation)) {
                 $data = $order_info->Variation;
                 foreach ($data as $value) {

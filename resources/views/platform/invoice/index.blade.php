@@ -209,9 +209,12 @@
                             @php
                                 $data = $order_info->Variation;
                             @endphp
-                            @foreach($variations as $key => $value)
-                            {{ $value['title']}} : {{$data[$key]['value']}}<br>
-                            @endforeach
+                            @if(isset($variations) && !empty($variations)){
+                                @foreach($variations as $key => $value)
+                                {{ $value['title']}} : {{$data[$key]['value']}}<br>
+                                @endforeach
+                            }
+                           
                         </div>
                         <div>
                             {{-- Warranty-15-02-2024 --}}
