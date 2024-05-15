@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\CartProductAddon;
+use App\Models\Master\Variation;
 use App\Models\Offers\CouponCategory;
 use App\Models\Offers\Coupons;
 use App\Models\Order;
 use App\Models\Product\Product;
+use App\Models\Product\ProductVariationOption;
 use App\Models\Settings\Tax;
 use App\Models\ShippingCharge;
 use Illuminate\Http\Request;
@@ -240,7 +242,7 @@ class Couponcontroller extends Controller
                                 return $response ?? '';
                             }
                             $product_info = Product::find($checkCartData->product_id);
-                            $checkCartData->sub_total = round($checkCartData->sub_total * $checkCartData->quantity);
+                            $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                             $checkCartData->update();
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
@@ -473,6 +475,36 @@ class Couponcontroller extends Controller
                 $tax = [];
                 $tax_percentage = 0;
                 $product_info = Product::find($citems->product_id);
+                $variation_option_id = [];
+
+                    $total_variation_amount = 0;
+                    if (isset($citems->variationOptions) && !empty($citems->variationOptions)) {
+                        foreach ($citems->variationOptions as $variationids) {
+                            $variation_option_id[] = $variationids->variation_option_id;
+                        }
+                    }
+                    if (isset($variation_option_id) && !empty($variation_option_id)) {
+                        $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
+                            ->where('product_id', $product_info->id)
+                            // ->selectRaw("SUM(amount) AS total_amount")
+                            // ->groupBy('product_id')
+                            ->get();
+                        // if (isset($variation_option_data)) {
+                        //     $total_variation_amount = $variation_option_data[0]->total_amount;
+                        // }
+
+                        foreach ($variation_option_data as $value) {
+
+                            $variation = Variation::where('id', $value->variation_id)->first();
+                            if ($variation) {
+                                $title = $variation->title ?? '';
+                                // $id = $value->id ?? '';
+                                $selected_value[$title] = $value->value ?? '';
+                                $amount = $value->amount;
+                                $total_variation_amount = $total_variation_amount + $amount;
+                            }
+                        }
+                    }
                 // if($citems){
 
                 //          if(isset($product_info->productCategory->tax)){
@@ -486,14 +518,14 @@ class Couponcontroller extends Controller
                 $category               = $items->productCategory;
                 if ($type != 'remove' && isset($citems->coupon_id)) {
                     // $price=$items->strike_price /(1+$tax_data);
-                    $price_with_tax         = $items->strike_price;
+                    $price_with_tax         = ($items->strike_price + $total_variation_amount);
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
-                    $citems->update();
+                    $citems->save();
                 } else {
                     //   $price=$items->mrp /(1+$tax_data);
-                    $price_with_tax         = $items->mrp;
+                    $price_with_tax         = ($items->mrp + $total_variation_amount);
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
-                    $citems->update();
+                    $citems->save();
                 }
                 if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
                     $tax_info = Tax::find($category->parent->tax_id);
@@ -557,8 +589,8 @@ class Couponcontroller extends Controller
                 $pro['is_featured']     = $items->is_featured;
                 $pro['is_best_selling'] = $items->is_best_selling;
                 $pro['price']           = $items->mrp;
-                $pro['strike_price']    = $items->strike_price;
-                $pro['save_price']      = $items->strike_price - $items->mrp;
+                $pro['strike_price']    = ($items->strike_price + $total_variation_amount);
+                $pro['save_price']      = ($items->strike_price + $total_variation_amount) - $items->mrp;
                 $pro['discount_percentage'] = abs($items->discount_percentage);
                 $pro['image']           = $items->base_image;
                 $pro['max_quantity']    = $items->quantity;
