@@ -32,4 +32,8 @@ class OrderProduct extends Model
     {
         return $this->hasOne(Product::class, 'id', 'product_id')->withTrashed();
     }
+
+    public function chosenVariation(){
+        return $this->hasMany(OrderProductVariationOption::class, 'order_product_id', 'id');
+    }
 }
