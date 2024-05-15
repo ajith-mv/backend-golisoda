@@ -223,7 +223,7 @@ class Couponcontroller extends Controller
                             break;
                         case '3':
                             # category ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total, l, SUM(cart_product_variation_options.amount * gbs_carts.quantity) as variation_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total, SUM(cart_product_variation_options.amount * gbs_carts.quantity) as variation_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('cart_product_variation_options', 'cart_product_variation_options.cart_id', '=', 'carts.id')
                                 ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
