@@ -523,7 +523,7 @@ class Couponcontroller extends Controller
                     $citems->save();
                 } else {
                     //   $price=$items->mrp /(1+$tax_data);
-                    $price_with_tax         = ($items->mrp);
+                    $price_with_tax         = ($items->mrp + $total_variation_amount);
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
                     $citems->save();
                 }
@@ -589,8 +589,8 @@ class Couponcontroller extends Controller
                 $pro['is_featured']     = $items->is_featured;
                 $pro['is_best_selling'] = $items->is_best_selling;
                 $pro['price']           = $items->mrp;
-                $pro['strike_price']    = ($items->strike_price + $total_variation_amount);
-                $pro['save_price']      = ($items->strike_price + $total_variation_amount) - $items->mrp;
+                $pro['strike_price']    = $items->strike_price;
+                $pro['save_price']      = $items->strike_price - $items->mrp;
                 $pro['discount_percentage'] = abs($items->discount_percentage);
                 $pro['image']           = $items->base_image;
                 $pro['max_quantity']    = $items->quantity;
