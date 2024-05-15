@@ -209,11 +209,11 @@
                             @php
                                 $data = $order_info->Variation;
                             @endphp
-                            @if(isset($variations) && !empty($variations)){
+                            @if(isset($variations) && !empty($variations))
                                 @foreach($variations as $key => $value)
                                 {{ $value['title']}} : {{$data[$key]['value']}}<br>
                                 @endforeach
-                            }
+                            @endif
                            
                         </div>
                         <div>
