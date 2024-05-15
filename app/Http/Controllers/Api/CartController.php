@@ -110,18 +110,18 @@ class CartController extends Controller
                         $message = 'Customer Data not available';
                         $data = [];
                     }
-                }else{
+                } else {
                     $product_quantity = $checkCart->quantity + $quantity;
                     if ($product_info->quantity <= $product_quantity) {
                         $product_quantity = $product_info->quantity;
                     }
-    
+
                     $checkCart->quantity  = $product_quantity;
                     $checkCart->sub_total = $product_quantity * $checkCart->price;
                     $checkCart->update();
                 }
 
-                
+
 
                 $data = $this->getCartListAll($customer_id, $guest_token);
             }
@@ -791,7 +791,8 @@ class CartController extends Controller
                                 $title = $variation->title ?? '';
                                 // $id = $value->id ?? '';
                                 $selected_value[$title] = $value->value ?? '';
-                                $total_variation_amount = $total_variation_amount + $value->amount;
+                                $amount = $value->amount;
+                                $total_variation_amount = $total_variation_amount + $amount;
                             }
                         }
                     }
