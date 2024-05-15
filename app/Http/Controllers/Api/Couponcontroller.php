@@ -523,7 +523,7 @@ class Couponcontroller extends Controller
                     $citems->save();
                 } else {
                     //   $price=$items->mrp /(1+$tax_data);
-                    $price_with_tax         = ($items->mrp + $total_variation_amount);
+                    $price_with_tax         = ($items->mrp);
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
                     $citems->save();
                 }
