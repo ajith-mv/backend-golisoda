@@ -309,7 +309,7 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
                 $title = $variation->title ?? '';
                 $id = $value->id ?? '';
                 $default_value[$title] = $id;
-                $total_variation_amount = $total_variation_amount + $value->amount;
+                $total_variation_amount = $total_variation_amount + ($value->amount);
             }
         }
     } else {
@@ -326,7 +326,7 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
                     $title = $variation->title ?? '';
                     $id = $value->id ?? '';
                     $default_value[$title] = $id;
-                    $total_variation_amount = $total_variation_amount + $value->amount;
+                    $total_variation_amount = $total_variation_amount + ($value->amount);
                 }
             }
         }
