@@ -97,5 +97,7 @@ class Order extends Model
     {
         return $this->hasOne(Pincode::class, 'id', 'shipping_post_code');
     }
-
+    public function Variation(){
+        return $this->hasMany(OrderProductVariationOption::class, 'order_id', 'id');
+    }
 }

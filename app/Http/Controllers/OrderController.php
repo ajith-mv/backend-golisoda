@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use DataTables;
 use Exception;
+use App\Models\Master\Variation;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -123,10 +124,15 @@ class OrderController extends Controller
         $order_id = $request->id;
         $order_info = Order::find($order_id);
         $pickup_details = [];
-        
         $modal_title        = 'View Order';
         $globalInfo = GlobalSettings::first();
-        $view_order = view('platform.invoice.view_invoice', compact('order_info', 'globalInfo', 'pickup_details'));
+        $data = $order_info->Variation;
+        $variation_id = [];
+        foreach ($data as $value) {
+            $variation_id[] = $value->variation_id;
+        }
+        $variations = Variation::whereIn('id', $variation_id)->get();
+        $view_order = view('platform.invoice.view_invoice', compact('order_info', 'globalInfo', 'pickup_details','variations'));
         return view('platform.order.view_modal', compact('view_order', 'modal_title'));
     }
 
