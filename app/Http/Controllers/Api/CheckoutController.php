@@ -195,8 +195,8 @@ class CheckoutController extends Controller
                 $order_product_info = OrderProduct::create($items_ins);
 
                 //insert variations
-                if (isset($variation_option_ids) && !empty($variation_option_ids)) {
-                    foreach ($variation_option_ids as $variation_option_id) {
+                if (isset($item['chosen_variation_option_ids']) && !empty($item['chosen_variation_option_ids'])) {
+                    foreach ($item['chosen_variation_option_ids'] as $variation_option_id) {
                         $product_variation_option = ProductVariationOption::find($variation_option_id);
                         $cart_product_variation_ins['order_id'] = $order_id;
                         $cart_product_variation_ins['order_product_id'] = $order_product_info->id;
@@ -535,8 +535,8 @@ class CheckoutController extends Controller
                     }
                 }
                 //insert variations
-                if (isset($variation_option_ids) && !empty($variation_option_ids)) {
-                    foreach ($variation_option_ids as $variation_option_id) {
+                if (isset($item['chosen_variation_option_ids']) && !empty($item['chosen_variation_option_ids'])) {
+                    foreach ($item['chosen_variation_option_ids'] as $variation_option_id) {
                         $product_variation_option = ProductVariationOption::find($variation_option_id);
                         $cart_product_variation_ins['order_id'] = $order_id;
                         $cart_product_variation_ins['order_product_id'] = $order_product_info->id;

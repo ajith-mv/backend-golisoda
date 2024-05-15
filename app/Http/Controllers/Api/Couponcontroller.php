@@ -505,7 +505,6 @@ class Couponcontroller extends Controller
                             }
                         }
                     }
-                    dd($total_variation_amount);
                 // if($citems){
 
                 //          if(isset($product_info->productCategory->tax)){
