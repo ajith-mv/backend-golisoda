@@ -733,9 +733,8 @@ class CartController extends Controller
         })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
             $q->where('guest_token', $guest_token);
         })->get();
-        $variation_option_id = [];
         // foreach ($checkCart as $cartItem) {
-            
+
         // }
         $globel = GlobalSettings::find(1);
         $tmp                = [];
@@ -771,6 +770,8 @@ class CartController extends Controller
                     //     }
                     // }
                     $pro                    = [];
+                    $variation_option_id = [];
+
                     $total_variation_amount = 0;
                     foreach ($citems->variationOptions as $variationids) {
                         $variation_option_id[] = $variationids->variation_option_id;
