@@ -199,6 +199,17 @@
                 $i = 1;
             @endphp
             @foreach ($order_info->orderItems as $item)
+            @php
+            $id=$item->id;
+            $OrderProductVariationOption =  App\Models\OrderProductVariationOption::where('order_product_id', $id)->get();
+            $variation_id = [];
+            $variation_value = [];
+            foreach ($OrderProductVariationOption as $value) {
+            $variation_id[] =$value->variation_id;
+            $variation_value[] =$value->value;
+            }
+            $variations = App\Models\Master\Variation::whereIn('id', $variation_id)->get();
+            @endphp
                 <tr>
                     <td>{{ $i }}</td>
                     <td>
@@ -208,10 +219,13 @@
                         <div>
                             {{ $item->product_name }}<br>
                             @php
-                                $data = $order_info->Variation;
+                                $data = $variation_value;  
                             @endphp
                             @foreach($variations as $key => $value)
-                            {{ $value['title']}} : {{$data[$key]['value']}}<br>
+                         {{-- @php
+                             
+                         @endphp --}}
+                            {{ $value->title}} : {{$data[$key]}}<br>
                             @endforeach
                         </div>
                         <div>

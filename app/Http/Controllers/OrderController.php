@@ -126,13 +126,7 @@ class OrderController extends Controller
         $pickup_details = [];
         $modal_title        = 'View Order';
         $globalInfo = GlobalSettings::first();
-        $data = $order_info->Variation;
-        $variation_id = [];
-        foreach ($data as $value) {
-            $variation_id[] = $value->variation_id;
-        }
-        $variations = Variation::whereIn('id', $variation_id)->get();
-        $view_order = view('platform.invoice.view_invoice', compact('order_info', 'globalInfo', 'pickup_details','variations'));
+        $view_order = view('platform.invoice.view_invoice', compact('order_info', 'globalInfo', 'pickup_details'));
         return view('platform.order.view_modal', compact('view_order', 'modal_title'));
     }
 
