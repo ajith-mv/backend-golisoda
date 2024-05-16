@@ -333,23 +333,24 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
             }
         }
     }
-    $price_data = getProductPrices($product_data, $total_variation_amount);
+    if($total_variation_amount != 0.00){
+        $product_data->mrp = $product_data->strike_price;
+        $product_data->strike_price = $product_data->strike_price + $total_variation_amount;
+    }
+    $price_data = getProductPrices($product_data);
 
     $pro['default_value'] = (object)$default_value;
     $pro['total_variation_amount'] = $total_variation_amount;
     if ($price_data['overall_discount_percentage'] != 0) {
-        $pro['price']           = $price_data['price'] + $total_variation_amount;
+        $pro['price']           = $price_data['price'];
         $pro['discount_percentage'] = $price_data['overall_discount_percentage'];
         $pro['strike_price']    = $price_data['strike_rate'];
         $pro['save_price']      = round($price_data['strike_rate'] - $pro['price']);
     } else {
-        $pro['price']           = $product_data->mrp + $total_variation_amount;
-        if($total_variation_amount != 0.00){
-            $product_data->mrp = $product_data->strike_price + $total_variation_amount;
-        }
-        $pro['discount_percentage'] = $product_data->discount_percentage != 0 ? abs($product_data->discount_percentage) : getDiscountPercentage($product_data->mrp, $product_data->strike_price + $total_variation_amount);
-        $pro['strike_price']    = $product_data->strike_price + $total_variation_amount;
-        $pro['save_price']      = round(($product_data->strike_price + $total_variation_amount) - ($product_data->mrp + $total_variation_amount));
+        $pro['price']           = $product_data->mrp;
+        $pro['discount_percentage'] = $product_data->discount_percentage != 0 ? abs($product_data->discount_percentage) : getDiscountPercentage($product_data->mrp, $product_data->strike_price);
+        $pro['strike_price']    = $product_data->strike_price;
+        $pro['save_price']      = round(($product_data->strike_price) - ($product_data->mrp));
     }
     $pro['id']              = $product_data->id;
     $pro['product_name']    = $product_data->product_name;
@@ -910,13 +911,10 @@ if (!function_exists('getProductPrice')) {
     }
 }
 if (!function_exists('getProductPrices')) {
-    function getProductPrices($productsObjects, $total_variation_amount)
+    function getProductPrices($productsObjects)
     { // this function not used check all files confirm and delete it
 
         $strike_rate            = 0;
-        if($total_variation_amount != 0.00){
-            $productsObjects->mrp = $productsObjects->strike_price + $total_variation_amount;
-        }
         $price                  = $productsObjects->mrp ;
         $today                  = date('Y-m-d');
         /****
