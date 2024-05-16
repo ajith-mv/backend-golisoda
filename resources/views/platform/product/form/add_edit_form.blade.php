@@ -19,6 +19,9 @@
             overflow: auto !important;
             white-space: nowrap !important;
         }
+        .is-default-checkbox.required:after{
+            display:none;
+        }
     </style>
 @endsection
 @section('content')
