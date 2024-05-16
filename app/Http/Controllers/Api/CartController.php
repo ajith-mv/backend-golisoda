@@ -806,11 +806,10 @@ class CartController extends Controller
                         }
                     }
                     if (isset($selected_value) && !empty($selected_value)) {
-                        $items->strike_price = $items->strike_price + $total_variation_amount;
                         $items->mrp = $items->strike_price + $total_variation_amount;
+                        $items->strike_price = $items->strike_price + $total_variation_amount;
                         $items->discount_percentage = 0;
                     }
-                    dd($items);
 
                     $category               = $items->productCategory;
                     if (isset($citems->coupon_id)) {
