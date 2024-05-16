@@ -336,6 +336,7 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
     if (isset($variation_option_id) && !empty($variation_option_id)) {
         $product_data->mrp = $product_data->strike_price;
         $product_data->strike_price = $product_data->strike_price + $total_variation_amount;
+        $product_data->update();
     }
     $price_data = getProductPrices($product_data);
 
@@ -913,7 +914,6 @@ if (!function_exists('getProductPrice')) {
 if (!function_exists('getProductPrices')) {
     function getProductPrices($productsObjects)
     { // this function not used check all files confirm and delete it
-dd($productsObjects);
         $strike_rate            = 0;
         $price                  = $productsObjects->mrp ;
         $today                  = date('Y-m-d');
