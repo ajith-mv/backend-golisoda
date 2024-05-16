@@ -289,7 +289,7 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
     $category               = $product_data->productCategory;
 
     $pro                    = [];
-    $total_variation_amount = 0.00;
+    $total_variation_amount = 0;
     $default_value = [];
 
     if (isset($variation_option_id) && !empty($variation_option_id)) {
