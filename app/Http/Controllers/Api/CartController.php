@@ -124,14 +124,28 @@ class CartController extends Controller
                         $data = [];
                     }
                 } else {
-                    $product_quantity = $checkCart->quantity + $quantity;
-                    if ($product_info->quantity <= $product_quantity) {
-                        $product_quantity = $product_info->quantity;
+                    if (isset($variation_option_ids) && !empty($variation_option_ids)) {
+                        $check_cart_variation_option = CartProductVariationOption::whereIn('variation_option_id', $variation_option_ids)->where('product_id', $product_id)->first();
+                        $checkCart = Cart::find($check_cart_variation_option->cart_id);
+                        $product_quantity = $checkCart->quantity + $quantity;
+                        if ($product_info->quantity <= $product_quantity) {
+                            $product_quantity = $product_info->quantity;
+                        }
+    
+                        $checkCart->quantity  = $product_quantity;
+                        $checkCart->sub_total = $product_quantity * $checkCart->price;
+                        $checkCart->update();
+                    }else{
+                        $product_quantity = $checkCart->quantity + $quantity;
+                        if ($product_info->quantity <= $product_quantity) {
+                            $product_quantity = $product_info->quantity;
+                        }
+    
+                        $checkCart->quantity  = $product_quantity;
+                        $checkCart->sub_total = $product_quantity * $checkCart->price;
+                        $checkCart->update();
                     }
-
-                    $checkCart->quantity  = $product_quantity;
-                    $checkCart->sub_total = $product_quantity * $checkCart->price;
-                    $checkCart->update();
+                    
                 }
 
 
