@@ -61,8 +61,18 @@ class CartController extends Controller
             } else {
                 $error = 0;
                 $message = 'Cart added successful';
-                dd($checkCart);
-                $check_cart_variation_option = CartProductVariationOption::where('cart_id', $checkCart->id)->whereNotIn('variation_option_id', $variation_option_ids)->exists();
+                $allCart = Cart::when($customer_id != '', function ($q) use ($customer_id) {
+                    $q->where('customer_id', $customer_id);
+                })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
+                    $q->where('guest_token', $guest_token);
+                })->where('product_id', $product_id)->get();
+                if(isset($allCart)){
+                    $cart_ids = [];
+                    foreach($allCart as $singleCart){
+                        $cart_ids[] = $singleCart->id;
+                    }
+                }
+                $check_cart_variation_option = CartProductVariationOption::whereIn('cart_id', $cart_ids)->whereIn('variation_option_id', $variation_option_ids)->groupBy('product_i', $product_id)->exists();
                 if ($check_cart_variation_option) {
                     $customer_info = Customer::find($request->customer_id);
                     $total_variation_amount = 0;
