@@ -211,11 +211,10 @@
                             @endphp
                             @if(isset($item->chosenVariation) && !empty($item->chosenVariation))
                                 @foreach($item->chosenVariation as $value)
-                                {{ $value['value']}} : 
                                 @php
                                     $variation = App\Models\Master\Variation::find($value['variation_id']);
                                 @endphp
-                                {{$variation->title}}<br>
+                                <b>{{$variation->title}}</b> : {{ $value['value']}} <br>
                                 @endforeach
                             @endif
                            
