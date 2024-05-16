@@ -125,7 +125,20 @@ class CartController extends Controller
                     }
                 } else {
                     if (isset($variation_option_ids) && !empty($variation_option_ids)) {
-                        $check_cart_variation_option = CartProductVariationOption::whereIn('variation_option_id', $variation_option_ids)->where('product_i', $product_id)->first();
+                        $allCart = Cart::when($customer_id != '', function ($q) use ($customer_id) {
+                            $q->where('customer_id', $customer_id);
+                        })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
+                            $q->where('guest_token', $guest_token);
+                        })->where('product_id', $product_id)->get();
+                        if(isset($allCart)){
+                            $cart_ids = [];
+                            foreach($allCart as $singleCart){
+                                $cart_ids[] = $singleCart->id;
+                            }
+                        }
+
+
+                        $check_cart_variation_option = CartProductVariationOption::whereIn('variation_option_i', $variation_option_ids)->where('product_id', $product_id)->whereIn('cart_id', $cart_ids)->get();
                         $checkCart = Cart::find($check_cart_variation_option->cart_id);
                         $product_quantity = $checkCart->quantity + $quantity;
                         if ($product_info->quantity <= $product_quantity) {
