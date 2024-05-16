@@ -21,6 +21,8 @@ use App\Models\Offers\CouponCategory;
 use App\Models\Offers\Coupons;
 use App\Models\Product\ProductVariationOption;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 
 class CartController extends Controller
 {
@@ -100,6 +102,7 @@ class CartController extends Controller
                         $ins['price']           = (float)$product_info->mrp;
                         $ins['sub_total']       = $ins['price'] * $quantity ?? 1;
                         $ins['cart_order_no']   = 'ORD' . date('ymdhis');
+                        Log::info("subtotal 1". $ins['sub_total']);
 
                         $cart_id = Cart::create($ins)->id;
                         if (isset($variation_option_ids) && !empty($variation_option_ids)) {
@@ -146,6 +149,7 @@ class CartController extends Controller
     
                         $checkCart->quantity  = $product_quantity;
                         $checkCart->sub_total = $product_quantity * $checkCart->price;
+                        Log::info("subtotal 2". $checkCart->sub_total);
                         $checkCart->update();
                     }else{
                         $product_quantity = $checkCart->quantity + $quantity;
@@ -155,6 +159,7 @@ class CartController extends Controller
     
                         $checkCart->quantity  = $product_quantity;
                         $checkCart->sub_total = $product_quantity * $checkCart->price;
+                        Log::info("subtotal 3". $checkCart->sub_total);
                         $checkCart->update();
                     }
                     
@@ -191,7 +196,7 @@ class CartController extends Controller
                 $ins['price']           = (float)$product_info->mrp;
                 $ins['sub_total']       = $ins['price'] * $quantity ?? 1;
                 $ins['cart_order_no']   = 'ORD' . date('ymdhis');
-
+                Log::info("subtotal 4". $ins['sub_total']);
                 $cart_id = Cart::create($ins)->id;
                 if (isset($variation_option_ids) && !empty($variation_option_ids)) {
                     foreach ($variation_option_ids as $variation_option_id) {
