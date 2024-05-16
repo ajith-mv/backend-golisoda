@@ -338,7 +338,6 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
         $product_data->strike_price = $product_data->strike_price + $total_variation_amount;
     }
     $price_data = getProductPrices($product_data);
-dd($product_data);
     $pro['default_value'] = (object)$default_value;
     $pro['total_variation_amount'] = $total_variation_amount;
     if ($price_data['overall_discount_percentage'] != 0) {
