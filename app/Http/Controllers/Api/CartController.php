@@ -147,7 +147,6 @@ class CartController extends Controller
                         $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                     }
                 }
-                dd($product_info);
                 $ins['customer_id']     = $request->customer_id;
                 $ins['product_id']      = $product_id;
                 $ins['guest_token']     = $request->guest_token ?? null;
@@ -155,6 +154,7 @@ class CartController extends Controller
                 $ins['price']           = (float)$product_info->mrp;
                 $ins['sub_total']       = $ins['price'] * $quantity ?? 1;
                 $ins['cart_order_no']   = 'ORD' . date('ymdhis');
+                dd($ins);
 
                 $cart_id = Cart::create($ins)->id;
                 if (isset($variation_option_ids) && !empty($variation_option_ids)) {
