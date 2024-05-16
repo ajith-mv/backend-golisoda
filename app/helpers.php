@@ -911,7 +911,7 @@ if (!function_exists('getProductPrices')) {
     { // this function not used check all files confirm and delete it
 
         $strike_rate            = 0;
-        if(isset($total_variation_amount)){
+        if(isset($total_variation_amount) && ($total_variation_amount != 0 || $total_variation_amount != 0.00)){
             $productsObjects->mrp = $productsObjects->strike_price + $total_variation_amount;
         }
         $price                  = $productsObjects->mrp ;
