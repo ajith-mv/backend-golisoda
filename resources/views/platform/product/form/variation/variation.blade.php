@@ -24,7 +24,7 @@
                     </div>
                 </div>
                 <div id="title">
-                    <h2 class="w-100">First you select a category</h2>
+                    <h2 class="w-100">The selected category doesn't contain variation or you haven't chosen category yet</h2>
                 </div>
             </div>
             <!--end::Repeater-->
