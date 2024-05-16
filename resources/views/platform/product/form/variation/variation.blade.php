@@ -25,6 +25,7 @@
                 </div>
                 <div id="title">
                     <h2 class="w-100">The selected category doesn't contain variation or you haven't chosen category yet</h2>
+                    <p>Please change category or add variation to the category</p>
                 </div>
             </div>
             <!--end::Repeater-->
