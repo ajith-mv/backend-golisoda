@@ -338,7 +338,7 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
         $product_data->strike_price = $product_data->strike_price + $total_variation_amount;
     }
     $price_data = getProductPrices($product_data);
-
+dd($product_data);
     $pro['default_value'] = (object)$default_value;
     $pro['total_variation_amount'] = $total_variation_amount;
     if ($price_data['overall_discount_percentage'] != 0) {
@@ -914,7 +914,6 @@ if (!function_exists('getProductPrices')) {
     function getProductPrices($productsObjects)
     { // this function not used check all files confirm and delete it
         $strike_rate            = 0;
-        dd($productsObjects);
         $price                  = $productsObjects->mrp ;
         $today                  = date('Y-m-d');
         /****
