@@ -147,6 +147,7 @@ class CartController extends Controller
                         $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                     }
                 }
+                dd($product_info);
                 $ins['customer_id']     = $request->customer_id;
                 $ins['product_id']      = $product_id;
                 $ins['guest_token']     = $request->guest_token ?? null;
