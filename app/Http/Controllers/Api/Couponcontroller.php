@@ -515,15 +515,20 @@ class Couponcontroller extends Controller
                 //                 $tax_data=(0 / 100);
                 //             }
                 //         }
+                if (isset($selected_value)) {
+                    $items->strike_price = $items->strike_price + $total_variation_amount;
+                    $items->mrp = $items->strike_price + $total_variation_amount;
+                    $items->discount_percentage = 0;
+                }
                 $category               = $items->productCategory;
                 if ($type != 'remove' && isset($citems->coupon_id)) {
                     // $price=$items->strike_price /(1+$tax_data);
-                    $price_with_tax         = ($items->strike_price + $total_variation_amount);
+                    $price_with_tax         = ($items->strike_price);
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
                     $citems->update();
                 } else {
                     //   $price=$items->mrp /(1+$tax_data);
-                    $price_with_tax         = ($items->mrp + $total_variation_amount);
+                    $price_with_tax         = ($items->mrp);
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
                     $citems->update();
                 }

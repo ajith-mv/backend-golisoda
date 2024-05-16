@@ -79,6 +79,7 @@ class CartController extends Controller
                             if (isset($variation_option_data)) {
                                 $total_variation_amount = $variation_option_data[0]->total_amount;
                                 $product_info->mrp = $product_info->strike_price + $total_variation_amount;
+                                $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                             }
                         }
                         $ins['customer_id']     = $request->customer_id;
@@ -143,6 +144,7 @@ class CartController extends Controller
                     if (isset($variation_option_data)) {
                         $total_variation_amount = $variation_option_data[0]->total_amount;
                         $product_info->mrp = $product_info->strike_price + $total_variation_amount;
+                        $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                     }
                 }
                 $ins['customer_id']     = $request->customer_id;
@@ -803,7 +805,7 @@ class CartController extends Controller
                             }
                         }
                     }
-                    if(isset($selected_value)){
+                    if (isset($selected_value)) {
                         $items->strike_price = $items->strike_price + $total_variation_amount;
                         $items->mrp = $items->strike_price + $total_variation_amount;
                         $items->discount_percentage = 0;
