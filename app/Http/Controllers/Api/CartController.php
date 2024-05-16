@@ -800,6 +800,7 @@ class CartController extends Controller
                                 $total_variation_amount = $total_variation_amount + $amount;
                             }
                         }
+                        dd($selected_value);
                     }
                     $category               = $items->productCategory;
                     if (isset($citems->coupon_id)) {
