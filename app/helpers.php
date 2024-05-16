@@ -334,7 +334,7 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
         }
     }
     if (isset($default_value) && !empty($default_value)) {
-        $product_data->mrp = $product_data->strike_price;
+        $product_data->mrp = $product_data->strike_price + $total_variation_amount;
         $product_data->strike_price = $product_data->strike_price + $total_variation_amount;
     }
     $price_data = getProductPrices($product_data);
