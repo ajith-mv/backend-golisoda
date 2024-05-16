@@ -847,26 +847,26 @@ class CartController extends Controller
                             }
                         }
                     }
-                    // if (isset($selected_value) && !empty($selected_value)) {
-                    //     $items->mrp = $items->strike_price + $total_variation_amount;
-                    //     $items->strike_price = $items->strike_price + $total_variation_amount;
-                    //     $items->discount_percentage = 0;
-                    // }
+                    if (isset($selected_value) && !empty($selected_value)) {
+                        $items->mrp = $items->strike_price + $total_variation_amount;
+                        $items->strike_price = $items->strike_price + $total_variation_amount;
+                        $items->discount_percentage = 0;
+                    }
 
                     $category               = $items->productCategory;
-                    // if (isset($citems->coupon_id)) {
-                    //     // $price=$items->strike_price /(1+$tax_data);
-                    //     $price_with_tax         = $items->strike_price;
-                    //     $citems->sub_total = round($price_with_tax * $citems->quantity);
-                    //     Log::info("subtotal cart list 1: ". $citems->sub_total);
-                    //     $citems->save();
-                    // } else {
-                    //     // $price=$items->mrp /(1+$tax_data);
-                    //     $price_with_tax         = $items->mrp;
-                    //     $citems->sub_total = round($price_with_tax * $citems->quantity);
-                    //     Log::info("subtotal cart list 2: ". $citems->sub_total);
-                    //     $citems->save();
-                    // }
+                    if (isset($citems->coupon_id)) {
+                        // $price=$items->strike_price /(1+$tax_data);
+                        $price_with_tax         = $$citems->price;
+                        $citems->sub_total = round($price_with_tax * $citems->quantity);
+                        Log::info("subtotal cart list 1: ". $citems->sub_total);
+                        $citems->save();
+                    } else {
+                        // $price=$items->mrp /(1+$tax_data);
+                        $price_with_tax         = $citems->price;
+                        $citems->sub_total = round($price_with_tax * $citems->quantity);
+                        Log::info("subtotal cart list 2: ". $citems->sub_total);
+                        $citems->save();
+                    }
 
                     if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
                         $tax_info = Tax::find($category->parent->tax_id);
