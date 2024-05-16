@@ -162,7 +162,7 @@ class CartController extends Controller
 
 
 
-                // $data = $this->getCartListAll($customer_id, $guest_token);
+                $data = $this->getCartListAll($customer_id, $guest_token);
             }
         } else {
             $customer_info = Customer::find($request->customer_id);
