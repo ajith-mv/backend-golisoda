@@ -154,7 +154,6 @@ class CartController extends Controller
                 $ins['price']           = (float)$product_info->mrp;
                 $ins['sub_total']       = $ins['price'] * $quantity ?? 1;
                 $ins['cart_order_no']   = 'ORD' . date('ymdhis');
-                dd($ins);
 
                 $cart_id = Cart::create($ins)->id;
                 if (isset($variation_option_ids) && !empty($variation_option_ids)) {
@@ -806,6 +805,7 @@ class CartController extends Controller
                             }
                         }
                     }
+                    dd($items);
                     if (isset($selected_value) && !empty($selected_value)) {
                         $items->strike_price = $items->strike_price + $total_variation_amount;
                         $items->mrp = $items->strike_price + $total_variation_amount;
