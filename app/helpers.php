@@ -338,12 +338,12 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
     $pro['default_value'] = (object)$default_value;
     $pro['total_variation_amount'] = $total_variation_amount;
     if ($price_data['overall_discount_percentage'] != 0) {
-        $pro['price']           = $price_data['price'] + $total_variation_amount;
+        $pro['price']           = $price_data['price'];
         $pro['discount_percentage'] = $price_data['overall_discount_percentage'];
         $pro['strike_price']    = $price_data['strike_rate'];
         $pro['save_price']      = round($price_data['strike_rate'] - $pro['price']);
     } else {
-        $pro['price']           = $product_data->mrp + $total_variation_amount;
+        $pro['price']           = $product_data->mrp;
         $pro['discount_percentage'] = $product_data->discount_percentage != 0 ? abs($product_data->discount_percentage) : getDiscountPercentage($product_data->mrp, $product_data->strike_price + $total_variation_amount);
         $pro['strike_price']    = $product_data->strike_price + $total_variation_amount;
         $pro['save_price']      = round(($product_data->strike_price + $total_variation_amount) - ($product_data->mrp + $total_variation_amount));
@@ -911,7 +911,10 @@ if (!function_exists('getProductPrices')) {
     { // this function not used check all files confirm and delete it
 
         $strike_rate            = 0;
-        $price                  = $productsObjects->mrp + $total_variation_amount;
+        if(isset($total_variation_amount)){
+            $productsObjects->mrp = $productsObjects->strike_price + $total_variation_amount;
+        }
+        $price                  = $productsObjects->mrp ;
         $today                  = date('Y-m-d');
         /****
          * 1.check product discount is applied via product add/edit
@@ -925,7 +928,7 @@ if (!function_exists('getProductPrices')) {
         if (isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type == 'percentage') {
             if ($today >= $productsObjects->sale_start_date && $today <= $productsObjects->sale_end_date) {
 
-                $strike_rate        = $productsObjects->mrp + $total_variation_amount;
+                $strike_rate        = $productsObjects->mrp;
                 $price              = $productsObjects->sale_price;
                 $has_discount       = 'yes';
                 if (isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type == 'percentage') {
@@ -934,7 +937,7 @@ if (!function_exists('getProductPrices')) {
                 $discount[]         = array('discount_type' => $productsObjects->productDiscount->discount_type, 'discount_value' => $productsObjects->productDiscount->discount_value, 'discount_name' => '');
             }
         } elseif (isset($productsObjects->productDiscount) && $productsObjects->productDiscount->discount_type == 'fixed_amount') {
-            $strike_rate        = $productsObjects->mrp + $total_variation_amount;
+            $strike_rate        = $productsObjects->mrp;
             $price              = $productsObjects->sale_price;
             $has_discount       = 'yes';
             $overall_discount_percentage = round($productsObjects->productDiscount->amount) ?? 0;
