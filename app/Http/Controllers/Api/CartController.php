@@ -78,13 +78,14 @@ class CartController extends Controller
                                 ->get();
                             if (isset($variation_option_data)) {
                                 $total_variation_amount = $variation_option_data[0]->total_amount;
+                                $product_info->mrp = $product_info->strike_price + $total_variation_amount;
                             }
                         }
                         $ins['customer_id']     = $request->customer_id;
                         $ins['product_id']      = $product_id;
                         $ins['guest_token']     = $request->guest_token ?? null;
                         $ins['quantity']        = $quantity ?? 1;
-                        $ins['price']           = (float)$product_info->mrp + $total_variation_amount;
+                        $ins['price']           = (float)$product_info->mrp;
                         $ins['sub_total']       = $ins['price'] * $quantity ?? 1;
                         $ins['cart_order_no']   = 'ORD' . date('ymdhis');
 
@@ -141,13 +142,14 @@ class CartController extends Controller
                         ->get();
                     if (isset($variation_option_data)) {
                         $total_variation_amount = $variation_option_data[0]->total_amount;
+                        $product_info->mrp = $product_info->strike_price + $total_variation_amount;
                     }
                 }
                 $ins['customer_id']     = $request->customer_id;
                 $ins['product_id']      = $product_id;
                 $ins['guest_token']     = $request->guest_token ?? null;
                 $ins['quantity']        = $quantity ?? 1;
-                $ins['price']           = (float)$product_info->mrp + $total_variation_amount;
+                $ins['price']           = (float)$product_info->mrp;
                 $ins['sub_total']       = $ins['price'] * $quantity ?? 1;
                 $ins['cart_order_no']   = 'ORD' . date('ymdhis');
 
@@ -801,15 +803,19 @@ class CartController extends Controller
                             }
                         }
                     }
+                    if(isset($selected_value)){
+                        $items->strike_price = $items->strike_price + $total_variation_amount;
+                        $items->mrp = $items->strike_price + $total_variation_amount;
+                    }
                     $category               = $items->productCategory;
                     if (isset($citems->coupon_id)) {
                         // $price=$items->strike_price /(1+$tax_data);
-                        $price_with_tax         = $items->strike_price + $total_variation_amount;
+                        $price_with_tax         = $items->strike_price;
                         $citems->sub_total = round($price_with_tax * $citems->quantity);
                         $citems->save();
                     } else {
                         // $price=$items->mrp /(1+$tax_data);
-                        $price_with_tax         = $items->mrp + $total_variation_amount;
+                        $price_with_tax         = $items->mrp;
                         $citems->sub_total = round($price_with_tax * $citems->quantity);
                         $citems->save();
                     }
@@ -879,10 +885,10 @@ class CartController extends Controller
                     $pro['stock_status']    = $items->stock_status;
                     $pro['is_featured']     = $items->is_featured;
                     $pro['is_best_selling'] = $items->is_best_selling;
-                    $pro['price']           = $items->mrp + $total_variation_amount;
+                    $pro['price']           = $items->mrp;
                     $pro['total_variation_amount'] = $total_variation_amount;
-                    $pro['strike_price']    = number_format(($items->strike_price + $total_variation_amount), 2);
-                    $pro['save_price']      = ($items->strike_price + $total_variation_amount) - ($items->mrp + $total_variation_amount);
+                    $pro['strike_price']    = number_format($items->strike_price, 2);
+                    $pro['save_price']      = $items->strike_price - $items->mrp;
                     $pro['discount_percentage'] = abs($items->discount_percentage);
                     $pro['image']           = $items->base_image;
                     $pro['max_quantity']    = $items->quantity;
