@@ -125,7 +125,7 @@ class CartController extends Controller
                     }
                 } else {
                     if (isset($variation_option_ids) && !empty($variation_option_ids)) {
-                        $check_cart_variation_option = CartProductVariationOption::whereIn('variation_option_id', $variation_option_ids)->where('product_id', $product_id)->first();
+                        $check_cart_variation_option = CartProductVariationOption::whereIn('variation_option_id', $variation_option_ids)->where('product_i', $product_id)->first();
                         $checkCart = Cart::find($check_cart_variation_option->cart_id);
                         $product_quantity = $checkCart->quantity + $quantity;
                         if ($product_info->quantity <= $product_quantity) {
