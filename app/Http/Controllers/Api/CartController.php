@@ -143,7 +143,7 @@ class CartController extends Controller
                         ->get();
                     if (isset($variation_option_data)) {
                         $total_variation_amount = $variation_option_data[0]->total_amount;
-                        // $product_info->mrp = $product_info->strike_price + $total_variation_amount;
+                        $product_info->mrp = $product_info->strike_price + $total_variation_amount;
                         $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                     }
                 }
