@@ -213,7 +213,7 @@
                                 @foreach($item->chosenVariation as $value)
                                 {{ $value['value']}} : 
                                 @php
-                                    $variation = Variation::find($value['variation_id']);
+                                    $variation = App\Models\Master\Variation::find($value['variation_id']);
                                 @endphp
                                 {{$variation->title}}<br>
                                 @endforeach
