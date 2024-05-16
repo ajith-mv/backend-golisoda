@@ -913,7 +913,7 @@ if (!function_exists('getProductPrice')) {
 if (!function_exists('getProductPrices')) {
     function getProductPrices($productsObjects)
     { // this function not used check all files confirm and delete it
-
+dd($productsObjects);
         $strike_rate            = 0;
         $price                  = $productsObjects->mrp ;
         $today                  = date('Y-m-d');
