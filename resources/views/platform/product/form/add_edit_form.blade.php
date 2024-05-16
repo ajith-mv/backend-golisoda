@@ -130,11 +130,11 @@
         }
 
         // Apply CSS styles to other elements within the row
-        $row.find('.form-control.amount.required').css('width', '145px');
-        $row.find('.amount.border.border-secondary.btn.btn-icon.btn-flex.btn-light-danger').css({
-            'margin-top': '-61px',
-            'margin-left': '230px'
-        });
+        // $row.find('.form-control.amount.required').css('width', '145px');
+        // $row.find('.amount.border.border-secondary.btn.btn-icon.btn-flex.btn-light-danger').css({
+        //     'margin-top': '-61px',
+        //     'margin-left': '230px'
+        // });
     });
 });
 
