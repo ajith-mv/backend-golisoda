@@ -523,12 +523,12 @@ class Couponcontroller extends Controller
                 $category               = $items->productCategory;
                 if ($type != 'remove' && isset($citems->coupon_id)) {
                     // $price=$items->strike_price /(1+$tax_data);
-                    $price_with_tax         = ($items->strike_price);
+                    $price_with_tax         = $citems->price;
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
                     $citems->update();
                 } else {
                     //   $price=$items->mrp /(1+$tax_data);
-                    $price_with_tax         = ($items->mrp);
+                    $price_with_tax         = $citems->price;
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
                     $citems->update();
                 }
