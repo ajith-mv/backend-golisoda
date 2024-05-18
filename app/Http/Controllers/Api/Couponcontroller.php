@@ -75,7 +75,7 @@ class Couponcontroller extends Controller
                                         return $response ?? '';
                                     }
 
-                                    $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id');
+                                    $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id')->toArray();
                                   log::info($cartCountNew);
                                     $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCount->id)->first();
                                     if (isset($cart_variation_option) && !empty($cart_variation_option)) {
