@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\CartProductAddon;
+use App\Models\CartProductVariationOption;
 use App\Models\Master\Variation;
 use App\Models\Offers\CouponCategory;
 use App\Models\Offers\Coupons;
@@ -67,14 +68,21 @@ class Couponcontroller extends Controller
                                 $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                 foreach ($coupon->couponProducts as $items) {
                                     $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
+
                                     if (isset($cartCount) && is_null($cartCount->id)) {
                                         $response['status'] = 'error';
                                         $response['message'] = 'Coupon not applicable';
                                         return $response ?? '';
                                     }
+
+                                    $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id');
+                                  log::info($cartCountNew);
+                                    // $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCount->id)->first();
+                                    // if (isset($cart_variation_option) && !empty($cart_variation_option)) {
+                                    // }
                                     $product_info = Product::find($items->product_id);
                                     $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
-                                    Log::info('cart subtotal coupon controller'.$cartCount->sub_total);
+                                    Log::info('cart subtotal coupon controller' . $cartCount->sub_total);
                                     $cartCount->update();
                                     if ($cartCount) {
                                         log::info('cart count exists');
@@ -88,7 +96,7 @@ class Couponcontroller extends Controller
                                                 case 'percentage':
                                                     Log::debug('percentage');
                                                     $product_amount += percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
-                                                    Log::debug('product amount'. $product_amount);
+                                                    Log::debug('product amount' . $product_amount);
                                                     $tmp['discount_amount'] = percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
                                                     $tmp['product_id'] = $cartCount->product_id;
                                                     $tmp['coupon_applied_amount'] = $cartCount->sub_total;
@@ -486,34 +494,34 @@ class Couponcontroller extends Controller
                 $product_info = Product::find($citems->product_id);
                 $variation_option_id = [];
 
-                    $total_variation_amount = 0;
-                    if (isset($citems->variationOptions) && !empty($citems->variationOptions)) {
-                        foreach ($citems->variationOptions as $variationids) {
-                            $variation_option_id[] = $variationids->variation_option_id;
+                $total_variation_amount = 0;
+                if (isset($citems->variationOptions) && !empty($citems->variationOptions)) {
+                    foreach ($citems->variationOptions as $variationids) {
+                        $variation_option_id[] = $variationids->variation_option_id;
+                    }
+                }
+                if (isset($variation_option_id) && !empty($variation_option_id)) {
+                    $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
+                        ->where('product_id', $product_info->id)
+                        // ->selectRaw("SUM(amount) AS total_amount")
+                        // ->groupBy('product_id')
+                        ->get();
+                    // if (isset($variation_option_data)) {
+                    //     $total_variation_amount = $variation_option_data[0]->total_amount;
+                    // }
+
+                    foreach ($variation_option_data as $value) {
+
+                        $variation = Variation::where('id', $value->variation_id)->first();
+                        if ($variation) {
+                            $title = $variation->title ?? '';
+                            // $id = $value->id ?? '';
+                            $selected_value[$title] = $value->value ?? '';
+                            $amount = $value->amount;
+                            $total_variation_amount = $total_variation_amount + $amount;
                         }
                     }
-                    if (isset($variation_option_id) && !empty($variation_option_id)) {
-                        $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
-                            ->where('product_id', $product_info->id)
-                            // ->selectRaw("SUM(amount) AS total_amount")
-                            // ->groupBy('product_id')
-                            ->get();
-                        // if (isset($variation_option_data)) {
-                        //     $total_variation_amount = $variation_option_data[0]->total_amount;
-                        // }
-
-                        foreach ($variation_option_data as $value) {
-
-                            $variation = Variation::where('id', $value->variation_id)->first();
-                            if ($variation) {
-                                $title = $variation->title ?? '';
-                                // $id = $value->id ?? '';
-                                $selected_value[$title] = $value->value ?? '';
-                                $amount = $value->amount;
-                                $total_variation_amount = $total_variation_amount + $amount;
-                            }
-                        }
-                    }
+                }
                 // if($citems){
 
                 //          if(isset($product_info->productCategory->tax)){
