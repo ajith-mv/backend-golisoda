@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Log;
 
 class Couponcontroller extends Controller
 {
@@ -72,6 +73,7 @@ class Couponcontroller extends Controller
                                     }
                                     $product_info = Product::find($items->product_id);
                                     $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
+                                    Log::info('catt subtotal'.$cartCount->sub_total);
                                     $cartCount->update();
                                     if ($cartCount) {
                                         if ($cartCount->sub_total >= $coupon->minimum_order_value) {
@@ -82,6 +84,7 @@ class Couponcontroller extends Controller
 
                                                 case 'percentage':
                                                     $product_amount += percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
+                                                    Log::debug('product amount'. $product_amount);
                                                     $tmp['discount_amount'] = percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
                                                     $tmp['product_id'] = $cartCount->product_id;
                                                     $tmp['coupon_applied_amount'] = $cartCount->sub_total;
