@@ -77,9 +77,9 @@ class Couponcontroller extends Controller
 
                                     $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id');
                                   log::info($cartCountNew);
-                                    // $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCount->id)->first();
-                                    // if (isset($cart_variation_option) && !empty($cart_variation_option)) {
-                                    // }
+                                    $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCount->id)->first();
+                                    if (isset($cart_variation_option) && !empty($cart_variation_option)) {
+                                    }
                                     $product_info = Product::find($items->product_id);
                                     $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
                                     Log::info('cart subtotal coupon controller' . $cartCount->sub_total);
