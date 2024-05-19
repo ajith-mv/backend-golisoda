@@ -76,8 +76,7 @@ class Couponcontroller extends Controller
                                     }
 
                                     $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id')->toArray();
-                                  log::info($cartCountNew);
-                                  $product_info = Product::find($items->product_id);
+                                    $product_info = Product::find($items->product_id);
 
                                     $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('product_id')->selectRaw("SUM(amount) AS total_amount")->first();
                                     if (isset($cart_variation_option) && !empty($cart_variation_option)) {
@@ -175,7 +174,18 @@ class Couponcontroller extends Controller
                                 $response['message'] = 'Coupon not applicable';
                                 return $response ?? '';
                             }
+                            $cartCountNew = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                                ->join('products', 'products.id', '=', 'carts.product_id')
+                                ->where('carts.customer_id', $customer_id)
+                                // ->groupBy('carts.product_id')
+                                ->pluck('id')->toArray();
                             $product_info = Product::find($checkCartData->product_id);
+
+
+                            $cart_variation_option = CartProductVariationOption::where('product_id', $checkCartData->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('product_id')->selectRaw("SUM(amount) AS total_amount")->first();
+                            if (isset($cart_variation_option) && !empty($cart_variation_option)) {
+                                $product_info->strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
+                            }
                             $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                             $checkCartData->update();
                             if (isset($checkCartData) && !empty($checkCartData)) {
