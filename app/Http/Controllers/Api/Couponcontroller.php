@@ -64,7 +64,6 @@ class Couponcontroller extends Controller
                         case '1':
                             # product ...
                             if (isset($coupon->couponProducts) && !empty($coupon->couponProducts)) {
-                                log::info($coupon->couponProducts);
                                 $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                 foreach ($coupon->couponProducts as $items) {
                                     $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
@@ -156,7 +155,6 @@ class Couponcontroller extends Controller
                             //     # customer ...
                             //     break;
                         case '4':
-                            log::info('works inside case 4 mentioned as category in comment');
                             # category ...
                             $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_carts.price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
@@ -238,7 +236,6 @@ class Couponcontroller extends Controller
                             }
                             break;
                         case '3':
-                            log::info('works inside case 3 mentioned as category in comment');
 
                             # category ...
                             $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_carts.price * gbs_carts.quantity) as category_total')
@@ -257,22 +254,8 @@ class Couponcontroller extends Controller
                                 $response['message'] = 'Coupon not applicable';
                                 return $response ?? '';
                             }
-                            $cartCountNew = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
-                                ->join('products', 'products.id', '=', 'carts.product_id')
-                                ->where('carts.customer_id', $customer_id)
-                                // ->groupBy('carts.product_id')
-                                ->pluck('id')->toArray();
 
-                            log::info($cartCountNew);
                             $product_info = Product::find($checkCartData->product_id);
-
-
-                            $cart_variation_option = CartProductVariationOption::where('product_id', $checkCartData->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('product_id')->selectRaw("SUM(amount) AS total_amount")->first();
-                            log::info($cart_variation_option);
-
-                            if (isset($cart_variation_option) && !empty($cart_variation_option)) {
-                                $product_info->strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
-                            }
 
                             $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                             $checkCartData->update();

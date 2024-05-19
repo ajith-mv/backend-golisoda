@@ -274,12 +274,21 @@ class CartController extends Controller
                                 $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                 foreach ($coupon->couponProducts as $items) {
                                     $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
+
                                     if (isset($cartCount) && is_null($cartCount->id)) {
                                         $response['status'] = 'error';
                                         $response['message'] = 'Coupon not applicable';
                                         return $response ?? '';
                                     }
+
+                                    $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id')->toArray();
                                     $product_info = Product::find($items->product_id);
+
+                                    
+                                    $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('product_id')->selectRaw("SUM(amount) AS total_amount")->first();
+                                    if (isset($cart_variation_option) && !empty($cart_variation_option)) {
+                                        $product_info->strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
+                                    }
                                     $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
                                     $cartCount->update();
                                     if ($cartCount) {
@@ -355,7 +364,7 @@ class CartController extends Controller
                             //     break;
                         case '4':
                             # category ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_carts.price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->where('carts.customer_id', $customer_id)
                                 // ->groupBy('carts.product_id')
@@ -365,7 +374,9 @@ class CartController extends Controller
                                 $response['message'] = 'Coupon not applicable';
                                 return $response ?? '';
                             }
+
                             $product_info = Product::find($checkCartData->product_id);
+
                             $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                             $checkCartData->update();
                             if (isset($checkCartData) && !empty($checkCartData)) {
@@ -434,7 +445,7 @@ class CartController extends Controller
                             break;
                         case '3':
                             # category ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_carts.price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
                                 ->join('coupon_categories', function ($join) {
@@ -520,7 +531,7 @@ class CartController extends Controller
                         case '5':
 
                             # brands ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_carts.price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('brands', 'brands.id', '=', 'products.brand_id')
                                 ->join('coupon_brands', function ($join) {
