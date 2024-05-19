@@ -83,21 +83,16 @@ class Couponcontroller extends Controller
                                         $product_info->strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
                                     }
                                     $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
-                                    Log::info('cart subtotal coupon controller' . $cartCount->sub_total);
                                     $cartCount->update();
                                     if ($cartCount) {
-                                        log::info('cart count exists');
                                         if ($cartCount->sub_total >= $coupon->minimum_order_value) {
-                                            log::info('sub total reater than minimum order value');
                                             /**
                                              * Check percentage or fixed amount
                                              */
                                             switch ($coupon->calculate_type) {
 
                                                 case 'percentage':
-                                                    Log::debug('percentage');
                                                     $product_amount += percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
-                                                    Log::debug('product amount' . $product_amount);
                                                     $tmp['discount_amount'] = percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
                                                     $tmp['product_id'] = $cartCount->product_id;
                                                     $tmp['coupon_applied_amount'] = $cartCount->sub_total;
@@ -107,7 +102,6 @@ class Couponcontroller extends Controller
                                                     $couponApplied[] = $tmp;
                                                     break;
                                                 case 'fixed_amount':
-                                                    Log::debug('case fixed amount');
                                                     $product_amount += $coupon->calculate_value;
                                                     $tmp['discount_amount'] = $coupon->calculate_value;
                                                     $tmp['product_id'] = $cartCount->product_id;
@@ -142,7 +136,6 @@ class Couponcontroller extends Controller
                                                 'shipping_fee_id' => $shippingfee_info->id ?? null,
                                                 'shipping_fee' => $shippingfee_info->charges ?? null
                                             ];
-                                            log::debug($update_data);
                                             DB::table('carts')->where('id', $cartCount->id)->update($update_data);
                                             $response['cart_info'] = $this->getCartListAll($customer_id, null, null, null, $shipping_fee_id, $response['coupon_amount']);
                                         }
@@ -163,6 +156,7 @@ class Couponcontroller extends Controller
                             //     # customer ...
                             //     break;
                         case '4':
+                            log::info('works inside case 4 mentioned as category in comment');
                             # category ...
                             $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
@@ -244,6 +238,8 @@ class Couponcontroller extends Controller
                             }
                             break;
                         case '3':
+                            log::info('works inside case 3 mentioned as category in comment');
+
                             # category ...
                             $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
@@ -345,6 +341,8 @@ class Couponcontroller extends Controller
                             }
                             break;
                         case '5':
+                            log::info('works inside case 5 mentioned as brands in comment');
+
                             # brands ...
                             $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
