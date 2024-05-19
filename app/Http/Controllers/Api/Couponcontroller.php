@@ -158,7 +158,7 @@ class Couponcontroller extends Controller
                         case '4':
                             log::info('works inside case 4 mentioned as category in comment');
                             # category ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name, SUM(gbs_carts.price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->where('carts.customer_id', $customer_id)
                                 // ->groupBy('carts.product_id')
@@ -241,7 +241,7 @@ class Couponcontroller extends Controller
                             log::info('works inside case 3 mentioned as category in comment');
 
                             # category ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_product_categories.name,gbs_coupon_categories.id as catcoupon_id, SUM(gbs_carts.price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
                                 ->join('coupon_categories', function ($join) {
