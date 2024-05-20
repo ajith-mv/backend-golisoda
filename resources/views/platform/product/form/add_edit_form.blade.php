@@ -50,13 +50,10 @@
                                 <a class="nav-link text-active-primary product-tab pb-4" data-bs-toggle="tab"
                                     href="#kt_ecommerce_add_product_filter">Filter</a>
                             </li>
-
-                 @if (access()->hasAccess(['product-variation']))
                             <li class="nav-item">
                                 <a class="nav-link text-active-primary product-tab pb-4" data-bs-toggle="tab"
-                                    href="#kt_ecommerce_a_product_variation">Variation</a>
+                                    href="#kt_ecommerce_add_product_variation">Variation</a>
                             </li>
-                    @endif
                             <li class="nav-item">
                                 <a class="nav-link text-active-primary product-tab pb-4" data-bs-toggle="tab"
                                     href="#kt_ecommerce_add_product_meta">Meta Tags</a>

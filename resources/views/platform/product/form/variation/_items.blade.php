@@ -72,8 +72,6 @@
               </div>
               @endforeach
             </div>
-
-            @if( access()->hasAccess('product-variation', 'editable') )
             <button class="btn btn-sm btn-flex btn-light-primary" data-repeater-create
             type="button">
             <span class="svg-icon svg-icon-2">
@@ -84,10 +82,9 @@
               <rect x="6" y="11" width="12" height="2" rx="1"
               fill="currentColor" />
             </svg>
-            Add Variation value
+            Add variation value
           </span>
         </button>
-        @endif
       </div>
     </div>
     <div class="col-md-2">
