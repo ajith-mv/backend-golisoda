@@ -496,6 +496,7 @@ class Couponcontroller extends Controller
                 $variation_option_id = [];
 
                 $total_variation_amount = 0;
+                $total_discount_amount = 0;
                 if (isset($citems->variationOptions) && !empty($citems->variationOptions)) {
                     foreach ($citems->variationOptions as $variationids) {
                         $variation_option_id[] = $variationids->variation_option_id;
@@ -504,22 +505,19 @@ class Couponcontroller extends Controller
                 if (isset($variation_option_id) && !empty($variation_option_id)) {
                     $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
                         ->where('product_id', $product_info->id)
-                        // ->selectRaw("SUM(amount) AS total_amount")
-                        // ->groupBy('product_id')
                         ->get();
-                    // if (isset($variation_option_data)) {
-                    //     $total_variation_amount = $variation_option_data[0]->total_amount;
-                    // }
 
                     foreach ($variation_option_data as $value) {
 
                         $variation = Variation::where('id', $value->variation_id)->first();
                         if ($variation) {
                             $title = $variation->title ?? '';
-                            // $id = $value->id ?? '';
                             $selected_value[$title] = $value->value ?? '';
                             $amount = $value->amount;
+                            $discount_amount = $value->discount_amount;
                             $total_variation_amount = $total_variation_amount + $amount;
+                            $total_discount_amount = $total_discount_amount + $discount_amount;
+
                         }
                     }
                 }
@@ -534,8 +532,10 @@ class Couponcontroller extends Controller
                 //             }
                 //         }
                 if (isset($selected_value)) {
+                    $items->mrp = ($items->strike_price + $total_variation_amount) - $total_discount_amount;
                     $items->strike_price = $items->strike_price + $total_variation_amount;
-                    $items->mrp = $items->strike_price + $total_variation_amount;
+                    // $items->strike_price = $items->strike_price + $total_variation_amount;
+                    // $items->mrp = $items->strike_price + $total_variation_amount;
                     $items->discount_percentage = 0;
                 }
                 $category               = $items->productCategory;
