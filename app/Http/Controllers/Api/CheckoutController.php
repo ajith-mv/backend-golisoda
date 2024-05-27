@@ -200,13 +200,15 @@ class CheckoutController extends Controller
                 if (isset($item['chosen_variation_option_ids']) && !empty($item['chosen_variation_option_ids'])) {
                     foreach ($item['chosen_variation_option_ids'] as $variation_option_id) {
                         $product_variation_option = ProductVariationOption::find($variation_option_id);
-                        $cart_product_variation_ins['order_id'] = $order_id;
-                        $cart_product_variation_ins['order_product_id'] = $order_product_info->id;
-                        $cart_product_variation_ins['variation_id'] = $product_variation_option->variation_id;
-                        $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
-                        $cart_product_variation_ins['value'] = $product_variation_option->value;
-                        $cart_product_variation_ins['amount'] = $product_variation_option->amount;
-                        OrderProductVariationOption::create($cart_product_variation_ins);
+                        if(isset($product_variation_option) && (!empty($product_variation_option))){
+                            $cart_product_variation_ins['order_id'] = $order_id;
+                            $cart_product_variation_ins['order_product_id'] = $order_product_info->id;
+                            $cart_product_variation_ins['variation_id'] = $product_variation_option->variation_id;
+                            $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
+                            $cart_product_variation_ins['value'] = $product_variation_option->value;
+                            $cart_product_variation_ins['amount'] = $product_variation_option->amount;
+                            OrderProductVariationOption::create($cart_product_variation_ins);
+                        }
                     }
                 }
 
