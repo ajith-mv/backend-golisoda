@@ -347,9 +347,9 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
         $pro['strike_price']    = number_format($price_data['strike_rate'], 2);
         $pro['save_price']      = round($price_data['strike_rate'] - $pro['price']);
     } else {
-        $pro['price']           = $product_data->mrp;
+        $pro['price']           = number_format($product_data->mrp, 2);
         $pro['discount_percentage'] = $product_data->discount_percentage != 0 ? abs($product_data->discount_percentage) : getDiscountPercentage($product_data->mrp, $product_data->strike_price);
-        $pro['strike_price']    = $product_data->strike_price;
+        $pro['strike_price']    = number_format($product_data->strike_price, 2);
         $pro['save_price']      = round(($product_data->strike_price) - ($product_data->mrp));
     }
     $pro['id']              = $product_data->id;
