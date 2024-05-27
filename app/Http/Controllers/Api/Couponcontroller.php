@@ -80,7 +80,6 @@ class Couponcontroller extends Controller
                                     $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('product_id')->selectRaw("SUM(amount) AS total_amount")->first();
                                     if (isset($cart_variation_option) && !empty($cart_variation_option)) {
                                         $product_info->strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
-                                        dd($product_info);
                                     }
                                     $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
                                     $cartCount->update();
