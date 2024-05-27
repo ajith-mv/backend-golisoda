@@ -66,9 +66,9 @@ class Couponcontroller extends Controller
                             if (isset($coupon->couponProducts) && !empty($coupon->couponProducts)) {
                                 $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                 foreach ($coupon->couponProducts as $items) {
-                                    $cartCount = Cart::where('customer_i', $customer_id)->where('product_id', $items->product_id)->first();
+                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
 
-                                    if (isset($cartCount) && (!empty($cartCount)) && is_null($cartCount->id)) {
+                                    if (isset($cartCount) && is_null($cartCount->id)) {
                                         $response['status'] = 'error';
                                         $response['message'] = 'Coupon not applicable';
                                         return $response ?? '';
