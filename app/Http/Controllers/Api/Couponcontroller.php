@@ -68,7 +68,7 @@ class Couponcontroller extends Controller
                                 foreach ($coupon->couponProducts as $items) {
                                     $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
 
-                                    if (!isset($cartCount) && is_null($cartCount->id)) {
+                                    if (!isset($cartCount)) {
                                         $response['status'] = 'error';
                                         $response['message'] = 'Coupon not applicable';
                                         return $response ?? '';
