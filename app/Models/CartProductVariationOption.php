@@ -15,7 +15,8 @@ class CartProductVariationOption extends Model
         'variation_id',
         'variation_option_id',
         'value',
-        'amount'
+        'amount',
+        'discount_amount'
     ];
    
 }

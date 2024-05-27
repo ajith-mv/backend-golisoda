@@ -207,6 +207,7 @@ class CheckoutController extends Controller
                             $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
                             $cart_product_variation_ins['value'] = $product_variation_option->value;
                             $cart_product_variation_ins['amount'] = $product_variation_option->amount;
+                            $cart_product_variation_ins['discount_amount'] = $product_variation_option->discount_amount;
                             OrderProductVariationOption::create($cart_product_variation_ins);
                         }
                     }
@@ -557,6 +558,7 @@ class CheckoutController extends Controller
                         $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
                         $cart_product_variation_ins['value'] = $product_variation_option->value;
                         $cart_product_variation_ins['amount'] = $product_variation_option->amount;
+                        $cart_product_variation_ins['discount_amount'] = $product_variation_option->discount_amount;
                         OrderProductVariationOption::create($cart_product_variation_ins);
                     }
                 }

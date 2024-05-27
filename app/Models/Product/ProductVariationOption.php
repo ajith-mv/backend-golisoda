@@ -15,6 +15,7 @@ class ProductVariationOption extends Model
         'value',
         'is_default',
         'amount',
+        'discount_amount'
     ];
 
     public function variation()

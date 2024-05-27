@@ -78,6 +78,7 @@ class CartController extends Controller
                 if (!$check_cart_variation_option) {
                     $customer_info = Customer::find($request->customer_id);
                     $total_variation_amount = 0;
+                    $total_discount_amount = 0;
                     if (isset($customer_info) && !empty($customer_info) || !empty($request->guest_token)) {
 
                         if ($product_info->quantity <= $quantity) {
@@ -86,12 +87,13 @@ class CartController extends Controller
                         if (isset($variation_option_ids) && !empty($variation_option_ids)) {
                             $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_ids)
                                 ->where('product_id', $product_id)
-                                ->selectRaw("SUM(amount) AS total_amount")
+                                ->selectRaw("SUM(amount) AS total_amount, SUM(discount_amount) as total_discount_amount")
                                 ->groupBy('product_id')
                                 ->get();
                             if (isset($variation_option_data)) {
                                 $total_variation_amount = $variation_option_data[0]->total_amount;
-                                $product_info->mrp = $product_info->strike_price + $total_variation_amount;
+                                $total_discount_amount = $variation_option_data[0]->total_discount_amount;
+                                $product_info->mrp = ($product_info->strike_price + $total_variation_amount) - $total_discount_amount;
                                 $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                             }
                         }
@@ -102,7 +104,6 @@ class CartController extends Controller
                         $ins['price']           = (float)$product_info->mrp;
                         $ins['sub_total']       = $ins['price'] * $quantity ?? 1;
                         $ins['cart_order_no']   = 'ORD' . date('ymdhis');
-                        Log::info("subtotal 1". $ins['sub_total']);
 
                         $cart_id = Cart::create($ins)->id;
                         if (isset($variation_option_ids) && !empty($variation_option_ids)) {
@@ -115,6 +116,7 @@ class CartController extends Controller
                                     $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
                                     $cart_product_variation_ins['value'] = $product_variation_option->value;
                                     $cart_product_variation_ins['amount'] = $product_variation_option->amount;
+                                    $cart_product_variation_ins['discount_amount'] = $product_variation_option->discount_amount;
                                     CartProductVariationOption::create($cart_product_variation_ins);
                                 }
                             }
@@ -151,7 +153,6 @@ class CartController extends Controller
     
                         $checkCart->quantity  = $product_quantity;
                         $checkCart->sub_total = $product_quantity * $checkCart->price;
-                        Log::info("subtotal 2". $checkCart->sub_total);
                         $checkCart->update();
                     }else{
                         $product_quantity = $checkCart->quantity + $quantity;
@@ -161,7 +162,6 @@ class CartController extends Controller
     
                         $checkCart->quantity  = $product_quantity;
                         $checkCart->sub_total = $product_quantity * $checkCart->price;
-                        Log::info("subtotal 3". $checkCart->sub_total);
                         $checkCart->update();
                     }
                     
@@ -174,6 +174,7 @@ class CartController extends Controller
         } else {
             $customer_info = Customer::find($request->customer_id);
             $total_variation_amount = 0;
+            $total_discount_amount = 0;
             if (isset($customer_info) && !empty($customer_info) || !empty($request->guest_token)) {
 
                 if ($product_info->quantity <= $quantity) {
@@ -182,12 +183,13 @@ class CartController extends Controller
                 if (isset($variation_option_ids) && !empty($variation_option_ids)) {
                     $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_ids)
                         ->where('product_id', $product_id)
-                        ->selectRaw("SUM(amount) AS total_amount")
+                        ->selectRaw("SUM(amount) AS total_amount, SUM(discount_amount) as total_discount_amount")
                         ->groupBy('product_id')
                         ->get();
                     if (isset($variation_option_data)) {
                         $total_variation_amount = $variation_option_data[0]->total_amount;
-                        $product_info->mrp = $product_info->strike_price + $total_variation_amount;
+                        $total_discount_amount = $variation_option_data[0]->total_discount_amount;
+                        $product_info->mrp = ($product_info->strike_price + $total_variation_amount) - $total_discount_amount;
                         $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                     }
                 }
@@ -198,7 +200,6 @@ class CartController extends Controller
                 $ins['price']           = (float)$product_info->mrp;
                 $ins['sub_total']       = $ins['price'] * $quantity ?? 1;
                 $ins['cart_order_no']   = 'ORD' . date('ymdhis');
-                Log::info("subtotal 4". $ins['sub_total']);
                 $cart_id = Cart::create($ins)->id;
                 if (isset($variation_option_ids) && !empty($variation_option_ids)) {
                     foreach ($variation_option_ids as $variation_option_id) {
@@ -209,6 +210,7 @@ class CartController extends Controller
                         $cart_product_variation_ins['variation_option_id'] = $product_variation_option->id;
                         $cart_product_variation_ins['value'] = $product_variation_option->value;
                         $cart_product_variation_ins['amount'] = $product_variation_option->amount;
+                        $cart_product_variation_ins['discount_amount'] = $product_variation_option->discount_amount;
                         CartProductVariationOption::create($cart_product_variation_ins);
                     }
                 }
@@ -833,6 +835,7 @@ class CartController extends Controller
                     $variation_option_id = [];
 
                     $total_variation_amount = 0;
+                    $total_discount_amount = 0;
                     if (isset($citems->variationOptions) && !empty($citems->variationOptions)) {
                         foreach ($citems->variationOptions as $variationids) {
                             $variation_option_id[] = $variationids->variation_option_id;
@@ -856,12 +859,14 @@ class CartController extends Controller
                                 // $id = $value->id ?? '';
                                 $selected_value[$title] = $value->value ?? '';
                                 $amount = $value->amount;
+                                $discount_amount = $value->discount_amount;
                                 $total_variation_amount = $total_variation_amount + $amount;
+                                $total_discount_amount = $total_discount_amount + $discount_amount;
                             }
                         }
                     }
                     if (isset($selected_value) && !empty($selected_value)) {
-                        $items->mrp = $items->strike_price + $total_variation_amount;
+                        $items->mrp = ($items->strike_price + $total_variation_amount) - $total_discount_amount;
                         $items->strike_price = $items->strike_price + $total_variation_amount;
                         $items->discount_percentage = 0;
                     }
@@ -871,7 +876,6 @@ class CartController extends Controller
                         // $price=$items->strike_price /(1+$tax_data);
                         $price_with_tax         = $citems->price;
                         $citems->sub_total = round($price_with_tax * $citems->quantity);
-                        Log::info("subtotal cart list 1: ". $citems->sub_total);
                         $citems->save();
                     } else {
                         // $price=$items->mrp /(1+$tax_data);

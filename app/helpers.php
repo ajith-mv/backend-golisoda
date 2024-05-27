@@ -290,17 +290,13 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
 
     $pro                    = [];
     $total_variation_amount = 0;
+    $total_discount_amount = 0;
     $default_value = [];
 
     if (isset($variation_option_id) && !empty($variation_option_id)) {
         $variation_option_data = ProductVariationOption::whereIn('id', $variation_option_id)
             ->where('product_id', $product_data->id)
-            // ->selectRaw("SUM(amount) AS total_amount")
-            // ->groupBy('product_id')
             ->get();
-        // if (isset($variation_option_data)) {
-        //     $total_variation_amount = $variation_option_data[0]->total_amount;
-        // }
 
         foreach ($variation_option_data as $value) {
 
@@ -310,7 +306,9 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
                 $id = $value->id ?? '';
                 $default_value[$title] = $id;
                 $amount = $value->amount;
+                $discount_amount = $value->discount_amount;
                 $total_variation_amount = $total_variation_amount + $amount;
+                $total_discount_amount = $total_discount_amount + $discount_amount;
             }
         }
     } else {
@@ -328,13 +326,15 @@ function getProductApiData($product_data, $customer_id = '', $variation_option_i
                     $id = $value->id ?? '';
                     $default_value[$title] = $id;
                     $amount = $value->amount;
+                    $discount_amount = $value->discount_amount;
                     $total_variation_amount = $total_variation_amount + $amount;
+                    $total_discount_amount = $total_discount_amount + $discount_amount;
                 }
             }
         }
     }
     if (isset($default_value) && !empty($default_value)) {
-        $product_data->mrp = $product_data->strike_price + $total_variation_amount;
+        $product_data->mrp = ($product_data->strike_price + $total_variation_amount) - $total_discount_amount;
         $product_data->strike_price = $product_data->strike_price + $total_variation_amount;
         $product_data->discount_percentage = 0;
     }
