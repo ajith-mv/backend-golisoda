@@ -81,8 +81,8 @@ class Couponcontroller extends Controller
                                     if (isset($cart_variation_option) && !empty($cart_variation_option)) {
                                         $product_info->strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
                                     }
-                                    // $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
-                                    // $cartCount->update();
+                                    $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
+                                    $cartCount->update();
                                     if ($cartCount) {
                                         if ($cartCount->sub_total >= $coupon->minimum_order_value) {
                                             /**
