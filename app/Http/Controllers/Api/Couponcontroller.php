@@ -66,7 +66,7 @@ class Couponcontroller extends Controller
                             if (isset($coupon->couponProducts) && !empty($coupon->couponProducts)) {
                                 $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                 foreach ($coupon->couponProducts as $items) {
-                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("carts.*, SUM(quantity) as quantity")->groupBy('product_id')->get();
+                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity")->groupBy('product_id')->get();
 
                                     if (!isset($cartCount)) {
                                         $response['status'] = 'error';
