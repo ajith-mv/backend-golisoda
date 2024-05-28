@@ -874,12 +874,12 @@ class CartController extends Controller
                     $category               = $items->productCategory;
                     if (isset($citems->coupon_id)) {
                         // $price=$items->strike_price /(1+$tax_data);
-                        $price_with_tax         = $citems->price;
+                        $price_with_tax         = $items->strike_price;
                         $citems->sub_total = round($price_with_tax * $citems->quantity);
                         $citems->save();
                     } else {
                         // $price=$items->mrp /(1+$tax_data);
-                        $price_with_tax         = $citems->price;
+                        $price_with_tax         = $items->mrp;
                         $citems->sub_total = round($price_with_tax * $citems->quantity);
                         $citems->save();
                     }
@@ -951,7 +951,7 @@ class CartController extends Controller
                     $pro['is_best_selling'] = $items->is_best_selling;
                     $pro['price']           = $items->mrp;
                     $pro['total_variation_amount'] = $total_variation_amount;
-                    $pro['strike_price']    = number_format($items->strike_price, 2);
+                    $pro['strike_price']    = $items->strike_price;
                     $pro['save_price']      = $items->strike_price - $items->mrp;
                     $pro['discount_percentage'] = abs($items->discount_percentage);
                     $pro['image']           = $items->base_image;
