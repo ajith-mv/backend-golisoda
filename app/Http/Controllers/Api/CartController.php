@@ -813,6 +813,7 @@ class CartController extends Controller
             foreach ($checkCart as $citems) {
                 $used_addons = [];
                 $selected_value = [];
+                $items = [];
                 $items = $citems->products;
                 $tax = [];
                 $tax_data = 0;
@@ -948,7 +949,7 @@ class CartController extends Controller
                     $pro['sku']             = $items->sku;
                     $pro['stock_status']    = $items->stock_status;
                     $pro['is_featured']     = $items->is_featured;
-                    $pro['is_best_selling'] = $items->is_best_selling.'testing';
+                    $pro['is_best_selling'] = $items->is_best_selling;
                     $pro['price']           = $items->mrp;
                     $pro['total_variation_amount'] = $total_variation_amount;
                     $pro['strike_price']    = number_format($items->strike_price, 2);
