@@ -86,6 +86,7 @@ class Couponcontroller extends Controller
                                             $strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
                                             // log::info('new subtotal without quantity: '.$strike_price);
                                             $cartData->sub_total = round($strike_price * $cartData->quantity);
+                                            $cartData->coupon_id = $coupon->id;
                                             // log::info('new subtotal with quantity: '.$cartData->sub_total);
                                             $cartData->update();
                                             // log::info($cartData);
