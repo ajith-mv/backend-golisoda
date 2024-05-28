@@ -277,9 +277,7 @@ class CartController extends Controller
                             if (isset($coupon->couponProducts) && !empty($coupon->couponProducts)) {
                                 $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                 foreach ($coupon->couponProducts as $items) {
-                                    // $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
-                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
-
+                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
 
                                     if (isset($cartCount) && is_null($cartCount->id)) {
                                         $response['status'] = 'error';
@@ -295,7 +293,7 @@ class CartController extends Controller
                                     if (isset($cart_variation_option) && !empty($cart_variation_option)) {
                                         $product_info->strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
                                     }
-                                    // $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
+                                    $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
                                     $cartCount->update();
                                     if ($cartCount) {
                                         if ($cartCount->sub_total >= $coupon->minimum_order_value) {

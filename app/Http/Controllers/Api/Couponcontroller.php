@@ -66,7 +66,8 @@ class Couponcontroller extends Controller
                             if (isset($coupon->couponProducts) && !empty($coupon->couponProducts)) {
                                 $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                 foreach ($coupon->couponProducts as $items) {
-                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
+                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
+
                                     if (!isset($cartCount)) {
                                         $response['status'] = 'error';
                                         $response['message'] = 'Coupon not applicable';
@@ -74,14 +75,13 @@ class Couponcontroller extends Controller
                                     }
 
                                     $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id')->toArray();
-                                    $cart_count_new = count($cartCountNew);
                                     $product_info = Product::find($items->product_id);
 
                                     $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('product_id')->selectRaw("SUM(amount) AS total_amount")->first();
                                     if (isset($cart_variation_option) && !empty($cart_variation_option)) {
                                         $product_info->strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
                                     }
-                                    // $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
+                                    $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
                                     $cartCount->update();
                                     if ($cartCount) {
                                         if ($cartCount->sub_total >= $coupon->minimum_order_value) {
@@ -532,7 +532,7 @@ class Couponcontroller extends Controller
                 //             }
                 //         }
                 if (isset($selected_value)) {
-                    $items->mrp = ($items->strike_price + $total_variation_amount) - $total_discount_amount;
+                    $items->mrp = $items->strike_price + $total_variation_amount;
                     $items->strike_price = $items->strike_price + $total_variation_amount;
                     $items->discount_percentage = ($total_discount_amount > 0) ? $items->discount_percentage : 0;
                 }
