@@ -94,9 +94,6 @@ class CartController extends Controller
                                 $total_variation_amount = $variation_option_data[0]->total_amount;
                                 $total_discount_amount = $variation_option_data[0]->total_discount_amount;
                                 $product_info->mrp = ($product_info->strike_price + $total_variation_amount) - $total_discount_amount;
-                                if($total_discount_amount > 0){
-                                    $product_info->mrp = $product_info->strike_price + $total_variation_amount;
-                                }
                                 $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                             }
                         }
