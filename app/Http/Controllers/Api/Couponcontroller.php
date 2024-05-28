@@ -75,13 +75,12 @@ class Couponcontroller extends Controller
                                     }
 
                                     $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id')->toArray();
-                                    $cart_count_new = count($cartCountNew);
-                                    log::info('cart_count'.$cart_count_new);
                                     $product_info = Product::find($items->product_id);
 
                                     $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('product_id')->selectRaw("SUM(amount) AS total_amount")->first();
                                     if (isset($cart_variation_option) && !empty($cart_variation_option)) {
                                         $product_info->strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
+                                        $cartCount->quantity = count($cartCountNew);
                                     }
                                     $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
                                     $cartCount->update();
@@ -345,7 +344,7 @@ class Couponcontroller extends Controller
                                 $response['message'] = 'Coupon not applicable';
                                 return $response ?? '';
                             }
-                            
+
                             $product_info = Product::find($checkCartData->product_id);
                             $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                             $checkCartData->update();
@@ -519,7 +518,6 @@ class Couponcontroller extends Controller
                             $discount_amount = $value->discount_amount;
                             $total_variation_amount = $total_variation_amount + $amount;
                             $total_discount_amount = $total_discount_amount + $discount_amount;
-
                         }
                     }
                 }
@@ -709,9 +707,9 @@ class Couponcontroller extends Controller
         return $tmp;
     }
 
-    public function getVariationAmount($product_id, $selected_variation_ids){
+    public function getVariationAmount($product_id, $selected_variation_ids)
+    {
         $product = Product::find($product_id);
-
     }
 
     public function setShippingCharges(Request $request)
