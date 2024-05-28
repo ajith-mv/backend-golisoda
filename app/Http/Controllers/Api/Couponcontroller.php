@@ -79,8 +79,10 @@ class Couponcontroller extends Controller
 
                                     $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('product_id')->selectRaw("SUM(amount) AS total_amount")->first();
                                     if (isset($cart_variation_option) && !empty($cart_variation_option)) {
-                                        $cartCount->sub_total = $cartCount->sub_total + $cart_variation_option->total_amount;
+                                        $sub_total = $cartCount->sub_total + $cart_variation_option->total_amount;
                                         // $cartCount->update();
+                                    }else{
+                                        $sub_total = $cartCount->sub_total;
                                     }
                                     // $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
                                     // $cartCount->update();
@@ -92,10 +94,10 @@ class Couponcontroller extends Controller
                                             switch ($coupon->calculate_type) {
 
                                                 case 'percentage':
-                                                    $product_amount += percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
-                                                    $tmp['discount_amount'] = percentageAmountOnly($cartCount->sub_total, $coupon->calculate_value);
+                                                    $product_amount += percentageAmountOnly($sub_total, $coupon->calculate_value);
+                                                    $tmp['discount_amount'] = percentageAmountOnly($sub_total, $coupon->calculate_value);
                                                     $tmp['product_id'] = $cartCount->product_id;
-                                                    $tmp['coupon_applied_amount'] = $cartCount->sub_total;
+                                                    $tmp['coupon_applied_amount'] = $sub_total;
                                                     // $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                                     $overall_discount_percentage += $coupon->calculate_value;
                                                     $has_product++;
