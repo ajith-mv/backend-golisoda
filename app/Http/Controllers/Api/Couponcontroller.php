@@ -93,7 +93,6 @@ class Couponcontroller extends Controller
                                         }
                                     }
                                     $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
-                                    log::info($cartCount);
                                     if ($cartCount) {
                                         if ($cartCount->sub_total >= $coupon->minimum_order_value) {
                                             /**
