@@ -75,6 +75,8 @@ class Couponcontroller extends Controller
                                     }
 
                                     $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id')->toArray();
+                                    $cart_count_new = count($cartCountNew);
+                                    log::info('cart_count'.$cart_count_new);
                                     $product_info = Product::find($items->product_id);
 
                                     $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('product_id')->selectRaw("SUM(amount) AS total_amount")->first();
