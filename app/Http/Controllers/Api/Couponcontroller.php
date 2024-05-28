@@ -81,9 +81,13 @@ class Couponcontroller extends Controller
                                     if (isset($cart_variation_option) && !empty($cart_variation_option)) {
                                         foreach($cart_variation_options as $cart_variation_option){
                                             $cartData = Cart::find($cart_variation_option->cart_id);
+                                            log::info($cartData);
                                             $strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
+                                            log::info('new subtotal without quantity: '.$strike_price);
                                             $cartData->sub_total = round($strike_price * $cartData->quantity);
+                                            log::info('new subtotal with quantity: '.$cartData->sub_total);
                                             $cartData->update();
+                                            log::info($cartData);
                                         }
                                     }
                                     $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
