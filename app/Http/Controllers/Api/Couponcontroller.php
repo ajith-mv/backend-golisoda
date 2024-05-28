@@ -532,7 +532,7 @@ class Couponcontroller extends Controller
                 //             }
                 //         }
                 if (isset($selected_value)) {
-                    $items->mrp = ($items->strike_price + $total_variation_amount) - $total_discount_amount;
+                    $items->mrp = $items->strike_price + $total_variation_amount;
                     $items->strike_price = $items->strike_price + $total_variation_amount;
                     $items->discount_percentage = ($total_discount_amount > 0) ? $items->discount_percentage : 0;
                 }
