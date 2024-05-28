@@ -343,7 +343,7 @@ class Couponcontroller extends Controller
                                 $response['message'] = 'Coupon not applicable';
                                 return $response ?? '';
                             }
-
+                            
                             $product_info = Product::find($checkCartData->product_id);
                             $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                             $checkCartData->update();
@@ -517,6 +517,7 @@ class Couponcontroller extends Controller
                             $discount_amount = $value->discount_amount;
                             $total_variation_amount = $total_variation_amount + $amount;
                             $total_discount_amount = $total_discount_amount + $discount_amount;
+
                         }
                     }
                 }
@@ -706,9 +707,9 @@ class Couponcontroller extends Controller
         return $tmp;
     }
 
-    public function getVariationAmount($product_id, $selected_variation_ids)
-    {
+    public function getVariationAmount($product_id, $selected_variation_ids){
         $product = Product::find($product_id);
+
     }
 
     public function setShippingCharges(Request $request)
