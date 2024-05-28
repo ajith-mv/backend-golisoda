@@ -541,11 +541,13 @@ class Couponcontroller extends Controller
                     // $price=$items->strike_price /(1+$tax_data);
                     $price_with_tax         = $items->strike_price;
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
+                    log::info($citems->sub_total. 'citems sub total if');
                     $citems->update();
                 } else {
                     //   $price=$items->mrp /(1+$tax_data);
                     $price_with_tax         = $items->mrp;
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
+                    log::info($citems->sub_total. 'citems sub total else');
                     $citems->update();
                 }
                 if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
