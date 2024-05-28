@@ -539,12 +539,12 @@ class Couponcontroller extends Controller
                 $category               = $items->productCategory;
                 if ($type != 'remove' && isset($citems->coupon_id)) {
                     // $price=$items->strike_price /(1+$tax_data);
-                    $price_with_tax         = $citems->price;
+                    $price_with_tax         = $items->strike_price;
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
                     $citems->update();
                 } else {
                     //   $price=$items->mrp /(1+$tax_data);
-                    $price_with_tax         = $citems->price;
+                    $price_with_tax         = $items->mrp;
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
                     $citems->update();
                 }
@@ -705,6 +705,11 @@ class Couponcontroller extends Controller
         }
 
         return $tmp;
+    }
+
+    public function getVariationAmount($product_id, $selected_variation_ids){
+        $product = Product::find($product_id);
+
     }
 
     public function setShippingCharges(Request $request)
