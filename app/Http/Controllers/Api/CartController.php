@@ -94,6 +94,9 @@ class CartController extends Controller
                                 $total_variation_amount = $variation_option_data[0]->total_amount;
                                 $total_discount_amount = $variation_option_data[0]->total_discount_amount;
                                 $product_info->mrp = ($product_info->strike_price + $total_variation_amount) - $total_discount_amount;
+                                if($total_discount_amount > 0){
+                                    $product_info->mrp = $product_info->strike_price + $total_variation_amount;
+                                }
                                 $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                             }
                         }
@@ -874,12 +877,12 @@ class CartController extends Controller
                     $category               = $items->productCategory;
                     if (isset($citems->coupon_id)) {
                         // $price=$items->strike_price /(1+$tax_data);
-                        $price_with_tax         = $items->strike_price;
+                        $price_with_tax         = $citems->price;
                         $citems->sub_total = round($price_with_tax * $citems->quantity);
                         $citems->save();
                     } else {
                         // $price=$items->mrp /(1+$tax_data);
-                        $price_with_tax         = $items->mrp;
+                        $price_with_tax         = $citems->price;
                         $citems->sub_total = round($price_with_tax * $citems->quantity);
                         Log::info("subtotal cart list 2: ". $citems->sub_total);
                         $citems->save();
