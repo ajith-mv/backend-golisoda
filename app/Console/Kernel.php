@@ -19,7 +19,7 @@ class Kernel extends ConsoleKernel
     ];
     protected function schedule(Schedule $schedule)
     {
-      $schedule->command('update:daily')->everyMinute();
+      $schedule->command('update:daily')->dailyAt('00:00');
     //   ->dailyAt('00:00');
     }
 
