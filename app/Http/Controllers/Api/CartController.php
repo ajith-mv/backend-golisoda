@@ -948,10 +948,10 @@ class CartController extends Controller
                     $pro['sku']             = $items->sku;
                     $pro['stock_status']    = $items->stock_status;
                     $pro['is_featured']     = $items->is_featured;
-                    $pro['is_best_selling'] = $items->is_best_selling;
+                    $pro['is_best_selling'] = $items->is_best_selling.'testing';
                     $pro['price']           = $items->mrp;
                     $pro['total_variation_amount'] = $total_variation_amount;
-                    $pro['strike_price']    = $items->strike_price;
+                    $pro['strike_price']    = number_format($items->strike_price, 2);
                     $pro['save_price']      = $items->strike_price - $items->mrp;
                     $pro['discount_percentage'] = abs($items->discount_percentage);
                     $pro['image']           = $items->base_image;
