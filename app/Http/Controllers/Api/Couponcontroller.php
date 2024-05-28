@@ -83,6 +83,7 @@ class Couponcontroller extends Controller
                                         $cartCount->quantity = count($cartCountNew);
                                     }
                                     $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
+                                    log::info($cartCount->sub_total);
                                     $cartCount->update();
                                     if ($cartCount) {
                                         if ($cartCount->sub_total >= $coupon->minimum_order_value) {
