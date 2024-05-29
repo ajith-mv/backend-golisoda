@@ -373,7 +373,7 @@ class Couponcontroller extends Controller
                                     log::info($cartData);
                                 }
                             }
-                            $checkCartData = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
+                            $checkCartData = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as category_total")->groupBy('product_id')->first();
 
                             // $product_info = Product::find($checkCartData->product_id);
                             // $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
