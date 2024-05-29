@@ -66,23 +66,33 @@ class Couponcontroller extends Controller
                             if (isset($coupon->couponProducts) && !empty($coupon->couponProducts)) {
                                 $couponApplied['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                 foreach ($coupon->couponProducts as $items) {
-                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
-                                    if (!isset($cartCount)) {
+                                    $cartCountcheck = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->first();
+                                    // $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
+                                    if (isset($cartCountcheck) && is_null($cartCountcheck->id)) {
                                         $response['status'] = 'error';
                                         $response['message'] = 'Coupon not applicable';
                                         return $response ?? '';
                                     }
 
                                     $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id')->toArray();
-                                    $cart_count_new = count($cartCountNew);
                                     $product_info = Product::find($items->product_id);
 
-                                    $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('product_id')->selectRaw("SUM(amount) AS total_amount")->first();
-                                    if (isset($cart_variation_option) && !empty($cart_variation_option)) {
-                                        $product_info->strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
+                                    $cart_variation_options = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('cart_id')->selectRaw("gbs_cart_product_variation_options.*, SUM(amount) AS total_amount")->get();
+                                    // log::debug($cart_variation_options);
+                                    if (isset($cart_variation_options) && !empty($cart_variation_options)) {
+                                        foreach($cart_variation_options as $cart_variation_option){
+                                            $cartData = Cart::find($cart_variation_option->cart_id);
+                                            // log::info($cartData);
+                                            $strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
+                                            // log::info('new subtotal without quantity: '.$strike_price);
+                                            $cartData->sub_total = round($strike_price * $cartData->quantity);
+                                            $cartData->coupon_id = $coupon->id;
+                                            // log::info('new subtotal with quantity: '.$cartData->sub_total);
+                                            $cartData->update();
+                                            // log::info($cartData);
+                                        }
                                     }
-                                    // $cartCount->sub_total = round($product_info->strike_price * $cartCount->quantity);
-                                    $cartCount->update();
+                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
                                     if ($cartCount) {
                                         if ($cartCount->sub_total >= $coupon->minimum_order_value) {
                                             /**
@@ -531,21 +541,25 @@ class Couponcontroller extends Controller
                 //                 $tax_data=(0 / 100);
                 //             }
                 //         }
-                if (isset($selected_value)) {
-                    $items->strike_price = $items->strike_price + $total_variation_amount;
-                    $items->mrp = $items->strike_price + $total_variation_amount;
+                if (isset($selected_value) && (!empty($selected_value))) {
+                    $items->mrp = ($items->strike_price + $total_variation_amount) - $total_discount_amount;;
+                    $strike_price = $items->strike_price + $total_variation_amount;
                     $items->discount_percentage = ($total_discount_amount > 0) ? $items->discount_percentage : 0;
+                }else{
+                    $strike_price = $items->strike_price;
                 }
                 $category               = $items->productCategory;
                 if ($type != 'remove' && isset($citems->coupon_id)) {
                     // $price=$items->strike_price /(1+$tax_data);
-                    $price_with_tax         = $items->strike_price;
+                    $price_with_tax         = $strike_price;
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
+                    log::info($citems->sub_total. 'citems sub total if');
                     $citems->update();
                 } else {
                     //   $price=$items->mrp /(1+$tax_data);
                     $price_with_tax         = $items->mrp;
                     $citems->sub_total = round($price_with_tax * $citems->quantity);
+                    log::info($citems->sub_total. 'citems sub total else');
                     $citems->update();
                 }
                 if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
@@ -610,8 +624,8 @@ class Couponcontroller extends Controller
                 $pro['is_featured']     = $items->is_featured;
                 $pro['is_best_selling'] = $items->is_best_selling;
                 $pro['price']           = $items->mrp;
-                $pro['strike_price']    = $items->strike_price;
-                $pro['save_price']      = $items->strike_price - $items->mrp;
+                $pro['strike_price']    = $strike_price;
+                $pro['save_price']      = $strike_price - $items->mrp;
                 $pro['discount_percentage'] = abs($items->discount_percentage);
                 $pro['image']           = $items->base_image;
                 $pro['max_quantity']    = $items->quantity;
