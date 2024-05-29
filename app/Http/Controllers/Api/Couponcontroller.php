@@ -337,7 +337,7 @@ class Couponcontroller extends Controller
                             log::info('works inside case 5 mentioned as brands in comment');
 
                             # brands ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_carts.price * gbs_carts.quantity) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('brands', 'brands.id', '=', 'products.brand_id')
                                 ->join('coupon_brands', function ($join) {
@@ -353,10 +353,31 @@ class Couponcontroller extends Controller
                                 $response['message'] = 'Coupon not applicable';
                                 return $response ?? '';
                             }
+
+
+                            $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->pluck('id')->toArray();
+                                    $product_info = Product::find($checkCartData->product_id);
+
+                                    $cart_variation_options = CartProductVariationOption::where('product_id', $checkCartData->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('cart_id')->selectRaw("gbs_cart_product_variation_options.*, SUM(amount) AS total_amount")->get();
+                                    // log::debug($cart_variation_options);
+                                    if (isset($cart_variation_options) && !empty($cart_variation_options)) {
+                                        foreach($cart_variation_options as $cart_variation_option){
+                                            $cartData = Cart::find($cart_variation_option->cart_id);
+                                            // log::info($cartData);
+                                            $strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
+                                            // log::info('new subtotal without quantity: '.$strike_price);
+                                            $cartData->sub_total = round($strike_price * $cartData->quantity);
+                                            $cartData->coupon_id = $coupon->id;
+                                            // log::info('new subtotal with quantity: '.$cartData->sub_total);
+                                            $cartData->update();
+                                            // log::info($cartData);
+                                        }
+                                    }
+                                    $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
                             
-                            $product_info = Product::find($checkCartData->product_id);
-                            $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
-                            $checkCartData->update();
+                            // $product_info = Product::find($checkCartData->product_id);
+                            // $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
+                            // $checkCartData->update();
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
                                 if ($checkCartData->category_total >= $coupon->minimum_order_value) {
