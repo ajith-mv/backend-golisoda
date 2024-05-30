@@ -412,14 +412,9 @@ class Couponcontroller extends Controller
                             }
                             
                             $checkCartData = Cart::selectRaw('SUM(gbs_carts.sub_total) as category_total')
-                            ->join('products', 'products.id', '=', 'carts.product_id')
-                            ->join('brands', 'brands.id', '=', 'products.brand_id')
-                            ->join('coupon_brands', function ($join) {
-                                $join->on('coupon_brands.brand_id', '=', 'brands.id');
-                            })
-                            // ->join('cart_product_variation_options', 'carts.id', '=', 'cart_product_variation_options.cart_id')
-                            ->where('coupon_brands.coupon_id', $coupon->id)
-                            ->where('carts.customer_id', $customer_id)
+                            ->whereIn('id', $cart_ids)
+                            ->where('coupon_id', $coupon->id)
+                            ->where('customer_id', $customer_id)
                             //->groupBy('carts.product_id')
                             ->first();
                             log::debug($checkCartData);
