@@ -262,7 +262,7 @@ class Couponcontroller extends Controller
 
                             # category ...
                             $cart_ids = [];
-                            $cartCheck = Cart::selectRaw('GROUP_CONCAT(gbs_carts.id) as cart_id')
+                            $cartCheck = Cart::selectRaw('gbs_carts.id, GROUP_CONCAT(gbs_carts.id) as cart_id')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
                                 ->join('coupon_categories', function ($join) {
@@ -369,7 +369,7 @@ class Couponcontroller extends Controller
                         case '5':
                             # brands ...
                             $cart_ids = [];
-                            $cartCheck = Cart::selectRaw('GROUP_CONCAT(gbs_carts.id) as cart_id')
+                            $cartCheck = Cart::selectRaw('gbs_carts.id, GROUP_CONCAT(gbs_carts.id) as cart_id')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('brands', 'brands.id', '=', 'products.brand_id')
                                 ->join('coupon_brands', function ($join) {
