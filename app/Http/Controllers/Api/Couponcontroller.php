@@ -385,17 +385,14 @@ class Couponcontroller extends Controller
 
                             
                             $cart_ids = explode(',', $checkCartData->cart_id);
-                            log::info('cart ids');
-                            log::info($cart_ids);
                             // $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->pluck('id')->toArray();
                             $total_variation_amount_to_be_added = 0;
                             foreach($cart_ids as $cart_id){
                                 $cartData = Cart::find($cart_id);
                                 $cart_variation_options = CartProductVariationOption::where('product_id', $cartData->product_id)->where('cart_id', $cart_id)->groupBy('cart_id')->selectRaw("SUM(amount) AS total_amount")->first();
-                                $product_info = Product::find($checkCartData->product_id);
+                                $product_info = Product::find($cartData->product_id);
                                 if (isset($cart_variation_options) && !empty($cart_variation_options)) {
-                                    log::info('variation_option set');
-                                    log::debug($cart_variation_options);
+                                    log::info('variation_option set for the product'. $cartData->product_id);
                                     // foreach ($cart_variation_options as $cart_variation_option) {
                                         $strike_price = $product_info->strike_price + $cart_variation_options->total_amount;
                                         $cartData->sub_total = round($strike_price * $cartData->quantity);
@@ -407,6 +404,8 @@ class Couponcontroller extends Controller
                                     // $checkCartData = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as category_total")->groupBy('product_id')->first();
                                 }
                                  else {
+                                    log::info('variation_option not set for the product'. $cartData->product_id);
+
                                     $cartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                                     $cartData->update();
                                 }
