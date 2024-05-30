@@ -273,12 +273,11 @@ class Couponcontroller extends Controller
                                 ->where('carts.customer_id', $customer_id)
                                 // ->groupBy('carts.product_id')
                                 ->first();
-                            if (isset($checkCartData) && is_null($checkCartData->id)) {
+                            if (isset($cartCheck) && is_null($cartCheck->id)) {
                                 $response['status'] = 'error';
                                 $response['message'] = 'Coupon not applicable';
                                 return $response ?? '';
                             }
-                            dd($cartCheck);
                             $cart_ids = explode(',', $cartCheck->cart_id);
                             log::info('cart ids for category');
                             log::debug($cart_ids);
