@@ -604,7 +604,7 @@ class CartController extends Controller
                                     $cartData->coupon_id = $coupon->id;
                                     $cartData->update();
                                 }
-                                $checkCartData = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as category_total")->groupBy('product_id')->first();
+                                // $checkCartData = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as category_total")->groupBy('product_id')->first();
                             }
                             //  else {
                             //     $product_info = Product::find($checkCartData->product_id);
