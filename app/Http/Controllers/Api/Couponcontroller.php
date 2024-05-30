@@ -278,6 +278,7 @@ class Couponcontroller extends Controller
                                 $response['message'] = 'Coupon not applicable';
                                 return $response ?? '';
                             }
+                            dd($cartCheck);
                             $cart_ids = explode(',', $cartCheck->cart_id);
                             log::info('cart ids for category');
                             log::debug($cart_ids);
