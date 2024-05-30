@@ -80,6 +80,7 @@ class Couponcontroller extends Controller
                                     $cart_variation_options = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('cart_id')->selectRaw("gbs_cart_product_variation_options.*, SUM(amount) AS total_amount")->get();
                                     // log::debug($cart_variation_options);
                                     if (isset($cart_variation_options) && !empty($cart_variation_options)) {
+                                        log::info('working inside if');
                                         foreach ($cart_variation_options as $cart_variation_option) {
                                             $cartData = Cart::find($cart_variation_option->cart_id);
                                             // log::info($cartData);
@@ -91,11 +92,16 @@ class Couponcontroller extends Controller
                                             $cartData->update();
                                             // log::info($cartData);
                                         }
+                                    log::info('subtotal of product'.$cartData->sub_total );
+
                                     }else{
+                                        log::info('working inside else');
                                         if(isset($cartCountcheck) && $cartCountcheck->quantity !=NUll){
                                             $cartCountcheck->sub_total=round($product_info->strike_price * $cartCountcheck->quantity);
                                             $cartCountcheck->update();
                                             }
+                                    log::info('subtotal of product'.$cartCountcheck->sub_total );
+
                                     }
                                     $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
                                     if ($cartCount) {
