@@ -405,7 +405,7 @@ class Couponcontroller extends Controller
                                 }
                                  else {
                                     log::info('variation_option not set for the product'. $cartData->product_id);
-
+                                    $cartData->coupon_id = $coupon->id;
                                     $cartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                                     $cartData->update();
                                 }
