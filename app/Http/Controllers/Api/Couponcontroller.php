@@ -412,7 +412,7 @@ class Couponcontroller extends Controller
                             }
                             $checkCartData = Cart::selectRaw('SUM(gbs_carts.sub_total) as category_total')
                             ->whereIn('id', $cart_ids)
-                            ->where('coupon_i', $coupon->id)
+                            ->where('coupon_id', $coupon->id)
                             ->where('customer_id', $customer_id)
                             ->groupBy('coupon_id')
                             ->first();
