@@ -584,7 +584,6 @@ class CartController extends Controller
                                 ->where('carts.customer_id', $customer_id)
                                 //->groupBy('carts.product_id')
                                 ->first();
-dd($checkCartData);
                             if (isset($checkCartData) && is_null($checkCartData->id)) {
                                 $response['status'] = 'error';
                                 $response['message'] = 'Coupon not applicable';
