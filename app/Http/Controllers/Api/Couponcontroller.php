@@ -422,6 +422,7 @@ class Couponcontroller extends Controller
                             ->where('carts.customer_id', $customer_id)
                             //->groupBy('carts.product_id')
                             ->first();
+                            log::debug($checkCartData);
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
                                 if ($checkCartData->category_total >= $coupon->minimum_order_value) {
@@ -432,6 +433,7 @@ class Couponcontroller extends Controller
 
                                         case 'percentage':
                                             $product_amount = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
+                                            log::debug($product_amount);
                                             $tmp['discount_amount'] = percentageAmountOnly($checkCartData->category_total, $coupon->calculate_value);
                                             $tmp['coupon_id'] = $coupon->id;
                                             $tmp['coupon_code'] = $coupon->coupon_code;
