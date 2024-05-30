@@ -279,6 +279,8 @@ class Couponcontroller extends Controller
                                 return $response ?? '';
                             }
                             $cart_ids = explode(',', $cartCheck->cart_id);
+                            log::info('cart ids for category');
+                            log::debug($cart_ids);
                             foreach ($cart_ids as $cart_id) {
                                 $cartData = Cart::find($cart_id);
                                 $cart_variation_options = CartProductVariationOption::where('product_id', $cartData->product_id)->where('cart_id', $cart_id)->groupBy('cart_id')->selectRaw("SUM(amount) AS total_amount")->first();
