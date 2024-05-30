@@ -392,6 +392,7 @@ class Couponcontroller extends Controller
                             foreach($cart_ids as $cart_id){
                                 $cartData = Cart::find($cart_id);
                                 $cart_variation_options = CartProductVariationOption::where('product_id', $cartData->product_id)->where('cart_id', $cart_id)->groupBy('cart_id')->selectRaw("gbs_cart_product_variation_options.*, SUM(amount) AS total_amount")->get();
+                                dd($cart_variation_options);
                                 $product_info = Product::find($checkCartData->product_id);
                                 if (isset($cart_variation_options) && !empty($cart_variation_options)) {
                                     // foreach ($cart_variation_options as $cart_variation_option) {
