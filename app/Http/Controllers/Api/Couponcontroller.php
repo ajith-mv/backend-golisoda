@@ -366,13 +366,13 @@ class Couponcontroller extends Controller
                             log::info('works inside case 5 mentioned as brands in comment');
                             $cart_ids = [];
                             # brands ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, (SUM(gbs_products.strike_price * gbs_carts.quantity) + SUM(gbs_cart_product_variation_options.amount * gbs_carts.quantity)) as category_total, SUM(gbs_carts.quantity) as quantity, GROUP_CONCAT(gbs_carts.id) as cart_id')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total, SUM(gbs_carts.quantity) as quantity, GROUP_CONCAT(gbs_carts.id) as cart_id')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('brands', 'brands.id', '=', 'products.brand_id')
                                 ->join('coupon_brands', function ($join) {
                                     $join->on('coupon_brands.brand_id', '=', 'brands.id');
                                 })
-                                ->join('cart_product_variation_options', 'carts.id', '=', 'cart_product_variation_options.cart_id')
+                                // ->join('cart_product_variation_options', 'carts.id', '=', 'cart_product_variation_options.cart_id')
                                 ->where('coupon_brands.coupon_id', $coupon->id)
                                 ->where('carts.customer_id', $customer_id)
                                 //->groupBy('carts.product_id')
@@ -411,6 +411,7 @@ class Couponcontroller extends Controller
                                 }
                             }
                             
+                            $checkCartData = Cart::where('customer_id', $customer_id)->whereIn('id', $cart_ids)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as category_total")->groupBy('product_id')->first();
 
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
