@@ -385,6 +385,8 @@ class Couponcontroller extends Controller
 
                             
                             $cart_ids = explode(',', $checkCartData->cart_id);
+                            log::info('cart ids');
+                            log::info($cart_ids);
                             // $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->pluck('id')->toArray();
                             $total_variation_amount_to_be_added = 0;
                             $cart_variation_options = CartProductVariationOption::where('product_id', $checkCartData->product_id)->whereIn('cart_id', $cart_ids)->groupBy('cart_id')->selectRaw("gbs_cart_product_variation_options.*, SUM(amount) AS total_amount")->get();
@@ -395,6 +397,7 @@ class Couponcontroller extends Controller
                                     $cartData = Cart::find($cart_variation_option->cart_id);
                                     $strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
                                     $cartData->sub_total = round($strike_price * $cartData->quantity);
+                                    log::info($cartData->sub_total);
                                     $cartData->coupon_id = $coupon->id;
                                     // $total_variation_amount_to_be_added = $total_variation_amount_to_be_added + $cart_variation_option->total_amount;
                                     $cartData->update();
@@ -406,7 +409,7 @@ class Couponcontroller extends Controller
                                 $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                                 $checkCartData->update();
                             }
-                            
+
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
                                 if ($checkCartData->category_total >= $coupon->minimum_order_value) {
