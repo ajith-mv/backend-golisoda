@@ -366,7 +366,7 @@ class Couponcontroller extends Controller
                             log::info('works inside case 5 mentioned as brands in comment');
                             $cart_ids = [];
                             # brands ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, (SUM(gbs_products.strike_price * gbs_carts.quantity) + SUM(cart_product_variation_options)) as category_total, SUM(gbs_carts.quantity) as quantity, GROUP_CONCAT(gbs_carts.id) as cart_id')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, (SUM(gbs_products.strike_price * gbs_carts.quantity) + SUM(gbs_cart_product_variation_options * gbs_carts.quantity)) as category_total, SUM(gbs_carts.quantity) as quantity, GROUP_CONCAT(gbs_carts.id) as cart_id')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('brands', 'brands.id', '=', 'products.brand_id')
                                 ->join('coupon_brands', function ($join) {
