@@ -389,26 +389,27 @@ class Couponcontroller extends Controller
                             log::info($cart_ids);
                             // $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->pluck('id')->toArray();
                             $total_variation_amount_to_be_added = 0;
-                            $cart_variation_options = CartProductVariationOption::where('product_id', $checkCartData->product_id)->whereIn('cart_id', $cart_ids)->groupBy('cart_id')->selectRaw("gbs_cart_product_variation_options.*, SUM(amount) AS total_amount")->get();
-                            if (isset($cart_variation_options) && !empty($cart_variation_options)) {
+                            foreach($cart_ids as $cart_id){
+                                $cartData = Cart::find($cart_id);
+                                $cart_variation_options = CartProductVariationOption::where('product_id', $cartData->product_id)->whereIn('cart_id', $cart_id)->groupBy('cart_id')->selectRaw("gbs_cart_product_variation_options.*, SUM(amount) AS total_amount")->get();
                                 $product_info = Product::find($checkCartData->product_id);
-
-                                foreach ($cart_variation_options as $cart_variation_option) {
-                                    $cartData = Cart::find($cart_variation_option->cart_id);
-                                    $strike_price = $product_info->strike_price + $cart_variation_option->total_amount;
-                                    $cartData->sub_total = round($strike_price * $cartData->quantity);
-                                    log::info($cartData->sub_total);
-                                    $cartData->coupon_id = $coupon->id;
-                                    // $total_variation_amount_to_be_added = $total_variation_amount_to_be_added + $cart_variation_option->total_amount;
+                                if (isset($cart_variation_options) && !empty($cart_variation_options)) {
+                                    // foreach ($cart_variation_options as $cart_variation_option) {
+                                        $strike_price = $product_info->strike_price + $cart_variation_options->total_amount;
+                                        $cartData->sub_total = round($strike_price * $cartData->quantity);
+                                        log::info($cartData->sub_total);
+                                        $cartData->coupon_id = $coupon->id;
+                                        // $total_variation_amount_to_be_added = $total_variation_amount_to_be_added + $cart_variation_option->total_amount;
+                                        $cartData->update();
+                                    // }
+                                    // $checkCartData = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as category_total")->groupBy('product_id')->first();
+                                }
+                                 else {
+                                    $cartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                                     $cartData->update();
                                 }
-                                // $checkCartData = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as category_total")->groupBy('product_id')->first();
                             }
-                             else {
-                                $product_info = Product::find($checkCartData->product_id);
-                                $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
-                                $checkCartData->update();
-                            }
+                            
 
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
