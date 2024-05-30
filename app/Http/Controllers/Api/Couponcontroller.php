@@ -77,7 +77,7 @@ class Couponcontroller extends Controller
                                     $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->pluck('id')->toArray();
                                     $product_info = Product::find($items->product_id);
 
-                                    $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('cart_id')->selectRaw("gbs_cart_product_variation_options.*, SUM(amount) AS total_amount")->fiirst();
+                                    $cart_variation_option = CartProductVariationOption::where('product_id', $items->product_id)->whereIn('cart_id', $cartCountNew)->groupBy('cart_id')->selectRaw("gbs_cart_product_variation_options.*, SUM(amount) AS total_amount")->first();
                                     // log::debug($cart_variation_options);
                                     if (isset($cart_variation_option) && !empty($cart_variation_option)) {
                                         log::info('working inside if');
