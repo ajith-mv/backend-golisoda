@@ -391,9 +391,9 @@ class Couponcontroller extends Controller
                             $total_variation_amount_to_be_added = 0;
                             foreach($cart_ids as $cart_id){
                                 $cartData = Cart::find($cart_id);
-                                $cart_variation_options = CartProductVariationOption::where('product_id', $cartData->product_id)->where('cart_id', $cart_id)->groupBy('cart_id')->selectRaw("SUM(amount) AS total_amount")->get();
+                                $cart_variation_options = CartProductVariationOption::where('product_id', $cartData->product_id)->where('cart_id', $cart_id)->groupBy('cart_id')->selectRaw("SUM(amount) AS total_amount")->first();
                                 $product_info = Product::find($checkCartData->product_id);
-                                if (($cart_variation_options) && isset($cart_variation_options) && !empty($cart_variation_options)) {
+                                if (isset($cart_variation_options) && !empty($cart_variation_options)) {
                                     log::info('variation_option set');
                                     log::debug($cart_variation_options);
                                     // foreach ($cart_variation_options as $cart_variation_option) {
