@@ -376,7 +376,6 @@ class Couponcontroller extends Controller
                                 ->where('carts.customer_id', $customer_id)
                                 //->groupBy('carts.product_id')
                                 ->first();
-                                dd($checkCartData);
 
                             if (isset($checkCartData) && is_null($checkCartData->id)) {
                                 $response['status'] = 'error';
@@ -406,6 +405,7 @@ class Couponcontroller extends Controller
                             //     $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
                             //     $checkCartData->update();
                             // }
+                            dd($checkCartData);
 
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
@@ -424,6 +424,7 @@ class Couponcontroller extends Controller
                                             $tmp['coupon_type'] = array('discount_type' => $coupon->calculate_type, 'discount_value' => $coupon->calculate_value);
                                             $overall_discount_percentage = $coupon->calculate_value;
                                             $couponApplied = $tmp;
+
                                             break;
                                         case 'fixed_amount':
                                             $product_amount += $coupon->calculate_value;
