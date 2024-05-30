@@ -163,7 +163,7 @@ class Couponcontroller extends Controller
                             //     # customer ...
                             //     break;
                         case '4':
-                            # category ...
+                            # minimum order value ...
                             $cart_ids = [];
                             $cartCheck = Cart::selectRaw('gbs_carts.id, GROUP_CONCAT(gbs_carts.id) as cart_id')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
@@ -197,11 +197,11 @@ class Couponcontroller extends Controller
                                 ->where('customer_id', $customer_id)
                                 ->groupBy('coupon_id')
                                 ->first();
-                                if (isset($checkCartData) && ($checkCartData->category_total < $coupon->minimum_order_value)) {
-                                    $response['status'] = 'error';
-                                    $response['message'] = 'Coupon not applicable';
-                                    return $response ?? '';
-                                }
+                            if (isset($checkCartData) && ($checkCartData->category_total < $coupon->minimum_order_value)) {
+                                $response['status'] = 'error';
+                                $response['message'] = 'Coupon not applicable';
+                                return $response ?? '';
+                            }
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
                                 if ($checkCartData->category_total >= $coupon->minimum_order_value) {
