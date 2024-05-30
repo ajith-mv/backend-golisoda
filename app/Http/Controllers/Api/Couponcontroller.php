@@ -100,9 +100,10 @@ class Couponcontroller extends Controller
                                         log::info('working inside else');
                                         if(isset($cartCountcheck) && $cartCountcheck->quantity !=NUll){
                                             $cartCountcheck->sub_total=round($product_info->strike_price * $cartCountcheck->quantity);
+                                    log::info('subtotal of product'.$cartCountcheck->sub_total );
+
                                             $cartCountcheck->update();
                                             }
-                                    log::info('subtotal of product'.$cartCountcheck->sub_total );
 
                                     }
                                     $cartCount = Cart::where('customer_id', $customer_id)->where('product_id', $items->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as sub_total")->groupBy('product_id')->first();
