@@ -366,7 +366,7 @@ class Couponcontroller extends Controller
                             log::info('works inside case 5 mentioned as brands in comment');
                             $cart_ids = [];
                             # brands ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total, SUM(gbs_carts.quantity) as quantity, GROUP_CONCAT(gbs_carts.id) as cart_id')
+                            $cartCheck = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total, SUM(gbs_carts.quantity) as quantity, GROUP_CONCAT(gbs_carts.id) as cart_id')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('brands', 'brands.id', '=', 'products.brand_id')
                                 ->join('coupon_brands', function ($join) {
@@ -377,14 +377,14 @@ class Couponcontroller extends Controller
                                 ->where('carts.customer_id', $customer_id)
                                 //->groupBy('carts.product_id')
                                 ->first();
-                            if (isset($checkCartData) && is_null($checkCartData->id)) {
+                            if (isset($cartCheck) && is_null($cartCheck->id)) {
                                 $response['status'] = 'error';
                                 $response['message'] = 'Coupon not applicable';
                                 return $response ?? '';
                             }
 
                             
-                            $cart_ids = explode(',', $checkCartData->cart_id);
+                            $cart_ids = explode(',', $cartCheck->cart_id);
                             // $cartCountNew = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->pluck('id')->toArray();
                             $total_variation_amount_to_be_added = 0;
                             foreach($cart_ids as $cart_id){
@@ -406,12 +406,22 @@ class Couponcontroller extends Controller
                                  else {
                                     log::info('variation_option not set for the product'. $cartData->product_id);
                                     $cartData->coupon_id = $coupon->id;
-                                    $cartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
+                                    $cartData->sub_total = round($product_info->strike_price * $cartCheck->quantity);
                                     $cartData->update();
                                 }
                             }
                             
-                            $checkCartData = Cart::where('customer_id', $customer_id)->whereIn('id', $cart_ids)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as category_total")->groupBy('product_id')->first();
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total, SUM(gbs_carts.quantity) as quantity, GROUP_CONCAT(gbs_carts.id) as cart_id')
+                            ->join('products', 'products.id', '=', 'carts.product_id')
+                            ->join('brands', 'brands.id', '=', 'products.brand_id')
+                            ->join('coupon_brands', function ($join) {
+                                $join->on('coupon_brands.brand_id', '=', 'brands.id');
+                            })
+                            // ->join('cart_product_variation_options', 'carts.id', '=', 'cart_product_variation_options.cart_id')
+                            ->where('coupon_brands.coupon_id', $coupon->id)
+                            ->where('carts.customer_id', $customer_id)
+                            //->groupBy('carts.product_id')
+                            ->first();
 
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
