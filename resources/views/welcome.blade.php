@@ -121,7 +121,7 @@
                             </a>
                         </div>
                     </div>
-
+<p>The current time is: {{ now()->format('Y-m-d H:i:s') }}</p>
                     <div class="ml-4 text-center text-sm text-gray-500 sm:text-right sm:ml-0">
                         Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
                     </div>
