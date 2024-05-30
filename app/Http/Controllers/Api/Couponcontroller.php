@@ -415,7 +415,7 @@ class Couponcontroller extends Controller
                             ->whereIn('id', $cart_ids)
                             ->where('coupon_id', $coupon->id)
                             ->where('customer_id', $customer_id)
-                            //->groupBy('carts.product_id')
+                            ->groupBy('coupon_id')
                             ->first();
                             log::debug($checkCartData);
                             if (isset($checkCartData) && !empty($checkCartData)) {
