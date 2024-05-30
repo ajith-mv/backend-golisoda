@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
       
-      $schedule->command('update:daily')->dailyAt('10:32');
+      $schedule->command('update:daily')->dailyAt('10:38');
     //   ->dailyAt('23:59');
     }
 
