@@ -574,7 +574,7 @@ class CartController extends Controller
                             log::info('works inside case 5 mentioned as brands in comment');
 
                             # brands ...
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_products.strike_price * gbs_carts.quantity) as category_total, SUM(quantity) as quantity')
                                 ->join('products', 'products.id', '=', 'carts.product_id')
                                 ->join('brands', 'brands.id', '=', 'products.brand_id')
                                 ->join('coupon_brands', function ($join) {
@@ -606,11 +606,12 @@ class CartController extends Controller
                                     $cartData->update();
                                 }
                                 $checkCartData = Cart::where('customer_id', $customer_id)->where('product_id', $checkCartData->product_id)->selectRaw("gbs_carts.*, SUM(quantity) as quantity, SUM(sub_total) as category_total")->groupBy('product_id')->first();
-                            } else {
-                                $product_info = Product::find($checkCartData->product_id);
-                                $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
-                                $checkCartData->update();
                             }
+                            //  else {
+                            //     $product_info = Product::find($checkCartData->product_id);
+                            //     $checkCartData->sub_total = round($product_info->strike_price * $checkCartData->quantity);
+                            //     $checkCartData->update();
+                            // }
 
 
                             if (isset($checkCartData) && !empty($checkCartData)) {
