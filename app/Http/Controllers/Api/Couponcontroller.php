@@ -90,9 +90,10 @@ class Couponcontroller extends Controller
                                             $cartData->coupon_id = $coupon->id;
                                             // log::info('new subtotal with quantity: '.$cartData->sub_total);
                                             $cartData->update();
+                                    log::info('subtotal of product'.$cartData->sub_total );
+
                                             // log::info($cartData);
                                         }
-                                    log::info('subtotal of product'.$cartData->sub_total );
 
                                     }else{
                                         log::info('working inside else');
