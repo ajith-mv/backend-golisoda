@@ -191,7 +191,7 @@ class Couponcontroller extends Controller
                                     $cartData->update();
                                 }
                             }
-                            $checkCartData = Cart::selectRaw('SUM(gbs_carts.sub_total) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.id, SUM(gbs_carts.sub_total) as category_total')
                                 ->whereIn('id', $cart_ids)
                                 ->where('coupon_id', $coupon->id)
                                 ->where('customer_id', $customer_id)
@@ -302,7 +302,7 @@ class Couponcontroller extends Controller
                                     $cartData->update();
                                 }
                             }
-                            $checkCartData = Cart::selectRaw('SUM(gbs_carts.sub_total) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.id, SUM(gbs_carts.sub_total) as category_total')
                                 ->whereIn('id', $cart_ids)
                                 ->where('coupon_id', $coupon->id)
                                 ->where('customer_id', $customer_id)
@@ -407,7 +407,7 @@ class Couponcontroller extends Controller
                                     $cartData->update();
                                 }
                             }
-                            $checkCartData = Cart::selectRaw('SUM(gbs_carts.sub_total) as category_total')
+                            $checkCartData = Cart::selectRaw('gbs_carts.id, SUM(gbs_carts.sub_total) as category_total')
                                 ->whereIn('id', $cart_ids)
                                 ->where('coupon_id', $coupon->id)
                                 ->where('customer_id', $customer_id)
