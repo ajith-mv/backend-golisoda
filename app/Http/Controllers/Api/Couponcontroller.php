@@ -411,7 +411,7 @@ class Couponcontroller extends Controller
                                 }
                             }
                             
-                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_carts.sub_total * gbs_carts.quantity) as category_total, SUM(gbs_carts.quantity) as quantity')
+                            $checkCartData = Cart::selectRaw('gbs_carts.*,gbs_products.product_name,gbs_brands.brand_name,gbs_coupon_brands.id as catcoupon_id, SUM(gbs_carts.sub_total * gbs_carts.quantity) as category_total')
                             ->join('products', 'products.id', '=', 'carts.product_id')
                             ->join('brands', 'brands.id', '=', 'products.brand_id')
                             ->join('coupon_brands', function ($join) {
@@ -422,7 +422,6 @@ class Couponcontroller extends Controller
                             ->where('carts.customer_id', $customer_id)
                             //->groupBy('carts.product_id')
                             ->first();
-log::info($checkCartData);
                             if (isset($checkCartData) && !empty($checkCartData)) {
 
                                 if ($checkCartData->category_total >= $coupon->minimum_order_value) {
