@@ -857,9 +857,12 @@ class CartController extends Controller
         $selected_shipping = $request->selected_shipping ?? '';
         if (!($request->has('customer')) && ($guest_token == '' || is_null($guest_token))) {
             $tmp                = [];
-            if ($guest_token == null) {
-                $tmp['carts'] = [];
+            // if ($guest_token == null) {
+                $tmp['carts'] = 0;
                 $tmp['cart_count'] = 0;
+                $tmp['cod_amount'] = 0;
+                $tmp['is_code'] = 0;
+                $tmp['is_pickup_from_store'] = 0;
                 $tmp['shipping_charges']    = [];
                 $tmp['cart_total']          = array(
                     'total' => 0.00,
@@ -867,10 +870,20 @@ class CartController extends Controller
                     'product_tax_exclusive_total_without_format' => 0,
                     'tax_total' =>  0.00,
                     'tax_percentage' =>  0.00,
-                    'shipping_charge' =>  0.00
+                    'shipping_charge' =>  0.00,
+                    'addon_amount' => 0,
+                    'coupon_amount' => 0,
+                    'has_pickup_store' => 0,
+                    'brand_id' => "",
+                    'is_cod' => 0,
+                    'cod_amount' => 0,
+                    'is_coupon' => 0,
+                    'coupon_code' => 0,
+                    'coupon_percentage' => 0,
+                    'coupon_type' => 0
                 );
-                return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $tmp), 200);
-            }
+                return $tmp;
+            // }
         }
         return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null);
     }
