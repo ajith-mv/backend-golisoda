@@ -855,6 +855,23 @@ class CartController extends Controller
         $guest_token = $request->guest_token;
         $customer_id    = $request->customer_id;
         $selected_shipping = $request->selected_shipping ?? '';
+        if (!($request->has('customer')) && ($guest_token == '' || is_null($guest_token))) {
+            $tmp                = [];
+            if ($guest_token == null) {
+                $tmp['carts'] = [];
+                $tmp['cart_count'] = 0;
+                $tmp['shipping_charges']    = [];
+                $tmp['cart_total']          = array(
+                    'total' => 0.00,
+                    'product_tax_exclusive_total' =>  0.00,
+                    'product_tax_exclusive_total_without_format' => 0,
+                    'tax_total' =>  0.00,
+                    'tax_percentage' =>  0.00,
+                    'shipping_charge' =>  0.00
+                );
+                return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $tmp), 200);
+            }
+        }
         return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null);
     }
 
