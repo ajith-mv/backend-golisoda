@@ -89,10 +89,10 @@ class CartController extends Controller
                                 ->where('product_id', $product_id)
                                 ->selectRaw("SUM(amount) AS total_amount, SUM(discount_amount) as total_discount_amount")
                                 ->groupBy('product_id')
-                                ->get();
+                                ->first();
                             if (isset($variation_option_data)) {
-                                $total_variation_amount = $variation_option_data[0]->total_amount;
-                                $total_discount_amount = $variation_option_data[0]->total_discount_amount;
+                                $total_variation_amount = $variation_option_data->total_amount;
+                                $total_discount_amount = $variation_option_data->total_discount_amount;
                                 $product_info->mrp = ($product_info->strike_price + $total_variation_amount) - $total_discount_amount;
                                 $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                             }
@@ -184,10 +184,10 @@ class CartController extends Controller
                         ->where('product_id', $product_id)
                         ->selectRaw("SUM(amount) AS total_amount, SUM(discount_amount) as total_discount_amount")
                         ->groupBy('product_id')
-                        ->get();
+                        ->first();
                     if (isset($variation_option_data)) {
-                        $total_variation_amount = $variation_option_data[0]->total_amount;
-                        $total_discount_amount = $variation_option_data[0]->total_discount_amount;
+                        $total_variation_amount = $variation_option_data->total_amount;
+                        $total_discount_amount = $variation_option_data->total_discount_amount;
                         $product_info->mrp = ($product_info->strike_price + $total_variation_amount) - $total_discount_amount;
                         $product_info->strike_price = $product_info->strike_price + $total_variation_amount;
                     }
