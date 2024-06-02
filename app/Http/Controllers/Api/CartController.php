@@ -855,7 +855,7 @@ class CartController extends Controller
         $guest_token = $request->guest_token;
         $customer_id    = $request->customer_id;
         $selected_shipping = $request->selected_shipping ?? '';
-        if (!($request->has('customer')) && ($guest_token == '' || is_null($guest_token))) {
+        if (!($request->has('customer_id')) && ($guest_token == '' || is_null($guest_token))) {
             $tmp                = [];
             // if ($guest_token == null) {
                 $tmp['carts'] = [];
