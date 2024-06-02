@@ -1055,6 +1055,7 @@ class CartController extends Controller
                     $pro['is_best_selling'] = $items->is_best_selling;
                     $pro['price']           = $items->mrp;
                     $pro['total_variation_amount'] = $total_variation_amount;
+                    $pro['total_discount_amount'] = $total_discount_amount;
                     $pro['strike_price']    = number_format($strike_price, 2);
                     $pro['save_price']      = $strike_price - $items->mrp;
                     $pro['discount_percentage'] = abs($items->discount_percentage);
