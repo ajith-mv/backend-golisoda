@@ -604,7 +604,8 @@ class Couponcontroller extends Controller
                 if (isset($selected_value) && (!empty($selected_value))) {
                     $items->mrp = ($items->strike_price + $total_variation_amount) - $total_discount_amount;;
                     $strike_price = $items->strike_price + $total_variation_amount;
-                    $items->discount_percentage = ($total_discount_amount > 0) ? $items->discount_percentage : 0;
+                    // $items->discount_percentage = ($total_discount_amount > 0) ? $items->discount_percentage : 0;
+                    $items->discount_percentage = ($total_discount_amount > 0) ? getDiscountPercentage($items->mrp, $strike_price) : 0;
                 } else {
                     $strike_price = $items->strike_price;
                 }
