@@ -858,7 +858,7 @@ class CartController extends Controller
         if (!($request->has('customer')) && ($guest_token == '' || is_null($guest_token))) {
             $tmp                = [];
             // if ($guest_token == null) {
-                $tmp['carts'] = 0;
+                $tmp['carts'] = [];
                 $tmp['cart_count'] = 0;
                 $tmp['cod_amount'] = 0;
                 $tmp['is_code'] = 0;
