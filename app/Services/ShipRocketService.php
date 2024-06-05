@@ -151,8 +151,9 @@ class ShipRocketService
                             $measure = DB::table('product_measurements')
                                 ->selectRaw("width, hight, length, weight")
                                 ->where('product_id', $product_id)->first();
-dd($cartShipAddress->PostCode);
-                            $params = array(
+
+$pincode = Pincode::find($cartShipAddress->post_code)->pincode;
+                                $params = array(
                                 "order_id" => $citems->cart_order_no,
                                 "order_date" => date('Y-m-d h:i'),
                                 "pickup_location" =>  "Primary",
@@ -163,7 +164,7 @@ dd($cartShipAddress->PostCode);
                                 "billing_address" =>  $cartShipAddress->address_line1,
                                 "billing_address_2" => $cartShipAddress->address_line2,
                                 "billing_city" => $cartShipAddress->city,
-                                "billing_pincode" => $cartShipAddress->PostCode->pincode,
+                                "billing_pincode" => $pincode,
                                 "billing_state" => $cartShipAddress->state ?? 'Tamil nadu',
                                 "billing_country" => "India",
                                 "billing_email" => $cartShipAddress->email ?? $customer->email,
@@ -174,7 +175,7 @@ dd($cartShipAddress->PostCode);
                                 "shipping_address" => $cartShipAddress->address_line1,
                                 "shipping_address_2" => $cartShipAddress->address_line2,
                                 "shipping_city" => $cartShipAddress->city,
-                                "shipping_pincode" => $cartShipAddress->PostCode->pincode,
+                                "shipping_pincode" => $pincode,
                                 "shipping_country" => "India",
                                 "shipping_state" => $cartShipAddress->state ?? 'Tamil nadu',
                                 "shipping_email" => $cartShipAddress->email ?? $customer->email,
