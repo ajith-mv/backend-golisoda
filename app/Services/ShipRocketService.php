@@ -41,7 +41,6 @@ class ShipRocketService
     {
         try{
             $token =  $this->getToken();
-            dd($params);
             $response =  Shiprocket::order($token)->create($params);
             // $response = json_decode($response);
             dd($response);
