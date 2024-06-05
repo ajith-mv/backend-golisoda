@@ -18,6 +18,7 @@
         "maatwebsite/excel": "^3.1",
         "owen-it/laravel-auditing": "^13.0",
         "razorpay/razorpay": "^2.8",
+        "seshac/laravel-shiprocket-api": "^2.0",
         "softon/indipay": "^1.2",
         "symfony/psr-http-message-bridge": "^2.1",
         "yajra/laravel-datatables-oracle": "^9.21"

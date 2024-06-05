@@ -24,7 +24,7 @@ class ProductVariationController extends Controller
         $info                   = Product::find($product_id);
         $attributes             = '';
 
-        $variationGroupdata = VariationGroup::all()->filter(function ($item) use ($category_id) {
+        $variationGroupdata = VariationGroup::where('status', 1)->get()->filter(function ($item) use ($category_id) {
             $category_ids = json_decode($item->category_id);
             return in_array($category_id, $category_ids);
         })->first();

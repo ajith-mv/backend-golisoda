@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
 Route::get('/upload-gallery-image', [App\Http\Controllers\ImageUploadController::class, 'GalleryImage']);
 
 Route::get('/test-invoice/{id?}', [App\Http\Controllers\TestController::class, 'invoiceSample']);
@@ -74,9 +75,9 @@ Route::post('/check/product/availability', [App\Http\Controllers\Api\ProductAvai
 Route::post('/add/cart', [App\Http\Controllers\Api\CartController::class, 'addToCart']);
 Route::post('/get/cart', [App\Http\Controllers\Api\CartController::class, 'getCarts']);
 Route::post('/update/cart', [App\Http\Controllers\Api\CartController::class, 'updateCart']);
-Route::post('/delete/cart', [App\Http\Controllers\Api\CartController::class, 'deleteCart']);    
-Route::post('/clear/cart', [App\Http\Controllers\Api\CartController::class, 'clearCart']); 
-Route::post('/delete/addon', [App\Http\Controllers\Api\CartController::class, 'deleteAddonItems']); 
+Route::post('/delete/cart', [App\Http\Controllers\Api\CartController::class, 'deleteCart']);
+Route::post('/clear/cart', [App\Http\Controllers\Api\CartController::class, 'clearCart']);
+Route::post('/delete/addon', [App\Http\Controllers\Api\CartController::class, 'deleteAddonItems']);
 
 Route::post('/list/customer/reviews', [App\Http\Controllers\Api\CustomerReviewController::class, 'listReviews']);
 
@@ -84,7 +85,7 @@ Route::get('/ccavenue/payment/processing/{customer_id?}/{order_id?}', [App\Http\
 
 Route::get('/site-map', [App\Http\Controllers\TestController::class, 'generateSiteMap']);
 
-Route::middleware(['client'])->group(function(){
+Route::middleware(['client'])->group(function () {
     //get profile data
     Route::post('/get/profile', [App\Http\Controllers\Api\CustomerController::class, 'getProfileDetails']);
     Route::post('/update/profile', [App\Http\Controllers\Api\CustomerController::class, 'updateProfile']);
@@ -107,7 +108,7 @@ Route::middleware(['client'])->group(function(){
     Route::post('/add/remove/whishlist', [App\Http\Controllers\Api\CustomerController::class, 'setWishlists']);
     Route::post('/clear/whishlist', [App\Http\Controllers\Api\CustomerController::class, 'clearWishlist']);
     Route::post('/get/whishlist', [App\Http\Controllers\Api\CustomerController::class, 'getWishlist']);
-    
+
     Route::post('/get/shipping/charges', [App\Http\Controllers\Api\CartController::class, 'getShippingCharges']);
     Route::post('/set/shipping/charges', [App\Http\Controllers\Api\Couponcontroller::class, 'setShippingCharges']);
     Route::post('/calculation/cod', [App\Http\Controllers\Api\CartController::class, 'calculationCod']);
@@ -120,22 +121,23 @@ Route::middleware(['client'])->group(function(){
      */
     Route::post('/proceed/ccav/checkout', [App\Http\Controllers\Payment\CCavenueController::class, 'proceedCheckout']);
     Route::post('/verify/ccav/token', [App\Http\Controllers\Payment\CCavenueController::class, 'verifyCCavenueTransaction']);
-    
+
     Route::post('/set/recent', [App\Http\Controllers\Api\CommonController::class, 'setRecentView']);
-    
-    Route::post('/apply/coupon', [App\Http\Controllers\Api\Couponcontroller::class, 'applyCoupon']);    
-    Route::post('/remove/coupon', [App\Http\Controllers\Api\Couponcontroller::class, 'removeCoupon']);    
+
+    Route::post('/apply/coupon', [App\Http\Controllers\Api\Couponcontroller::class, 'applyCoupon']);
+    Route::post('/remove/coupon', [App\Http\Controllers\Api\Couponcontroller::class, 'removeCoupon']);
 
     Route::post('/get/orders', [App\Http\Controllers\Api\OrderController::class, 'getOrders']);
     Route::post('/get/orders-status/{customer_id}', [App\Http\Controllers\Api\OrderController::class, 'getOrderStatus']);
 
-    
+
     Route::post('/get/orderByno', [App\Http\Controllers\Api\OrderController::class, 'getOrderByOrderNo']);
-    
+
     Route::post('/cancel/request/orders', [App\Http\Controllers\Api\OrderController::class, 'requestCancelOrder']);
 
     Route::post('/get/recent/view', [App\Http\Controllers\Api\CollectionController::class, 'getRecentViews']);
- 
+    Route::post('/generate-customer-invoice', [App\Http\Controllers\Api\CheckoutController::class, 'generateInvoice']);
+
+    Route::post('/get/shipping/rocket/charges', [App\Http\Controllers\Api\CartController::class, 'getShippingRocketCharges']);
 
 });
-

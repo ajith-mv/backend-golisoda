@@ -1189,3 +1189,8 @@ function ccHextobin($hexString)
     }
     return $binString;
 }
+
+function getVolumeMetricCalculation($length, $width, $height)
+{
+    return ($length * $width * $height) / 5000; //it return weight in kg
+}

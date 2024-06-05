@@ -27,5 +27,9 @@ class Cart extends Model
     public function variationOptions(){
         return $this->hasMany(CartProductVariationOption::class, 'cart_id', 'id');
     }
+
+    public function rocketResponse() {
+        return $this->hasOne(CartShiprocketResponse::class, 'cart_token', 'guest_token');
+    }
     
 }

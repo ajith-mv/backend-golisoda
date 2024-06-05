@@ -861,4 +861,26 @@ class CheckoutController extends Controller
 
         return  array('success' => $success, 'message' => $error_message);
     }
+    
+    /**
+     * Method generateInvoice
+     *
+     * @param Request $request [Generate invoice for customer who we enter data manually]
+     *
+     * @return void
+     */
+    public function generateInvoice(Request $request)
+    {
+        $order_no = $request->order_no;
+        $order_info = Order::where('order_no', $order_no)->first();
+        if ($order_info) {
+            $globalInfo = GlobalSettings::first();
+
+            $pdf = PDF::loadView('platform.invoice.index', compact('order_info', 'globalInfo'));
+            Storage::put('public/invoice_order/' . $order_info->order_no . '.pdf', $pdf->output());
+            return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Invoice generated successfully', 'status' => 'success', 'success' => []), 200);
+        }
+        return response()->json(array('error' => 1, 'status_code' => 200, 'message' => 'Something went wrong', 'status' => 'failure', 'success' => []), 200);
+
+    }
 }

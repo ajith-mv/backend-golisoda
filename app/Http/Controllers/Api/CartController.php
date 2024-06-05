@@ -22,6 +22,11 @@ use App\Models\Offers\Coupons;
 use App\Models\Product\ProductVariationOption;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\Master\CustomerAddress;
+use App\Services\ShipRocketService;
+use Seshac\Shiprocket\Shiprocket;
+
+
 
 
 class CartController extends Controller
@@ -1232,5 +1237,67 @@ class CartController extends Controller
         }
 
         return array('error' => $error, 'message' => $message, 'data' => $data ?? []);
+    }
+
+    public function getShippingRocketCharges(Request $request, ShipRocketService $service)
+    {
+
+        $from_type = $request->from_type;
+        $address = $request->address;
+        $shippingAddress = CustomerAddress::find($address);
+        $customer_id = $request->customer_id;
+
+        $cart_info = Cart::where('customer_id', $customer_id)->first(); //get from token
+        /**
+         * get volume metric value for kg
+         */
+        $all_cart = Cart::where('customer_id', $customer_id)->get();
+        $flat_charges = 0;
+        $overall_flat_charges = 0;
+        // dd( $all_cart );
+        if (isset($all_cart) && !empty($all_cart)) {
+            foreach ($all_cart as $item) {
+                $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
+            }
+        }
+        if (!empty($flat_charges)) {
+
+            $overall_flat_charges = $flat_charges * 50 ?? 0;
+        }
+
+        /**
+         *  End Metric value calculation
+         */
+        if (isset($from_type) && !empty($from_type)) {
+
+            CartAddress::where('customer_id', $customer_id)
+                ->where('address_type', $from_type)->delete();
+            $ins_cart = [];
+            $ins_cart['cart_token'] = $cart_info->guest_token;
+            $ins_cart['customer_id'] = $customer_id;
+            $ins_cart['address_type'] = $from_type;
+            $ins_cart['name'] = isset($shippingAddress->name) ? $shippingAddress->name : 'No name';
+            $ins_cart['email'] = $shippingAddress->email;
+            $ins_cart['mobile_no'] = $shippingAddress->mobile_no;
+            $ins_cart['address_line1'] = $shippingAddress->address_line1;
+            $ins_cart['country'] = 'india';
+            $ins_cart['post_code'] = $shippingAddress->post_code;
+            $ins_cart['state'] = $shippingAddress->state;
+            $ins_cart['city'] = $shippingAddress->city;
+
+            $cart_address = CartAddress::create($ins_cart);
+            $data = $service->getShippingRocketOrderDimensions($customer_id, $cart_info->guest_token ?? null, $cart_address->id);
+        }
+        if (isset($data)) {
+            $shipping_charge = $data;
+            Log::debug("got the response from api for cart id " . $shipping_charge);
+        } else {
+            $shipping_charge = round($overall_flat_charges);
+            Log::debug("did not get the response from api for cart id, calculated shipping charge based on volumetric calculation - " . $cart_info->id);
+            Log::debug("overall flat charge" . $overall_flat_charges);
+        }
+        $chargeData =  array('shiprocket_charges' => $data, 'flat_charge' => $shipping_charge);
+
+        return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $chargeData), 200);
     }
 }
