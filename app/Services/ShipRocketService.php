@@ -151,7 +151,7 @@ class ShipRocketService
                             $measure = DB::table('product_measurements')
                                 ->selectRaw("width, hight, length, weight")
                                 ->where('product_id', $product_id)->first();
-
+dd($cartShipAddress->PostCode);
                             $params = array(
                                 "order_id" => $citems->cart_order_no,
                                 "order_date" => date('Y-m-d h:i'),
