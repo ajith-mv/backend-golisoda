@@ -42,6 +42,7 @@ class ShipRocketService
         try{
             $token =  $this->getToken();
             $response =  Shiprocket::order($token)->create($params);
+            dd($response);
             if ($response->status_code == 1) {
 
                 CartShiprocketResponse::where('cart_token', $params['order_id'])->delete();
