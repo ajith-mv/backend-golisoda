@@ -15,6 +15,7 @@ use App\Models\Product\Product;
 use App\Models\Seller\Merchant;
 use App\Models\Seller\MerchantShopsData;
 use App\Models\Settings\Tax;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Seshac\Shiprocket\Shiprocket;
@@ -38,25 +39,31 @@ class ShipRocketService
 
     public function createOrder($params)
     {
-        $token =  $this->getToken();
-        $response =  Shiprocket::order($token)->create($params);
-        dd($response);
+        try{
+            $token =  $this->getToken();
+            $response =  Shiprocket::order($token)->create($params);
+            if ($response->status_code == 1) {
+
+                CartShiprocketResponse::where('cart_token', $params['order_id'])->delete();
+                $ins_params['cart_token'] = $params['order_id'];
+                $ins_params['rocket_token'] = $token;
+                $ins_params['request_type'] = 'create_order';
+                $ins_params['rocket_order_request_data'] = json_encode($params);
+                $ins_params['rocket_order_response_data'] = $response;
+                $ins_params['order_id'] = $response->order_id;
+    
+                CartShiprocketResponse::create($ins_params);
+            }
+    
+            return $response;
+        }catch(Exception  $e){
+            log::debug($e);
+            return null;
+        }
+        
         // $success_response = json_decode($response);
 
-        if ($response->status_code == 1) {
-
-            CartShiprocketResponse::where('cart_token', $params['order_id'])->delete();
-            $ins_params['cart_token'] = $params['order_id'];
-            $ins_params['rocket_token'] = $token;
-            $ins_params['request_type'] = 'create_order';
-            $ins_params['rocket_order_request_data'] = json_encode($params);
-            $ins_params['rocket_order_response_data'] = $response;
-            $ins_params['order_id'] = $response->order_id;
-
-            CartShiprocketResponse::create($ins_params);
-        }
-
-        return $response;
+       
     }
 
     public function updateOrder($params)
@@ -146,7 +153,7 @@ class ShipRocketService
                                 ->where('product_id', $product_id)->first();
 
                             $params = array(
-                                "order_id" => $citems->guest_token,
+                                "order_id" => $citems->cart_order_no,
                                 "order_date" => date('Y-m-d h:i'),
                                 "pickup_location" =>  "Primary",
                                 "channel_id" =>  "",
@@ -167,7 +174,7 @@ class ShipRocketService
                                 "shipping_address" => $cartShipAddress->address_line1,
                                 "shipping_address_2" => $cartShipAddress->address_line2,
                                 "shipping_city" => $cartShipAddress->city,
-                                "shipping_pincode" => $cartShipAddress->post_code,
+                                "shipping_pincode" => $cartShipAddress->PostCode->pincode,
                                 "shipping_country" => "India",
                                 "shipping_state" => $cartShipAddress->state ?? 'Tamil nadu',
                                 "shipping_email" => $cartShipAddress->email ?? $customer->email,

@@ -1281,7 +1281,7 @@ class CartController extends Controller
             $ins_cart['mobile_no'] = $shippingAddress->mobile_no;
             $ins_cart['address_line1'] = $shippingAddress->address_line1;
             $ins_cart['country'] = 'india';
-            $ins_cart['post_code'] = $shippingAddress->post_code;
+            $ins_cart['post_code'] = $shippingAddress->PostCode->pincode;
             $ins_cart['state'] = $shippingAddress->state;
             $ins_cart['city'] = $shippingAddress->city;
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Master\Pincode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,4 +25,9 @@ class CartAddress extends Model
         'state',
         'city'
     ];
+
+    public function PostCode()
+    {
+        return $this->hasOne(Pincode::class, 'id', 'post_code');
+    }
 }
