@@ -42,7 +42,6 @@ class ShipRocketService
         try{
             $token =  $this->getToken();
             $response =  Shiprocket::order($token)->create($params);
-            dd($response);
             if ($response->status_code == 1) {
 
                 CartShiprocketResponse::where('cart_token', $params['order_id'])->delete();
@@ -201,7 +200,6 @@ class ShipRocketService
                             );
 
                             $createResponse = $this->createOrder($params);
-                            $createResponse = json_decode($createResponse);
 
                             if (isset($createResponse) && !empty($createResponse->order_id)) {
                                 $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse->order_id, $measure_ment, $pickup_post_code);
@@ -236,8 +234,6 @@ class ShipRocketService
             "couriers_type" => 0,
             "only_local" => 0
         );
-        dd( $charge_array );
-        //
         $token =  $this->getToken();
         // $response =  Shiprocket::courier($token)->checkServiceability($charge_array);
         // dd( $response );
@@ -272,7 +268,6 @@ class ShipRocketService
         );
         CartShiprocketResponse::where('order_id', $order_id)->update($updata);
         // Log::info($response);
-        $response = json_decode($response);
         $amount = null;
         if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
             $courier_data = end($response->data->available_courier_companies);
