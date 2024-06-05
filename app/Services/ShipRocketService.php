@@ -163,7 +163,7 @@ class ShipRocketService
                                 "billing_address" =>  $cartShipAddress->address_line1,
                                 "billing_address_2" => $cartShipAddress->address_line2,
                                 "billing_city" => $cartShipAddress->city,
-                                "billing_pincode" => $cartShipAddress->post_code,
+                                "billing_pincode" => $cartShipAddress->PostCode->pincode,
                                 "billing_state" => $cartShipAddress->state ?? 'Tamil nadu',
                                 "billing_country" => "India",
                                 "billing_email" => $cartShipAddress->email ?? $customer->email,
