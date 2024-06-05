@@ -38,36 +38,6 @@ class ShipRocketService
 
     public function createOrder($params)
     {
-        /*  $token = $this->getToken();
-        // dd( $params );
-        // $token =  Shiprocket::getToken();
-        // dump( $token );
-        // $response = Shiprocket::order($token)->create($params);
-        // dd( $response );
-        $curl = curl_init();
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/create/adhoc',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            // CURLOPT_SSL_VERIFYHOST => FALSE,
-            // CURLOPT_SSL_VERIFYPEER => FALSE,
-            CURLOPT_POSTFIELDS => json_encode($params),
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $token
-            ),
-        ));
-
-        $response = curl_exec($curl);
-
-        curl_close($curl);*/
-
         $token =  $this->getToken();
         $response =  Shiprocket::order($token)->create($params);
         $success_response = json_decode($response);
@@ -122,13 +92,6 @@ class ShipRocketService
             $shipping_amount = 0;
             $checkCart = Cart::where('customer_id', $customer_id)->get();
             $customer = Customer::find($customer_id);
-            // $cartBillAddress = CartAddress::where('customer_id', $customer_id)
-            //     ->where('cart_token', $cart_token)
-            //     ->where('address_type', 'billing')->first();
-            // $cartShipAddress = CartAddress::where('customer_id', $customer_id)
-            //     ->where('cart_token', $cart_token)
-            //     ->where('address_type', 'shipping')->first();
-            // dump( $cartBillAddress );
             $cartShipAddress = CartAddress::find($cart_address_id);
 
             if ($cartShipAddress) {
@@ -149,7 +112,7 @@ class ShipRocketService
                                 ->select("weight")
                                 ->where('product_id', $product_id)->first();
 
-                            $total_weight = isset($pro_measure->weight)? $pro_measure->weight : 1 * $citems->quantity;
+                            $total_weight = isset($pro_measure->weight) ? $pro_measure->weight : 1 * $citems->quantity;
 
                             $tax_total  = 0;
                             $tax = [];
@@ -265,7 +228,7 @@ class ShipRocketService
             "couriers_type" => 0,
             "only_local" => 0
         );
-        // dd( $charge_array );
+        dd( $charge_array );
         //
         $token =  $this->getToken();
         // $response =  Shiprocket::courier($token)->checkServiceability($charge_array);
