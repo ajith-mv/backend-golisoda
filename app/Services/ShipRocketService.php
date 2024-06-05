@@ -157,7 +157,7 @@ class ShipRocketService
                             $params = array(
                                 "order_id" => $citems->cart_order_no,
                                 "order_date" => date('Y-m-d h:i'),
-                                "pickup_location" =>  "Primary",
+                                "pickup_location" =>  "Golisoda",
                                 "channel_id" =>  "",
                                 "comment" =>  "",
                                 "billing_customer_name" => $cartShipAddress->name,
