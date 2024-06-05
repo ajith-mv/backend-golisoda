@@ -43,7 +43,6 @@ class ShipRocketService
             $token =  $this->getToken();
             $response =  Shiprocket::order($token)->create($params);
             // $response = json_decode($response);
-            dd($response);
             if ($response->status_code == 1) {
 
                 CartShiprocketResponse::where('cart_token', $params['order_id'])->delete();
@@ -202,7 +201,7 @@ class ShipRocketService
                             );
 
                             $createResponse = $this->createOrder($params);
-                            $createResponse = json_decode($createResponse);
+                            // $createResponse = json_decode($createResponse);
 
                             if (isset($createResponse) && !empty($createResponse->order_id)) {
                                 $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse->order_id, $measure_ment, $pickup_post_code);
@@ -272,7 +271,7 @@ class ShipRocketService
         );
         CartShiprocketResponse::where('order_id', $order_id)->update($updata);
         // Log::info($response);
-        $response = json_decode($response);
+        // $response = json_decode($response);
         $amount = null;
         if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
             $courier_data = end($response->data->available_courier_companies);
