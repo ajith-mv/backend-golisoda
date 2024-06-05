@@ -40,6 +40,7 @@ class ShipRocketService
     {
         $token =  $this->getToken();
         $response =  Shiprocket::order($token)->create($params);
+        dd($response);
         // $success_response = json_decode($response);
 
         if ($response->status_code == 1) {
