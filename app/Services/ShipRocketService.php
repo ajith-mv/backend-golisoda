@@ -277,9 +277,9 @@ log::info('shipping amount: '. $shipping_amount);
         CartShiprocketResponse::where('order_id', $order_id)->update($updata);
         // $response = json_decode($response);
         $amount = null;
-        if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
-            $courier_data = end($response->data->available_courier_companies);
-            $amount = $courier_data->freight_charge;
+        if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
+            $courier_data = end($response['data']['available_courier_companies']);
+            $amount = $courier_data['freight_charge'];
         }
 
         return $amount;
