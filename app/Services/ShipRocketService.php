@@ -239,7 +239,7 @@ log::info('shipping amount: '. $shipping_amount);
             "couriers_type" => 0,
             "only_local" => 0
         );
-        log::info($charge_array);
+        // log::info($charge_array);
         //
         $token =  $this->getToken();
         // $response =  Shiprocket::courier($token)->checkServiceability($charge_array);
@@ -268,7 +268,7 @@ log::info('shipping amount: '. $shipping_amount);
         // $response = curl_exec($curl);
         // curl_close($curl);
         $response = Shiprocket::courier($token)->checkServiceability($charge_array);
-        Log::info($response);
+        // Log::info($response);
 
         $updata = array(
             'shipping_charge_request_data' => json_encode($charge_array),
@@ -280,9 +280,11 @@ log::info('shipping amount: '. $shipping_amount);
         if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
             // log::info($response['data']['available_courier_companies']);
             $recommended_id = $response['data']['recommended_by']['id'];
+            log::info("recommended id is".$recommended_id);
             foreach ($response['data']['available_courier_companies'] as $company) {
                 if ($company['id'] == $recommended_id) {
                     $amount = $company['freight_charge'];
+                    log::info("freight charge is: ".$amount);
                     break;
                 }
             }
