@@ -280,9 +280,12 @@ log::info('shipping amount: '. $shipping_amount);
         if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
             // log::info($response['data']['available_courier_companies']);
             $recommended_id = $response['data']['recommended_by']['id'];
-            Log::info($recommended_id);
-            $courier_data = end($response['data']['available_courier_companies']);
-            $amount = $courier_data['freight_charge'];
+            foreach ($response['data']['available_courier_companies'] as $company) {
+                if ($company['id'] == $recommended_id) {
+                    $amount = $company['freight_charge'];
+                    break;
+                }
+            }
         }
 
         return $amount;
