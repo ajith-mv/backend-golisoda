@@ -44,7 +44,7 @@ class ShipRocketService
             $response =  Shiprocket::order($token)->create($params);
             log::info($response['status_code']);
             // $response = json_decode($response);
-            if ($response->status_code == 1) {
+            if ($response['status_code'] == 1) {
 
                 CartShiprocketResponse::where('cart_token', $params['order_id'])->delete();
                 $ins_params['cart_token'] = $params['order_id'];
@@ -52,7 +52,7 @@ class ShipRocketService
                 $ins_params['request_type'] = 'create_order';
                 $ins_params['rocket_order_request_data'] = json_encode($params);
                 $ins_params['rocket_order_response_data'] = $response;
-                $ins_params['order_id'] = $response->order_id;
+                $ins_params['order_id'] = $response['order_id'];
     
                 CartShiprocketResponse::create($ins_params);
             }
