@@ -278,7 +278,9 @@ log::info('shipping amount: '. $shipping_amount);
         // $response = json_decode($response);
         $amount = null;
         if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
-            log::info($response['data']['available_courier_companies']);
+            // log::info($response['data']['available_courier_companies']);
+            $recommended_id = $response['data']['recommended_by']['id'];
+            Log::info($recommended_id);
             $courier_data = end($response['data']['available_courier_companies']);
             $amount = $courier_data['freight_charge'];
         }
