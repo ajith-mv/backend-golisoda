@@ -202,6 +202,7 @@ class ShipRocketService
                             );
 
                             $createResponse = $this->createOrder($params);
+                            log::info($createResponse);
                             // $createResponse = json_decode($createResponse);
 log::info('shipping amount: '. $shipping_amount);
                             if (isset($createResponse) && !empty($createResponse->order_id)) {
