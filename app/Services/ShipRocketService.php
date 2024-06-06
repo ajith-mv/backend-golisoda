@@ -110,6 +110,7 @@ class ShipRocketService
                 $cartItemsarr = [];
                 $cartTotal = 0;
                 $total_weight = 0;
+                $delivery_post_code = $cartShipAddress->post_code;
                 if (isset($checkCart) && !empty($checkCart)) {
                     foreach ($checkCart as $citems) {
 
@@ -206,7 +207,7 @@ class ShipRocketService
                             // $createResponse = json_decode($createResponse);
 log::info('shipping amount: '. $shipping_amount);
                             if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                                $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code);
+                                $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
                             }
                         }
                     }
@@ -216,7 +217,7 @@ log::info('shipping amount: '. $shipping_amount);
         }
     }
 
-    public function getShippingCharges($order_id, $measure_ment, $pickup_post_code)
+    public function getShippingCharges($order_id, $measure_ment, $pickup_post_code, $delivery_post_code)
     {
         log::info('works inside shippign charges function');
         $cart_ship_response = CartShiprocketResponse::where('order_id', $order_id)->first();
