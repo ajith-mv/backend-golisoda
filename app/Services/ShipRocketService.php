@@ -217,7 +217,7 @@ log::info('shipping amount: '. $shipping_amount);
 
     public function getShippingCharges($order_id, $measure_ment, $pickup_post_code)
     {
-
+        log::info('works inside shippign charges function');
         $cart_ship_response = CartShiprocketResponse::where('order_id', $order_id)->first();
         // dd( $cart_ship_response->deliveryAddress );
 
@@ -237,6 +237,7 @@ log::info('shipping amount: '. $shipping_amount);
             "couriers_type" => 0,
             "only_local" => 0
         );
+        log::info($charge_array);
         //
         $token =  $this->getToken();
         // $response =  Shiprocket::courier($token)->checkServiceability($charge_array);
@@ -265,13 +266,13 @@ log::info('shipping amount: '. $shipping_amount);
         // $response = curl_exec($curl);
         // curl_close($curl);
         $response = Shiprocket::courier($token)->checkServiceability($charge_array);
+        Log::info($response);
 
         $updata = array(
             'shipping_charge_request_data' => json_encode($charge_array),
             'shipping_charge_response_data' => $response
         );
         CartShiprocketResponse::where('order_id', $order_id)->update($updata);
-        Log::info($response);
         // $response = json_decode($response);
         $amount = null;
         if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
