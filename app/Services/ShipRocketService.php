@@ -42,7 +42,7 @@ class ShipRocketService
         try{
             $token =  $this->getToken();
             $response =  Shiprocket::order($token)->create($params);
-            dd($response);
+            // dd($response);
             // $response = json_decode($response);
             if ($response->status_code == 1) {
 
@@ -203,7 +203,7 @@ class ShipRocketService
 
                             $createResponse = $this->createOrder($params);
                             // $createResponse = json_decode($createResponse);
-
+log::info('shipping amount: '. $shipping_amount);
                             if (isset($createResponse) && !empty($createResponse->order_id)) {
                                 $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse->order_id, $measure_ment, $pickup_post_code);
                             }
