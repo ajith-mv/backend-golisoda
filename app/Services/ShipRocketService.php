@@ -282,8 +282,8 @@ log::info('shipping amount: '. $shipping_amount);
             $recommended_id = $response['data']['recommended_by']['id'];
             log::info("recommended id is".$recommended_id);
             foreach ($response['data']['available_courier_companies'] as $company) {
-                if ($company['id'] == $recommended_id) {
-                    $amount = $company['freight_charge'];
+                if (isset($response['data']['available_courier_companies'][$recommended_id - 1])) {
+                    $amount = $response['data']['available_courier_companies'][$recommended_id - 1]['freight_charge'];
                     log::info("freight charge is: ".$amount);
                     break;
                 }
