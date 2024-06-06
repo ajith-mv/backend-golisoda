@@ -225,7 +225,7 @@ log::info('shipping amount: '. $shipping_amount);
 
         $charge_array = array(
             "pickup_postcode" => $pickup_post_code,
-            "delivery_postcode" => $cart_ship_response->deliveryAddress->post_code,
+            "delivery_postcode" => $delivery_post_code,
 
             "order_id" => $order_id,
             "cod" =>  false,
