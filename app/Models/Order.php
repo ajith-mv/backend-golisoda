@@ -102,4 +102,9 @@ class Order extends Model
     public function Variation(){
         return $this->hasMany(OrderProductVariationOption::class, 'order_id', 'id');
     }
+
+    public function brandOrders()
+    {
+        return $this->hasMany(BrandOrder::class);
+    }
 }

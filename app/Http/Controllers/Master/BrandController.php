@@ -120,6 +120,7 @@ class BrandController extends Controller
             $ins['notes']               = $request->notes;
             $ins['order_by']            = $request->order_by ?? 0;
             $ins['is_free_shipping']    = $request->is_free_shipping;
+            $ins['minimum_shipping_amount']    = $request->minimum_shipping_amount;
             $ins['commission_percentage']    = $request->commission_percentage;
             $ins['added_by']            = Auth::id();
             $ins['slug']                = Str::slug($request->brand_name);

@@ -2,6 +2,7 @@
 
 namespace App\Models\Master;
 
+use App\Models\BrandOrder;
 use App\Models\Product\Product;
 use App\Models\StoreLocator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,7 +25,8 @@ class Brands extends Model
         'status',
         'is_top_brand',
         'is_free_shipping',
-        'commission_percentage'
+        'commission_percentage',
+        'minimum_shipping_amount'
     ];
 
     public function products() {
@@ -52,5 +54,10 @@ class Brands extends Model
 
     public function vendorLocation(){
         return $this->hasMany(BrandVendorLocation::class,'brand_id','id');
+    }
+
+    public function brandOrders()
+    {
+        return $this->hasMany(BrandOrder::class);
     }
 }

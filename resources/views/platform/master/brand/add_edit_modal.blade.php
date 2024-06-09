@@ -110,7 +110,15 @@
 
 
                         </div>
-
+                        <div class="row mb-7">
+                            <div class="col-md-6">
+                                <label class="fw-bold fs-6 mb-2">Minimum Shipping amount</label>
+                                <input type="text" name="minimum_shipping_amount" id="minimum_shipping_amount"
+                                    class="form-control form-control-solid mb-3 mb-lg-0"
+                                    value="{{ $info->minimum_shipping_amount ?? '' }}">
+                            </div>
+                           
+                        </div>
                         <div class="row mb-7">
                             <div class="col-md-6">
                                 <label class="fw-bold fs-6 mb-2">Notes</label>

@@ -234,6 +234,17 @@
                                 </a>
                             </div>
                         @endif
+                        @if (access()->hasAccess(['manifest-generation']))
+                            <div class="menu-item">
+                                <a class="menu-link @if (request()->routeIs(['manifest-generation'])) active @endif"
+                                    href="{{ route('manifest-generation') }}">
+                                    <span class="menu-bullet">
+                                        <span class="bullet bullet-dot"></span>
+                                    </span>
+                                    <span class="menu-title"> Manifest Generation </span>
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endif

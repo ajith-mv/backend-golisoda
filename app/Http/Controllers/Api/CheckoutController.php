@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\OrderMail;
+use App\Models\BrandOrder;
 use App\Models\Cart;
 use App\Models\GlobalSettings;
+use App\Models\Master\Brands;
 use App\Models\Master\EmailTemplate;
 use App\Models\Master\OrderStatus;
 use App\Models\Offers\Coupons;
@@ -55,7 +57,7 @@ class CheckoutController extends Controller
         $customer_id            = $request->customer_id;
         $order_status           = OrderStatus::where('status', 'published')->where('order', 1)->first();
         $shipping_method        = $request->shipping_method;
-
+        $shipment_amount = $request->shipment_amount;
         $checkout_data          = $request->cart_total;
         $cart_items             = $request->cart_items;
         $shipping_address       = $shipping_address;
@@ -122,7 +124,7 @@ class CheckoutController extends Controller
         $order_ins['amount'] = $pay_amount;
         $order_ins['tax_amount'] = $checkout_data['tax_total'] ? str_replace(',', '', $checkout_data['tax_total']) : 0;
         $order_ins['tax_percentage'] = $checkout_data['tax_percentage'] ?? 0;
-        $order_ins['shipping_amount'] = $checkout_data['shipping_charge'] ?? 0;
+        $order_ins['shipping_amount'] = $shipment_amount;
         $order_ins['coupon_amount'] = $coupon_amount ?? 0;
         $order_ins['coupon_code'] = $coupon_code ?? '';
         $order_ins['coupon_details'] = $coupon_details ?? '';
@@ -196,11 +198,22 @@ class CheckoutController extends Controller
 
                 $order_product_info = OrderProduct::create($items_ins);
 
+                $brandIds[] = $product_info->brand_id;
+                $ins['order_id'] = $order_info->id;
+                $ins['brand_id'] = $product_info->brand_id;
+                $ins['order_product_id'] = $order_product_info->id;
+                $ins['qty'] = $order_product_info->quantity;
+                $ins['price'] = $order_product_info->price;
+                $ins['sub_total'] = $order_product_info->sub_total;
+                $brand_data = Brands::find($ins['brand_id']);
+                $ins['commission_percentage'] = $brand_data->commission_percentage;
+                $brand_order = BrandOrder::create($ins);
+
                 //insert variations
                 if (isset($item['chosen_variation_option_ids']) && !empty($item['chosen_variation_option_ids'])) {
                     foreach ($item['chosen_variation_option_ids'] as $variation_option_id) {
                         $product_variation_option = ProductVariationOption::find($variation_option_id);
-                        if(isset($product_variation_option) && (!empty($product_variation_option))){
+                        if (isset($product_variation_option) && (!empty($product_variation_option))) {
                             $cart_product_variation_ins['order_id'] = $order_id;
                             $cart_product_variation_ins['order_product_id'] = $order_product_info->id;
                             $cart_product_variation_ins['variation_id'] = $product_variation_option->variation_id;
@@ -360,7 +373,7 @@ class CheckoutController extends Controller
             } catch (\Throwable $th) {
                 Log::info($th->getMessage());
             }
-
+            $this->sendBrandVendorEmail($brandIds); //email to brand vendor
             #send sms for notification
             $sms_params = array(
                 'company_name' => env('APP_NAME'),
@@ -392,6 +405,7 @@ class CheckoutController extends Controller
         $shipping_id = $request->shipping_method['address_id'] ?? $request->customer_id;
         $billing_address = CustomerAddress::find($billing_id);
         $shipping_address = CustomerAddress::find($shipping_id);
+        $shipment_amount = $request->shipment_amount;
         $customer_id            = $request->customer_id;
         $order_status           = OrderStatus::where('status', 'published')->where('order', 1)->first();
         $shipping_method        = $request->shipping_method;
@@ -462,7 +476,7 @@ class CheckoutController extends Controller
         $order_ins['amount'] = $pay_amount;
         $order_ins['tax_amount'] = $checkout_data['tax_total'] ? str_replace(',', '', $checkout_data['tax_total']) : 0;
         $order_ins['tax_percentage'] = $checkout_data['tax_percentage'] ?? 0;
-        $order_ins['shipping_amount'] = $checkout_data['shipping_charge'] ?? 0;
+        $order_ins['shipping_amount'] = $shipment_amount;
         $order_ins['coupon_amount'] = $coupon_amount ?? 0;
         $order_ins['coupon_code'] = $coupon_code ?? '';
         $order_ins['coupon_details'] = $coupon_details ?? '';
@@ -531,6 +545,17 @@ class CheckoutController extends Controller
                 $items_ins['sub_total'] = $item['sub_total'];
 
                 $order_product_info = OrderProduct::create($items_ins);
+                $brandIds[] = $product_info->brand_id;
+                $ins['order_id'] = $order_info->id;
+                $ins['brand_id'] = $product_info->brand_id;
+                $ins['order_product_id'] = $order_product_info->id;
+                $ins['qty'] = $order_product_info->quantity;
+                $ins['price'] = $order_product_info->price;
+                $ins['sub_total'] = $order_product_info->sub_total;
+                $brand_data = Brands::find($ins['brand_id']);
+                $ins['commission_percentage'] = $brand_data->commission_percentage;
+                $brand_order = BrandOrder::create($ins);
+
                 if (isset($product_info->warranty_id) && !empty($product_info->warranty_id)) {
                     $warranty_info = Warranty::find($product_info->warranty_id);
                     if ($warranty_info) {
@@ -705,6 +730,7 @@ class CheckoutController extends Controller
                             $product_info = Product::find($product->product_id);
                             $pquantity = $product_info->quantity - $product->quantity;
                             $product_info->quantity = $pquantity;
+                            $brandIds[] = $product_info->brand_id;
                             if ($pquantity == 0) {
                                 $product_info->stock_status = 'out_of_stock';
                                 $product_info->status = 'unpublished';
@@ -780,7 +806,7 @@ class CheckoutController extends Controller
                     } catch (\Throwable $th) {
                         Log::info($th->getMessage());
                     }
-
+                    $this->sendBrandVendorEmail($brandIds); //email to brand vendor
                     #send sms for notification
                     $sms_params = array(
                         'company_name' => env('APP_NAME'),
@@ -861,7 +887,7 @@ class CheckoutController extends Controller
 
         return  array('success' => $success, 'message' => $error_message);
     }
-    
+
     /**
      * Method generateInvoice
      *
@@ -881,6 +907,100 @@ class CheckoutController extends Controller
             return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Invoice generated successfully', 'status' => 'success', 'success' => []), 200);
         }
         return response()->json(array('error' => 1, 'status_code' => 200, 'message' => 'Something went wrong', 'status' => 'failure', 'success' => []), 200);
+    }
 
+    /**
+     * Method sendBrandVendorEmail
+     *
+     * @param $brandIds array
+     *
+     * @return void
+     */
+    public function sendBrandVendorEmail($brandIds)
+    {
+        $uniqueBrandIds =  array_unique($brandIds);
+        $globalInfo = GlobalSettings::first();
+        if (!empty($uniqueBrandIds)) {
+            foreach ($uniqueBrandIds as $singleBrandId) {
+                $brandOrderData = BrandOrder::join('orders', 'orders.id', '=', 'brand_orders.order_id')
+                    ->where('brand_id', $singleBrandId)
+                    ->get();
+                if ($brandOrderData) {
+                    $order_info = $brandOrderData[0]->order;
+                    $variations = $this->getVariations($order_info);
+                    $pdf = PDF::loadView('platform.invoice.index', compact('order_info', 'globalInfo', 'variations'));
+                    Storage::put('public/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf', $pdf->output());
+                    $email_slug = 'new-order';
+                    $to_email_address = 'dalbinshimy@gmail.com';
+                    $globalInfo = GlobalSettings::first();
+                    $filePath = 'storage/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf';
+                    $extract = array(
+                        'name' => $order_info->billing_name,
+                        'regards' => $globalInfo->site_name,
+                        'company_website' => '',
+                        'company_mobile_no' => $globalInfo->site_mobile_no,
+                        'company_address' => $globalInfo->address,
+                        'dynamic_content' => '',
+                        'order_id' => $order_info->order_no
+                    );
+
+                    $this->sendEmailNotificationByArray($email_slug, $extract, $to_email_address, $filePath);
+                }
+            }
+        }
+    }
+
+    /**
+     * Method sendEmailNotificationByArray
+     *
+     * @param $email_slug string
+     * @param $extract array
+     * @param $to_email_address string
+     * @param $filePath string
+     *
+     * @return void
+     */
+    public function sendEmailNotificationByArray($email_slug, $extract, $to_email_address, $filePath)
+    {
+        $emailTemplate = EmailTemplate::select('email_templates.*')
+            ->join('sub_categories', 'sub_categories.id', '=', 'email_templates.type_id')
+            ->where('sub_categories.slug', $email_slug)->first();
+
+        $templateMessage = $emailTemplate->message;
+        $templateMessage = str_replace("{", "", addslashes($templateMessage));
+        $templateMessage = str_replace("}", "", $templateMessage);
+        extract($extract);
+        eval("\$templateMessage = \"$templateMessage\";");
+
+        // $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
+        $send_mail = new OrderMail($templateMessage, $title, $filePath);
+        // return $send_mail->render();
+        try {
+            $bccEmails = explode(',', env('ORDER_EMAILS'));
+            Mail::to($to_email_address)->bcc($bccEmails)->send($send_mail);
+        } catch (\Throwable $th) {
+            Log::info($th->getMessage());
+        }
+    }
+
+    /**
+     * Method getVariations
+     *
+     * @param $order_info object
+     *
+     * @return array
+     */
+    public function getVariations($order_info)
+    {
+        $variation_id = [];
+        $variations = [];
+        if (isset($order_info->Variation) && !empty($order_info->Variation)) {
+            $data = $order_info->Variation;
+            foreach ($data as $value) {
+                $variation_id[] = $value->variation_id;
+            }
+            $variations = Variation::whereIn('id', $variation_id)->get();
+        }
+        return $variations;
     }
 }

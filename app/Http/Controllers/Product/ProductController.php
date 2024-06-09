@@ -480,14 +480,16 @@ class ProductController extends Controller
            
                 $product_option_ins['product_id']                  = $product_id;
                 for ($i = 0; $i < count($kt_docs_repeater_nested_outer); $i++) {
-                    $product_option_ins['variation_id'] = $kt_docs_repeater_nested_outer[$i]['variation_id'];
-                    $kt_docs_repeater_nested_inner = $kt_docs_repeater_nested_outer[$i]['kt_docs_repeater_nested_inner'];
-                    for ($j = 0; $j < count($kt_docs_repeater_nested_inner); $j++) {
-                        $product_option_ins['value'] = $kt_docs_repeater_nested_inner[$j]['variation_value'];
-                        $product_option_ins['amount'] = $kt_docs_repeater_nested_inner[$j]['amount'];
-                        $product_option_ins['discount_amount'] = $kt_docs_repeater_nested_inner[$j]['discount_amount'];
-                        $product_option_ins['is_default'] = $kt_docs_repeater_nested_inner[$j]['is_default'][0] ?? 0;
-                        ProductVariationOption::create($product_option_ins);
+                    if(!empty($kt_docs_repeater_nested_outer[$i]['variation_id'])){
+                        $product_option_ins['variation_id'] = $kt_docs_repeater_nested_outer[$i]['variation_id'];
+                        $kt_docs_repeater_nested_inner = $kt_docs_repeater_nested_outer[$i]['kt_docs_repeater_nested_inner'];
+                        for ($j = 0; $j < count($kt_docs_repeater_nested_inner); $j++) {
+                            $product_option_ins['value'] = $kt_docs_repeater_nested_inner[$j]['variation_value'];
+                            $product_option_ins['amount'] = $kt_docs_repeater_nested_inner[$j]['amount'];
+                            $product_option_ins['discount_amount'] = $kt_docs_repeater_nested_inner[$j]['discount_amount'];
+                            $product_option_ins['is_default'] = $kt_docs_repeater_nested_inner[$j]['is_default'][0] ?? 0;
+                            ProductVariationOption::create($product_option_ins);
+                        }
                     }
                 }
             }
