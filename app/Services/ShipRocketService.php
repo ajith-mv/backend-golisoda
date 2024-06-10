@@ -193,7 +193,7 @@ class ShipRocketService
                             }
                         }
                     } else {
-                        dd($uniqueBrandIds[0]);
+                        dd($createOrderData);
                         $brand_data = Brands::find($uniqueBrandIds[0]);
                         if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                             $shipping_amount = 0;
