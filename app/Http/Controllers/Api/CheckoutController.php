@@ -806,7 +806,7 @@ class CheckoutController extends Controller
                     } catch (\Throwable $th) {
                         Log::info($th->getMessage());
                     }
-                    $this->sendBrandVendorEmail($brandIds); //email to brand vendor
+                    $this->sendBrandVendorEmail($brandIds, $order_info->id); //email to brand vendor
                     #send sms for notification
                     $sms_params = array(
                         'company_name' => env('APP_NAME'),
@@ -916,14 +916,14 @@ class CheckoutController extends Controller
      *
      * @return void
      */
-    public function sendBrandVendorEmail($brandIds)
+    public function sendBrandVendorEmail($brandIds, $order_id)
     {
         $uniqueBrandIds =  array_unique($brandIds);
         $globalInfo = GlobalSettings::first();
         if (!empty($uniqueBrandIds)) {
             foreach ($uniqueBrandIds as $singleBrandId) {
                 $brandOrderData = BrandOrder::join('orders', 'orders.id', '=', 'brand_orders.order_id')
-                    ->where('brand_id', $singleBrandId)
+                    ->where([['brand_id', $singleBrandId],['order_id', $order_id]])
                     ->get();
                 if ($brandOrderData) {
                     $order_info = $brandOrderData[0]->order;
