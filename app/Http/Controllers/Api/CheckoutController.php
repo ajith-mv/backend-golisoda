@@ -982,6 +982,7 @@ class CheckoutController extends Controller
         // return $send_mail->render();
         try {
             $bccEmails = explode(',', env('ORDER_EMAILS'));
+            dd($send_mail);
             Mail::to($to_email_address)->bcc($bccEmails)->send($send_mail);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
