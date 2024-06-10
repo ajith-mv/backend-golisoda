@@ -188,7 +188,7 @@ class ShipRocketService
                                 $params = $this->getRequestForCreateOrderApi($createOrderData[$brandId]['citems'], $createOrderData[$brandId]['cartShipAddress'], $createOrderData[$brandId]['customer'], $createOrderData[$brandId]['cartItemsarr'], $createOrderData[$brandId]['measure'], $createOrderData[$brandId]['cartTotal'], $createOrderData[$brandId]['total_weight']);
                                 $createResponse = $this->createOrder($params);
                                 if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                                    $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measure_ment'], $pickup_post_code, $delivery_post_code);
+                                    $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
                                 }
                             }
                         }
@@ -207,7 +207,7 @@ class ShipRocketService
                                 }
                                 $createResponse = $this->createOrder($params);
                                     if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                                        $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $createOrderData[$uniqueBrandIds[0]]['measure_ment'], $pickup_post_code, $delivery_post_code);
+                                        $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $createOrderData[$uniqueBrandIds[0]]['measurement'], $pickup_post_code, $delivery_post_code);
                                     }
                             } 
                         }
