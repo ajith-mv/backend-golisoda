@@ -366,6 +366,7 @@ class CheckoutController extends Controller
 
             $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
             $send_mail = new OrderMail($templateMessage, $title, $filePath);
+            dd($send_mail);
             // return $send_mail->render();
             try {
                 $bccEmails = explode(',', env('ORDER_EMAILS'));
