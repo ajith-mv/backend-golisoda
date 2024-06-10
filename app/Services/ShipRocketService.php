@@ -185,8 +185,6 @@ class ShipRocketService
                                 $shipping_amount = 0;
                             } else {
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
-dd($createOrderData[$brandId]);
-
                                 $params = $this->getRequestForCreateOrderApi($createOrderData[$brandId]['citems'], $createOrderData[$brandId]['cartShipAddress'], $createOrderData[$brandId]['customer'], $createOrderData[$brandId]['cartItemsarr'], $createOrderData[$brandId]['measure'], $createOrderData[$brandId]['cartTotal'], $createOrderData[$brandId]['total_weight']);
                                 $createResponse = $this->createOrder($params);
                                 if (isset($createResponse) && !empty($createResponse['order_id'])) {
@@ -199,6 +197,7 @@ dd($createOrderData[$brandId]);
                         if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                             $shipping_amount = 0;
                         } else {
+                            dd($createOrderData[$uniqueBrandIds[0]]);
                             $pickup_post_code = $this->getVendorPostCode($uniqueBrandIds[0]);
                             $params = $this->getRequestForCreateOrderApi($createOrderData[$uniqueBrandIds[0]]['citems'], $createOrderData[$uniqueBrandIds[0]]['cartShipAddress'], $createOrderData[$uniqueBrandIds[0]]['customer'], $createOrderData[$uniqueBrandIds[0]]['cartItemsarr'], $createOrderData[$uniqueBrandIds[0]]['measure'], $createOrderData[$uniqueBrandIds[0]]['cartTotal'], $createOrderData[$uniqueBrandIds[0]]['total_weight']);
                             $createResponse = $this->createOrder($params);
