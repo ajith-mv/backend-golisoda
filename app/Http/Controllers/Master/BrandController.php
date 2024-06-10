@@ -121,7 +121,8 @@ class BrandController extends Controller
             $ins['order_by']            = $request->order_by ?? 0;
             $ins['is_free_shipping']    = $request->is_free_shipping;
             $ins['minimum_shipping_amount']    = $request->minimum_shipping_amount;
-            $ins['commission_percentage']    = $request->commission_percentage;
+            $ins['commission_type']    = $request->commission_type;
+            $ins['commission_value']    = $request->commission_value;
             $ins['added_by']            = Auth::id();
             $ins['slug']                = Str::slug($request->brand_name);
             if ($request->status == "1") {
@@ -144,19 +145,21 @@ class BrandController extends Controller
 
                 $brand_option_ins['brand_id']                  = $brand_id;
                 for ($i = 0; $i < count($kt_docs_repeater_nested_outer); $i++) {
+                    if (!empty($kt_docs_repeater_nested_outer[$i]['branch_name'])) {
 
-                    $brand_option_ins['branch_name'] = $kt_docs_repeater_nested_outer[$i]['branch_name'];
-                    $brand_option_ins['address_line1'] = $kt_docs_repeater_nested_outer[$i]['address_line_1'];
-                    $brand_option_ins['address_line2'] = $kt_docs_repeater_nested_outer[$i]['address_line_2'];
-                    $brand_option_ins['city'] = $kt_docs_repeater_nested_outer[$i]['city'];
-                    $brand_option_ins['state'] = $kt_docs_repeater_nested_outer[$i]['state'];
-                    $brand_option_ins['pincode'] = $kt_docs_repeater_nested_outer[$i]['pincode'];
-                    $brand_option_ins['email_id'] = $kt_docs_repeater_nested_outer[$i]['email_id'];
-                    $brand_option_ins['mobile_no'] = $kt_docs_repeater_nested_outer[$i]['mobile_number'];
-                    $brand_option_ins['contact_person'] = $kt_docs_repeater_nested_outer[$i]['contact_person'];
-                    $brand_option_ins['contact_number'] = $kt_docs_repeater_nested_outer[$i]['contact_number'];
-                    $brand_option_ins['is_default'] = $kt_docs_repeater_nested_outer[$i]['is_default'][0] ?? 0;
-                    BrandVendorLocation::create($brand_option_ins);
+                        $brand_option_ins['branch_name'] = $kt_docs_repeater_nested_outer[$i]['branch_name'];
+                        $brand_option_ins['address_line1'] = $kt_docs_repeater_nested_outer[$i]['address_line_1'];
+                        $brand_option_ins['address_line2'] = $kt_docs_repeater_nested_outer[$i]['address_line_2'];
+                        $brand_option_ins['city'] = $kt_docs_repeater_nested_outer[$i]['city'];
+                        $brand_option_ins['state'] = $kt_docs_repeater_nested_outer[$i]['state'];
+                        $brand_option_ins['pincode'] = $kt_docs_repeater_nested_outer[$i]['pincode'];
+                        $brand_option_ins['email_id'] = $kt_docs_repeater_nested_outer[$i]['email_id'];
+                        $brand_option_ins['mobile_no'] = $kt_docs_repeater_nested_outer[$i]['mobile_number'];
+                        $brand_option_ins['contact_person'] = $kt_docs_repeater_nested_outer[$i]['contact_person'];
+                        $brand_option_ins['contact_number'] = $kt_docs_repeater_nested_outer[$i]['contact_number'];
+                        $brand_option_ins['is_default'] = $kt_docs_repeater_nested_outer[$i]['is_default'][0] ?? 0;
+                        BrandVendorLocation::create($brand_option_ins);
+                    }
                 }
             }
 

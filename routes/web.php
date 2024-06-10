@@ -94,6 +94,7 @@ Route::middleware(['auth'])->group(function(){
         'homepage-setting-field'    => App\Http\Controllers\HomePageSetting\HomepageSettingFieldController::class,
         'homepage-setting'    => App\Http\Controllers\HomePageSetting\HomepageSettingController::class,
         'warranty'    => App\Http\Controllers\WarrantyController::class,
+        'manifest-generation' => App\Http\Controllers\Master\ManifestGenerationController::class,
     );
    
     foreach ($routeArray as $key => $value) {

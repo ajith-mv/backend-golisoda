@@ -25,7 +25,8 @@ class Brands extends Model
         'status',
         'is_top_brand',
         'is_free_shipping',
-        'commission_percentage',
+        'commission_type',
+        'commission_value',
         'minimum_shipping_amount'
     ];
 

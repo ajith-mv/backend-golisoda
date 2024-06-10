@@ -42,11 +42,12 @@
                                     value="{{ $info->brand_name ?? '' }}" />
                             </div>
                             <div class="col-md-6">
-                                <label class="required fw-bold fs-6 mb-2">Commission percentage</label>
-                                <input type="text" name="commission_percentage"
-                                    class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Commission Percentage"
-                                    value="{{ $info->commission_percentage ?? '' }}" />
+                                <label class="fw-bold fs-6 mb-2">Minimum Shipping amount</label>
+                                <input type="text" name="minimum_shipping_amount" id="minimum_shipping_amount"
+                                    class="form-control form-control-solid mb-3 mb-lg-0"
+                                    value="{{ $info->minimum_shipping_amount ?? '' }}">
                             </div>
+                            
                         </div>
                         <div class="row mb-7">
                             <div class="col-md-6">
@@ -112,11 +113,28 @@
                         </div>
                         <div class="row mb-7">
                             <div class="col-md-6">
-                                <label class="fw-bold fs-6 mb-2">Minimum Shipping amount</label>
-                                <input type="text" name="minimum_shipping_amount" id="minimum_shipping_amount"
-                                    class="form-control form-control-solid mb-3 mb-lg-0"
-                                    value="{{ $info->minimum_shipping_amount ?? '' }}">
+                                <label class="required fw-bold fs-6 mb-2">Commission type</label>
+
+                                <div class="form-check form-check-custom form-check-solid">
+                                    <input name="commission_type" class="form-check-input" type="radio" value="fixed" id="fixed"/>
+                                    <label class="form-check-label" for="flexRadioDefault">
+                                        Fixed
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-custom form-check-solid">
+                                    <input name="commission_type" class="form-check-input" type="radio" value="percentage" id="percentage"/>
+                                    <label class="form-check-label" for="flexRadioDefault">
+                                        Percentage
+                                    </label>
+                                </div>
                             </div>
+                            <div class="col-md-6">
+                                <label class="required fw-bold fs-6 mb-2">Commission value</label>
+                                <input type="text" name="commission_value"
+                                    class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Commission Value"
+                                    value="{{ $info->commission_value ?? '' }}" />
+                            </div>
+                            
                            
                         </div>
                         <div class="row mb-7">
