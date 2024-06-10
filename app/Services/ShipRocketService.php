@@ -55,6 +55,8 @@ class ShipRocketService
                 $ins_params['order_id'] = $response['order_id'];
 
                 CartShiprocketResponse::create($ins_params);
+            }else{
+                log::debug($response);
             }
 
             return $response;
