@@ -205,8 +205,9 @@ class CheckoutController extends Controller
                 $ins['qty'] = $order_product_info->quantity;
                 $ins['price'] = $order_product_info->price;
                 $ins['sub_total'] = $order_product_info->sub_total;
+                $ins['order_status_id'] = $order_status->id;
                 $brand_data = Brands::find($ins['brand_id']);
-                $ins['commission_percentage'] = $brand_data->commission_percentage;
+                $ins['commission_value'] = $brand_data->commission_value;
                 $brand_order = BrandOrder::create($ins);
 
                 //insert variations
@@ -366,7 +367,6 @@ class CheckoutController extends Controller
 
             $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
             $send_mail = new OrderMail($templateMessage, $title, $filePath);
-            dd($send_mail);
             // return $send_mail->render();
             try {
                 $bccEmails = explode(',', env('ORDER_EMAILS'));
@@ -553,8 +553,9 @@ class CheckoutController extends Controller
                 $ins['qty'] = $order_product_info->quantity;
                 $ins['price'] = $order_product_info->price;
                 $ins['sub_total'] = $order_product_info->sub_total;
+                $ins['order_status_id'] = $order_status->id;
                 $brand_data = Brands::find($ins['brand_id']);
-                $ins['commission_percentage'] = $brand_data->commission_percentage;
+                $ins['commission_value'] = $brand_data->commission_value;
                 $brand_order = BrandOrder::create($ins);
 
                 if (isset($product_info->warranty_id) && !empty($product_info->warranty_id)) {
@@ -717,6 +718,14 @@ class CheckoutController extends Controller
                     $order_info->save();
 
                     $order_items = OrderProduct::where('order_id', $order_info->id)->get();
+
+                    $brand_orders = BrandOrder::where('order_id', $order_info->id)->get();
+                    if (isset($brand_orders) && !empty($brand_orders)) {
+                        foreach ($brand_orders as $brand_order) {
+                            $brand_order->order_status_id =  $order_status->id;
+                            $brand_order->save();
+                        }
+                    }
 
                     if (!is_null($order_info->coupon_code)) {
                         $AppliedCoupon =  Coupons::where('coupon_code', $order_info->coupon_code)->first();
@@ -983,7 +992,6 @@ class CheckoutController extends Controller
         // return $send_mail->render();
         try {
             $bccEmails = explode(',', env('ORDER_EMAILS'));
-            dd($send_mail);
             Mail::to($to_email_address)->bcc($bccEmails)->send($send_mail);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
