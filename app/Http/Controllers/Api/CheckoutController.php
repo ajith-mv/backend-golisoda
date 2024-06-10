@@ -373,7 +373,7 @@ class CheckoutController extends Controller
             } catch (\Throwable $th) {
                 Log::info($th->getMessage());
             }
-            $this->sendBrandVendorEmail($brandIds); //email to brand vendor
+            $this->sendBrandVendorEmail($brandIds, $order_info->id); //email to brand vendor
             #send sms for notification
             $sms_params = array(
                 'company_name' => env('APP_NAME'),
