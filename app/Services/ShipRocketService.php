@@ -210,6 +210,7 @@ class ShipRocketService
                                         $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $createOrderData[$uniqueBrandIds[0]]['measure_ment'], $pickup_post_code, $delivery_post_code);
                                     }
                             } 
+                        }
                     }
                 }
             }
