@@ -194,6 +194,8 @@ class ShipRocketService
                         }
                     } else {
                         $cart_total = 0;
+                        $orderItems = [];
+                        $measure_ment = [];
                         $brand_data = Brands::find($uniqueBrandIds[0]);
                         if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                             $shipping_amount = 0;
@@ -203,11 +205,12 @@ class ShipRocketService
                                 foreach ($createOrderData[$uniqueBrandIds[0]] as $data) {
                                     $orderItems[] = $data['cartItemsarr'];
                                     $cart_total += $data['cartTotal'];
+                                    $measure_ment[] = $data['measurement'];
                                     $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $data['cartItemsarr'], $data['measure'], $data['cartTotal'], $data['total_weight']);
                                 }
                                 $createResponse = $this->createOrder($params);
                                     if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                                        $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $createOrderData[$uniqueBrandIds[0]]['measurement'], $pickup_post_code, $delivery_post_code);
+                                        $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
                                     }
                             } 
                         }
