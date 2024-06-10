@@ -209,7 +209,7 @@ class ShipRocketService
                                     if (isset($createResponse) && !empty($createResponse['order_id'])) {
                                         $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $createOrderData[$uniqueBrandIds[0]]['measure_ment'], $pickup_post_code, $delivery_post_code);
                                     }
-                            }
+                            } 
                     }
                 }
             }
