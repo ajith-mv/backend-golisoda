@@ -212,6 +212,7 @@ class ShipRocketService
                                     $measure_ment = $data['measurement'];
                                     $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
                                 }
+                                log::info($orderItems);
                                 $createResponse = $this->createOrder($params);
                                     if (isset($createResponse) && !empty($createResponse['order_id'])) {
                                         $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
