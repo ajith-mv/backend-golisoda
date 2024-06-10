@@ -205,7 +205,7 @@ class ShipRocketService
                                     $orderItems[] = $data['cartItemsarr'];
                                     $cart_total += $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
-                                    $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $data['cartItemsarr'], $data['measure'], $data['cartTotal'], $data['total_weight']);
+                                    $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
                                 }
                                 $createResponse = $this->createOrder($params);
                                     if (isset($createResponse) && !empty($createResponse['order_id'])) {
