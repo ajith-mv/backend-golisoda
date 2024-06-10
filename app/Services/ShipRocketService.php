@@ -199,7 +199,6 @@ class ShipRocketService
                         log::info('same brand ids are in cart');
 
                         $cart_total = 0;
-                        $orderItems = [];
                         $brand_data = Brands::find($uniqueBrandIds[0]);
                         if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                             $shipping_amount = 0;
@@ -207,7 +206,7 @@ class ShipRocketService
                             $pickup_post_code = $this->getVendorPostCode($uniqueBrandIds[0]);
                             if (isset($createOrderData[$uniqueBrandIds[0]])) {
                                 foreach ($createOrderData[$uniqueBrandIds[0]] as $data) {
-                                    $orderItems[] = $data['cartItemsarr'];
+                                    $orderItems = $data['cartItemsarr'];
                                     $cart_total += $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
                                     $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
@@ -279,6 +278,7 @@ class ShipRocketService
         $vendor_post_code = '600002';
 
         $vendor_location_data = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])->first();
+        log::debug($vendor_location_data);
         if (isset($vendor_location_data) && (!empty($vendor_location_data))) {
             $vendor_post_code = $vendor_location_data->pincode;
         }
