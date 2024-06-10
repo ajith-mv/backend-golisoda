@@ -972,6 +972,11 @@ class CheckoutController extends Controller
         extract($extract);
         eval("\$templateMessage = \"$templateMessage\";");
 
+        $title = $emailTemplate->title;
+            $title = str_replace("{", "", addslashes($title));
+            $title = str_replace("}", "", $title);
+            eval("\$title = \"$title\";");
+
         // $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
         $send_mail = new OrderMail($templateMessage, $title, $filePath);
         // return $send_mail->render();
