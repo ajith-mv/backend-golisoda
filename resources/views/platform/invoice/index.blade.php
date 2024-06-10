@@ -197,6 +197,17 @@
                 $i = 1;
             @endphp
             @foreach ($order_info->orderItems as $item)
+            @php
+            $id=$item->id;
+            $OrderProductVariationOption =  App\Models\OrderProductVariationOption::where('order_product_id', $id)->get();
+            $variation_id = [];
+            $variation_value = [];
+            foreach ($OrderProductVariationOption as $value) {
+            $variation_id[] =$value->variation_id;
+            $variation_value[] =$value->value;
+            }
+            $variations = App\Models\Master\Variation::whereIn('id', $variation_id)->get();
+            @endphp
                 <tr>
                     <td>{{ $i }}</td>
                     <td>
@@ -204,20 +215,16 @@
                     </td>
                     <td>
                         <div>
-
                             {{ $item->product_name }}<br>
                             @php
-                                // $data = $order_info->Variation;
+                                $data = $variation_value;  
                             @endphp
-                            @if(isset($item->chosenVariation) && !empty($item->chosenVariation))
-                                @foreach($item->chosenVariation as $value)
-                                @php
-                                    $variation = App\Models\Master\Variation::find($value['variation_id']);
-                                @endphp
-                                <b>{{$variation->title}}</b> : {{ $value['value']}} <br>
-                                @endforeach
-                            @endif
-                           
+                            @foreach($variations as $key => $value)
+                         {{-- @php
+                             
+                         @endphp --}}
+                            {{ $value->title}} : {{$data[$key]}}<br>
+                            @endforeach
                         </div>
                         <div>
                             {{-- Warranty-15-02-2024 --}}
