@@ -181,6 +181,7 @@ class ShipRocketService
                     $uniqueBrandIds = array_unique($brandIds);
 
                     if (count($uniqueBrandIds) > 1) {
+                        log::info('different brand ids are in cart');
                         foreach ($uniqueBrandIds as $brandId) {
                             $brand_data = Brands::find($brandId);
                             if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
@@ -195,6 +196,8 @@ class ShipRocketService
                             }
                         }
                     } else {
+                        log::info('same brand ids are in cart');
+
                         $cart_total = 0;
                         $orderItems = [];
                         $brand_data = Brands::find($uniqueBrandIds[0]);
@@ -278,7 +281,7 @@ class ShipRocketService
         if (isset($vendor_location_data) && (!empty($vendor_location_data))) {
             $vendor_post_code = $vendor_location_data->pincode;
         }
-
+log::info('vendor post code'. $vendor_post_code);
         return $vendor_post_code;
     }
 
