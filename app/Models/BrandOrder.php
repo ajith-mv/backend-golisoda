@@ -18,6 +18,7 @@ class BrandOrder extends Model
         'price',
         'sub_total',
         'commission_percentage',
+        'order_status_id'
     ];
 
     public function order()
