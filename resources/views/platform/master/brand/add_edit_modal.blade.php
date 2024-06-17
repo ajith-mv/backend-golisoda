@@ -38,7 +38,7 @@
                             <div class="col-md-6">
                                 <label class="required fw-bold fs-6 mb-2">Brand Name</label>
                                 <input type="text" name="brand_name"
-                                    class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Brand Name"
+                                    class="form-control form-control-solid mb-3 mb-lg-0 required" placeholder="Brand Name"
                                     value="{{ $info->brand_name ?? '' }}" />
                             </div>
                             <div class="col-md-6">
@@ -116,13 +116,13 @@
                                 <label class="required fw-bold fs-6 mb-2">Commission type</label>
 
                                 <div class="form-check form-check-custom form-check-solid">
-                                    <input name="commission_type" class="form-check-input" type="radio" value="fixed" id="fixed"/>
+                                    <input name="commission_type" class="form-check-input required" {{ $info->commission_type == 'fixed' ? 'checked' : '' }} type="radio" value="fixed" id="fixed"/>
                                     <label class="form-check-label" for="flexRadioDefault">
                                         Fixed
                                     </label>
                                 </div>
                                 <div class="form-check form-check-custom form-check-solid">
-                                    <input name="commission_type" class="form-check-input" type="radio" value="percentage" id="percentage"/>
+                                    <input name="commission_type" class="form-check-input required" type="radio" {{ $info->commission_type == 'percentage' ? 'checked' : '' }} value="percentage" id="percentage"/>
                                     <label class="form-check-label" for="flexRadioDefault">
                                         Percentage
                                     </label>
@@ -131,7 +131,7 @@
                             <div class="col-md-6">
                                 <label class="required fw-bold fs-6 mb-2">Commission value</label>
                                 <input type="text" name="commission_value"
-                                    class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Commission Value"
+                                    class="form-control required form-control-solid mb-3 mb-lg-0" placeholder="Commission Value"
                                     value="{{ $info->commission_value ?? '' }}" />
                             </div>
                             
@@ -147,7 +147,7 @@
                             <div class="col-md-6">
                                 <label class="required fw-bold fs-6 mb-2">Sorting Order</label>
                                 <input type="text" name="order_by"
-                                    class="form-control form-control-solid mb-3 mb-lg-0 mobile_num"
+                                    class="form-control required form-control-solid mb-3 mb-lg-0 mobile_num"
                                     placeholder="Sorting Order" value="{{ $info->order_by ?? '' }}" />
                             </div>
                         </div>
@@ -208,6 +208,8 @@
         margin: 0;
     }
 </style>
+<script src="{{ asset('assets/js/jquery.validate.min.js') }}"></script>
+
 <script>
     $('.mobile_num').keypress(
         function(event) {
@@ -291,29 +293,78 @@
         // Init add schedule modal
         var initAddRole = () => {
 
-            // Init form validation rules. For more info check the FormValidation plugin's official documentation:https://formvalidation.io/
-            var validator = FormValidation.formValidation(
-                form, {
-                    fields: {
-                        'brand_name': {
-                            validators: {
-                                notEmpty: {
-                                    message: 'Brand name is required'
-                                }
-                            }
-                        },
-                    },
+            $('#add_brand_form').validate({
+                rules: {
+                    brand_name: "required"
+                },
+                messages: {
+                    brand_name: "Brand name is required",
+                },
 
-                    plugins: {
-                        trigger: new FormValidation.plugins.Trigger(),
-                        bootstrap: new FormValidation.plugins.Bootstrap5({
-                            rowSelector: '.fv-row',
-                            eleInvalidClass: '',
-                            eleValidClass: ''
-                        })
-                    }
+                submitHandler: function(form) {
+                    var from = $('#from').val();
+                    var formData = new FormData(document.getElementById(
+                        "add_brand_form"));
+                    submitButton.setAttribute('data-kt-indicator', 'on');
+                    // Disable button to avoid multiple click
+                    submitButton.disabled = true;
+                    //call ajax call
+                    $.ajax({
+                        url: add_url,
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function() {
+
+                        },
+                        success: function(res) {
+
+                            if (res.error == 1) {
+                                // Remove loading indication
+                                submitButton.removeAttribute(
+                                    'data-kt-indicator');
+                                // Enable button
+                                submitButton.disabled = false;
+                                let error_msg = res.message
+                                Swal.fire({
+                                    text: res.message,
+                                    icon: "error",
+                                    buttonsStyling: false,
+                                    confirmButtonText: "Ok, got it!",
+                                    customClass: {
+                                        confirmButton: "btn btn-primary"
+                                    }
+                                });
+                            } else {
+
+                                if (from != '') {
+                                    getProductBrandDropdown(res.brand_id);
+                                    return false;
+                                }
+                                dtTable.ajax.reload();
+                                Swal.fire({
+                                    text: res.message,
+                                    icon: "success",
+                                    buttonsStyling: false,
+                                    confirmButtonText: "Ok, got it!",
+                                    customClass: {
+                                        confirmButton: "btn btn-primary"
+                                    }
+                                }).then(function(result) {
+                                    if (result
+                                        .isConfirmed) {
+                                        commonDrawer
+                                            .hide();
+
+                                    }
+                                });
+                            }
+                        }
+                    });
                 }
-            );
+            });
+
 
             // Cancel button handler
             const cancelButton = element.querySelector('#discard');
@@ -340,91 +391,7 @@
 
             // Submit button handler
             const submitButton = element.querySelector('[data-kt-order_status-modal-action="submit"]');
-            // submitButton.addEventListener('click', function(e) {
-            $('#add_brand_form').submit(function(e) {
-                // Prevent default button action
-                e.preventDefault();
-                // Validate form before submit
-                if (validator) {
-                    validator.validate().then(function(status) {
-                        if (status == 'Valid') {
-                            var from = $('#from').val();
-                            var formData = new FormData(document.getElementById(
-                                "add_brand_form"));
-                            submitButton.setAttribute('data-kt-indicator', 'on');
-                            // Disable button to avoid multiple click 
-                            submitButton.disabled = true;
 
-                            //call ajax call
-                            $.ajax({
-                                url: add_url,
-                                type: "POST",
-                                data: formData,
-                                processData: false,
-                                contentType: false,
-                                beforeSend: function() {
-
-                                },
-                                success: function(res) {
-
-                                    if (res.error == 1) {
-                                        // Remove loading indication
-                                        submitButton.removeAttribute(
-                                            'data-kt-indicator');
-                                        // Enable button
-                                        submitButton.disabled = false;
-                                        let error_msg = res.message
-                                        Swal.fire({
-                                            text: res.message,
-                                            icon: "error",
-                                            buttonsStyling: false,
-                                            confirmButtonText: "Ok, got it!",
-                                            customClass: {
-                                                confirmButton: "btn btn-primary"
-                                            }
-                                        });
-                                    } else {
-
-                                        if (from != '') {
-                                            getProductBrandDropdown(res.brand_id);
-                                            return false;
-                                        }
-                                        dtTable.ajax.reload();
-                                        Swal.fire({
-                                            text: res.message,
-                                            icon: "success",
-                                            buttonsStyling: false,
-                                            confirmButtonText: "Ok, got it!",
-                                            customClass: {
-                                                confirmButton: "btn btn-primary"
-                                            }
-                                        }).then(function(result) {
-                                            if (result
-                                                .isConfirmed) {
-                                                commonDrawer
-                                                    .hide();
-
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-
-                        } else {
-                            // Show popup warning. For more info check the plugin's official documentation: https://sweetalert2.github.io/
-                            Swal.fire({
-                                text: "Sorry, looks like there are some errors detected, please try again.",
-                                icon: "error",
-                                buttonsStyling: false,
-                                confirmButtonText: "Ok, got it!",
-                                customClass: {
-                                    confirmButton: "btn btn-primary"
-                                }
-                            });
-                        }
-                    });
-                }
-            });
         }
 
         return {

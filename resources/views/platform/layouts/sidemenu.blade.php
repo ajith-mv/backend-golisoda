@@ -333,6 +333,17 @@
                                 <span class="menu-title">Payment Transaction Report</span>
                             </a>
                         </div>
+
+                        <div class="menu-item">
+                            <a class="menu-link @if (request()->routeIs(['reports.vendor.wise'])) active @endif"
+                               href="{{ route('reports.vendor.wise') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Vendor Wise Sales Report</span>
+                            </a>
+                        </div>
+
                     </div>
                 </div>
             @endif

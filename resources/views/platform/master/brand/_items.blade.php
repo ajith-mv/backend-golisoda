@@ -40,7 +40,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">Email</label>
-                                <input type="text" name="email_id" class="form-control  required"
+                                <input type="email" name="email_id" class="form-control  required"
                                     placeholder="Enter Email" value={{ $vendor_location->email_id }} />
                             </div>
                             <div class="col-md-3">
@@ -175,6 +175,7 @@
 
         show: function() {
             $(this).slideDown();
+            repeater()
         },
 
         hide: function(deleteElement) {

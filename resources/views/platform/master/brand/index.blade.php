@@ -9,6 +9,10 @@
 @section('content')
 
     <style>
+        label.error {
+            color: red;
+        }
+
         .paginate_button {
             padding: 5px 14px;
         }

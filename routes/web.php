@@ -215,6 +215,8 @@ Route::middleware(['auth'])->group(function(){
         Route::get('payment-report', [App\Http\Controllers\PaymentReportController::class, 'index'])->name('reports.payment');
         Route::post('/payment-view', [App\Http\Controllers\PaymentReportController::class, 'paymentView'])->name('payment-reports.view');
         Route::post('/export/excel', [App\Http\Controllers\PaymentReportController::class, 'export'])->name('payment-reports.export.excel');
+        Route::get('/vendor-wise-sale', [App\Http\Controllers\VendorWiseSaleReportController::class, 'index'])->name('reports.vendor.wise');
+
     });
     
     Route::prefix('payment')->group(function(){
