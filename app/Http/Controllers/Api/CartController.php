@@ -868,31 +868,31 @@ class CartController extends Controller
         if (!($request->has('customer_id')) && ($guest_token == '' || is_null($guest_token))) {
             $tmp                = [];
             // if ($guest_token == null) {
-                $tmp['carts'] = [];
-                $tmp['cart_count'] = 0;
-                $tmp['cod_amount'] = 0;
-                $tmp['is_code'] = 0;
-                $tmp['is_pickup_from_store'] = 0;
-                $tmp['shipping_charges']    = [];
-                $tmp['cart_total']          = array(
-                    'total' => 0.00,
-                    'product_tax_exclusive_total' =>  0.00,
-                    'product_tax_exclusive_total_without_format' => 0,
-                    'tax_total' =>  0.00,
-                    'tax_percentage' =>  0.00,
-                    'shipping_charge' =>  0.00,
-                    'addon_amount' => 0,
-                    'coupon_amount' => 0,
-                    'has_pickup_store' => 0,
-                    'brand_id' => "",
-                    'is_cod' => 0,
-                    'cod_amount' => 0,
-                    'is_coupon' => 0,
-                    'coupon_code' => 0,
-                    'coupon_percentage' => 0,
-                    'coupon_type' => 0
-                );
-                return $tmp;
+            $tmp['carts'] = [];
+            $tmp['cart_count'] = 0;
+            $tmp['cod_amount'] = 0;
+            $tmp['is_code'] = 0;
+            $tmp['is_pickup_from_store'] = 0;
+            $tmp['shipping_charges']    = [];
+            $tmp['cart_total']          = array(
+                'total' => 0.00,
+                'product_tax_exclusive_total' =>  0.00,
+                'product_tax_exclusive_total_without_format' => 0,
+                'tax_total' =>  0.00,
+                'tax_percentage' =>  0.00,
+                'shipping_charge' =>  0.00,
+                'addon_amount' => 0,
+                'coupon_amount' => 0,
+                'has_pickup_store' => 0,
+                'brand_id' => "",
+                'is_cod' => 0,
+                'cod_amount' => 0,
+                'is_coupon' => 0,
+                'coupon_code' => 0,
+                'coupon_percentage' => 0,
+                'coupon_type' => 0
+            );
+            return $tmp;
             // }
         }
         return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null);
@@ -1104,32 +1104,46 @@ class CartController extends Controller
 
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
-            $cartInfoData = Cart::where('customer_id', $customer_id)->get();
+            $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
 
             $shipping_amount = 0;
-            foreach($cartInfoData as $cartInfo){
-                if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
-                    $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
-                    log::info('cart shiprocket response');
-                    if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
-                        // log::info($response['data']['available_courier_companies']);
-                        $available_courier_companies = (array)$response->data->available_courier_companies;
-                        $recommended_id = $response->data->recommended_by->id;
-                        log::info("cart recommended id is" . $recommended_id);
-                        // foreach ($available_courier_companies as $company) {
+            $flat_charges = 0;
+            if (isset($cartInfoData) && !empty($cartInfoData)) {
+                foreach ($cartInfoData as $cartInfo) {
+
+                    if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
+                        $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
+                        log::info('cart shiprocket response');
+                        if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
+                            // log::info($response['data']['available_courier_companies']);
+                            $available_courier_companies = (array)$response->data->available_courier_companies;
+                            $recommended_id = $response->data->recommended_by->id;
+                            log::info("cart recommended id is" . $recommended_id);
+                            // foreach ($available_courier_companies as $company) {
                             if (isset($available_courier_companies[$recommended_id - 1])) {
                                 $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
                                 $shipping_amount = $shipping_amount + number_format($recommended_shipping_data->freight_charge, 2);
                                 log::info("cart freight charge is: " . $shipping_amount);
                                 // break;
                             }
-                        // }
-    
+                            // }
+
+                        }
                     }
                 }
+                if ($shipping_amount == 0) {
+                    $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
+                    if (!empty($flat_charges)) {
+
+                        $shipping_amount = round($flat_charges * 50) ?? 0;
+                    }
+                }
+            } else {
+                $shipping_amount = 0;
             }
+
             $grand_total                = $grand_total + number_format($shipping_amount, 2);
-            
+
             // if (isset($coupon_data) && !empty($coupon_data)) {
             //     $grand_total = $grand_total - $coupon_data['discount_amount'] ?? 0;
             // }
@@ -1274,6 +1288,7 @@ class CartController extends Controller
          * get volume metric value for kg
          */
         $all_cart = Cart::where('customer_id', $customer_id)->get();
+        $is_free = [];
         $flat_charges = 0;
         $overall_flat_charges = 0;
         // dd( $all_cart );
@@ -1285,9 +1300,17 @@ class CartController extends Controller
                 if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                     $item->shipping_fee_id = 1;
                     $item->update();
+                    $is_free[] = $brand_data->is_free_shipping;
                 }
+                log::info($item->products->productMeasurement);
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
             }
+        }
+        $uniqueIsFree = array_unique($is_free);
+        if (count($uniqueIsFree) === 1 && reset($uniqueIsFree) == 1) {
+            $chargeData = ['shipping_title' => "Free Shipping", 'is_free' => 1, 'charges' => 0];
+
+            return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $chargeData), 200);
         }
         if (!empty($flat_charges)) {
 

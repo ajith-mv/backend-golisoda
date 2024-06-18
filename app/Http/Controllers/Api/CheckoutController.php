@@ -57,7 +57,6 @@ class CheckoutController extends Controller
         $customer_id            = $request->customer_id;
         $order_status           = OrderStatus::where('status', 'published')->where('order', 1)->first();
         $shipping_method        = $request->shipping_method;
-        $shipment_amount = $request->shipment_amount;
         $checkout_data          = $request->cart_total;
         $cart_items             = $request->cart_items;
         $shipping_address       = $shipping_address;
@@ -115,6 +114,42 @@ class CheckoutController extends Controller
         $checkout_total = str_replace(',', '', $checkout_data['total']);
         $pay_amount  = filter_var($checkout_total, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 
+        $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
+        $shipping_amount = 0;
+        $flat_charges = 0;
+        if (isset($cartInfoData) && !empty($cartInfoData)) {
+            foreach ($cartInfoData as $cartInfo) {
+
+                if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
+                    $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
+                    log::info('checkout shiprocket response');
+                    if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
+                        // log::info($response['data']['available_courier_companies']);
+                        $available_courier_companies = (array)$response->data->available_courier_companies;
+                        $recommended_id = $response->data->recommended_by->id;
+                        log::info("checkout recommended id is" . $recommended_id);
+                        // foreach ($available_courier_companies as $company) {
+                        if (isset($available_courier_companies[$recommended_id - 1])) {
+                            $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
+                            $shipping_amount = $shipping_amount + number_format($recommended_shipping_data->freight_charge, 2);
+                            log::info("checkout freight charge is: " . $shipping_amount);
+                            // break;
+                        }
+                        // }
+
+                    }
+                }
+            }
+            if ($shipping_amount == 0) {
+                $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
+                if (!empty($flat_charges)) {
+
+                    $shipping_amount = round($flat_charges * 50) ?? 0;
+                }
+            }
+        } else {
+            $shipping_amount = 0;
+        }
 
         $order_ins['customer_id'] = $customer_id;
         $order_ins['customer_id'] = $customer_id;
@@ -124,7 +159,7 @@ class CheckoutController extends Controller
         $order_ins['amount'] = $pay_amount;
         $order_ins['tax_amount'] = $checkout_data['tax_total'] ? str_replace(',', '', $checkout_data['tax_total']) : 0;
         $order_ins['tax_percentage'] = $checkout_data['tax_percentage'] ?? 0;
-        $order_ins['shipping_amount'] = $shipment_amount;
+        $order_ins['shipping_amount'] = $shipping_amount;
         $order_ins['coupon_amount'] = $coupon_amount ?? 0;
         $order_ins['coupon_code'] = $coupon_code ?? '';
         $order_ins['coupon_details'] = $coupon_details ?? '';
@@ -468,6 +503,42 @@ class CheckoutController extends Controller
         $checkout_total = str_replace(',', '', $checkout_data['total']);
         $pay_amount  = filter_var($checkout_total, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 
+        $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
+        $shipping_amount = 0;
+        $flat_charges = 0;
+        if (isset($cartInfoData) && !empty($cartInfoData)) {
+            foreach ($cartInfoData as $cartInfo) {
+
+                if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
+                    $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
+                    log::info('checkout shiprocket response');
+                    if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
+                        // log::info($response['data']['available_courier_companies']);
+                        $available_courier_companies = (array)$response->data->available_courier_companies;
+                        $recommended_id = $response->data->recommended_by->id;
+                        log::info("checkout recommended id is" . $recommended_id);
+                        // foreach ($available_courier_companies as $company) {
+                        if (isset($available_courier_companies[$recommended_id - 1])) {
+                            $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
+                            $shipping_amount = $shipping_amount + number_format($recommended_shipping_data->freight_charge, 2);
+                            log::info("checkout freight charge is: " . $shipping_amount);
+                            // break;
+                        }
+                        // }
+
+                    }
+                }
+            }
+            if ($shipping_amount == 0) {
+                $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
+                if (!empty($flat_charges)) {
+
+                    $shipping_amount = round($flat_charges * 50) ?? 0;
+                }
+            }
+        } else {
+            $shipping_amount = 0;
+        }
 
         $order_ins['customer_id'] = $customer_id;
         $order_ins['customer_id'] = $customer_id;
