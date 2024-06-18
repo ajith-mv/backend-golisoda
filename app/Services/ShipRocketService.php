@@ -115,7 +115,7 @@ class ShipRocketService
             $shipping_amount = 0;
             $shipping_text = "Standard Shipping";
             $is_free = 0;
-            $checkCart = Cart::where(['customer_id', $customer_id])->whereNull('shipping_fee_id')->get();
+            $checkCart = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
             $customer = Customer::find($customer_id);
             $cartShipAddress = CartAddress::find($cart_address_id);
 
