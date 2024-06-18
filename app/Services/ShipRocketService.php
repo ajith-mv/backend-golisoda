@@ -190,6 +190,7 @@ class ShipRocketService
 
                     if (count($uniqueBrandIds) > 1) {
                         log::info('different brand ids are in cart');
+                        $cart_total = 0;
                         foreach ($uniqueBrandIds as $brandId) {
                             $brand_data = Brands::find($brandId);
                             if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
@@ -198,11 +199,15 @@ class ShipRocketService
                                 $is_free = 1;
                             } else {
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
-                                dd($createOrderData[$brandId]);
-                                $params = $this->getRequestForCreateOrderApi($createOrderData[$brandId]['citems'], $createOrderData[$brandId]['cartShipAddress'], $createOrderData[$brandId]['customer'], $createOrderData[$brandId]['cartItemsarr'], $createOrderData[$brandId]['measure'], $createOrderData[$brandId]['cartTotal'], $createOrderData[$brandId]['total_weight']);
-                                $createResponse = $this->createOrder($params);
-                                if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                                    $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
+                                foreach ($createOrderData[$brandId] as $data) {
+                                    $orderItems = $data['cartItemsarr'];
+                                    $cart_total += $data['cartTotal'];
+                                    $measure_ment = $data['measurement'];
+                                    $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
+                                    $createResponse = $this->createOrder($params);
+                                    if (isset($createResponse) && !empty($createResponse['order_id'])) {
+                                        $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
+                                    }
                                 }
                             }
                         }
