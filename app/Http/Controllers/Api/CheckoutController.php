@@ -138,9 +138,11 @@ class CheckoutController extends Controller
                         // }
 
                     }
+                    $shipping_type = "Standard Shipping";
                 }
             }
             if ($shipping_amount == 0) {
+                $shipping_type = "Flat Shipping";
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
                 if (!empty($flat_charges)) {
 
@@ -148,6 +150,7 @@ class CheckoutController extends Controller
                 }
             }
         } else {
+            $shipping_type = "Free Shipping";
             $shipping_amount = 0;
         }
 
@@ -194,21 +197,21 @@ class CheckoutController extends Controller
         $order_ins['shipping_city'] = $shipping_address->city ?? $billing_address->city ?? null;
         $order_ins['is_cod'] = $checkout_data['is_cod'] ?? 0;
         $order_ins['cod_amount'] = $checkout_data['cod_amount'] ?? NULL;
+        $order_ins['shipping_type'] = $shipping_type;
 
 
+        // if (isset($shipping_method) && $shipping_method != 'PICKUP_FROM_STORE' && isset($shipping_address) && !empty($shipping_address)) {
 
-        if (isset($shipping_method) && $shipping_method != 'PICKUP_FROM_STORE' && isset($shipping_address) && !empty($shipping_address)) {
+        //     $shipping_type_info = ShippingCharge::find($shipping_method['charge_id']);
 
-            $shipping_type_info = ShippingCharge::find($shipping_method['charge_id']);
+        //     $order_ins['shipping_options'] = $shipping_method['charge_id'] ?? 0;
+        //     if ($shipping_type_info) {
+        //         $order_ins['shipping_type'] = $shipping_type_info->shipping_title ?? 'Free';
+        //     }
+        // } else {
 
-            $order_ins['shipping_options'] = $shipping_method['charge_id'] ?? 0;
-            if ($shipping_type_info) {
-                $order_ins['shipping_type'] = $shipping_type_info->shipping_title ?? 'Free';
-            }
-        } else {
-
-            $order_ins['pickup_store_id'] = $request->pickup_store_id;
-        }
+        //     $order_ins['pickup_store_id'] = $request->pickup_store_id;
+        // }
 
         $order_info = Order::create($order_ins);
         $order_id = $order_info->id;
@@ -528,8 +531,10 @@ class CheckoutController extends Controller
 
                     }
                 }
+                $shipping_type = "Standard Shipping";
             }
             if ($shipping_amount == 0) {
+                $shipping_type = "Flat Shipping";
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
                 if (!empty($flat_charges)) {
 
@@ -537,6 +542,7 @@ class CheckoutController extends Controller
                 }
             }
         } else {
+            $shipping_type = "Free Shipping";
             $shipping_amount = 0;
         }
 
@@ -581,19 +587,19 @@ class CheckoutController extends Controller
         $order_ins['shipping_post_code'] = $shipping_address->post_code ?? $billing_address->post_code;
         $order_ins['shipping_state'] = $shipping_address->states->state_name ?? $billing_address->states->state_name ?? null;
         $order_ins['shipping_city'] = $shipping_address->city ?? $billing_address->city ?? null;
+        $order_ins['shipping_type'] = $shipping_type;
+        // if (isset($shipping_method) && $shipping_method != 'PICKUP_FROM_STORE' && isset($shipping_address) && !empty($shipping_address)) {
 
-        if (isset($shipping_method) && $shipping_method != 'PICKUP_FROM_STORE' && isset($shipping_address) && !empty($shipping_address)) {
+        //     $shipping_type_info = ShippingCharge::find($shipping_method['charge_id']);
 
-            $shipping_type_info = ShippingCharge::find($shipping_method['charge_id']);
+        //     $order_ins['shipping_options'] = $shipping_method['charge_id'] ?? 0;
+        //     if ($shipping_type_info) {
+        //         $order_ins['shipping_type'] = $shipping_type_info->shipping_title ?? 'Free';
+        //     }
+        // } else {
 
-            $order_ins['shipping_options'] = $shipping_method['charge_id'] ?? 0;
-            if ($shipping_type_info) {
-                $order_ins['shipping_type'] = $shipping_type_info->shipping_title ?? 'Free';
-            }
-        } else {
-
-            $order_ins['pickup_store_id'] = $request->pickup_store_id;
-        }
+        //     $order_ins['pickup_store_id'] = $request->pickup_store_id;
+        // }
 
         $order_info = Order::create($order_ins);
         $order_id = $order_info->id;
