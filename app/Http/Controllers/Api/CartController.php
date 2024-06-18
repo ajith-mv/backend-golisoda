@@ -1111,14 +1111,14 @@ class CartController extends Controller
                     $available_courier_companies = (array)$response->data->available_courier_companies;
                     $recommended_id = $response->data->recommended_by->id;
                     log::info("cart recommended id is" . $recommended_id);
-                    foreach ($available_courier_companies as $company) {
+                    // foreach ($available_courier_companies as $company) {
                         if (isset($available_courier_companies[$recommended_id - 1])) {
                             $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
                             $shipping_amount = round($recommended_shipping_data->freight_charge);
                             log::info("cart freight charge is: " . $shipping_amount);
-                            break;
+                            // break;
                         }
-                    }
+                    // }
                 $grand_total                = $grand_total + $shipping_amount;
 
                 }
