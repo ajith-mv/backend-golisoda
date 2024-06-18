@@ -185,7 +185,7 @@ class ShipRocketService
                                 "weight" => $total_weight
                             ];
 
-                            $brandIds[] = $pro->brand_id;
+                            $brandIds[$citems->id] = $pro->brand_id;
                             $createOrderData[$pro->brand_id][] = [
                                 'measurement' => $measure_ment,
                                 'citems' => $citems,
@@ -199,7 +199,7 @@ class ShipRocketService
                         }
                     }
                     $uniqueBrandIds = array_unique($brandIds);
-
+                    log::info($uniqueBrandIds);
                     if (count($uniqueBrandIds) > 1) {
                         log::info('different brand ids are in cart');
                         $cart_total = 0;
@@ -209,6 +209,7 @@ class ShipRocketService
                                 $shipping_text = "Free Shipping";
                                 $shipping_amount = 0;
                                 $is_free = 1;
+                                
                             } else {
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
                                 foreach ($createOrderData[$brandId] as $data) {
