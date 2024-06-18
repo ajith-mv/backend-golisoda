@@ -118,7 +118,7 @@ class ShipRocketService
             $checkCart = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
             $customer = Customer::find($customer_id);
             $cartShipAddress = CartAddress::find($cart_address_id);
-
+            $brandIds - [];
             if ($cartShipAddress) {
 
                 $product_id = [];
@@ -198,7 +198,7 @@ class ShipRocketService
                             ];
                         }
                     }
-                    if($brandIds){
+                    if($brandIds && (!empty($brandIds))){
                         $uniqueBrandIds = array_unique($brandIds);
 
                         if (count($uniqueBrandIds) > 1) {
