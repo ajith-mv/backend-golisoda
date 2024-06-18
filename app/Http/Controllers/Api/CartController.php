@@ -1099,30 +1099,33 @@ class CartController extends Controller
 
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
-            $cartInfo = Cart::where('customer_id', $customer_id)->latest()->first();
+            $cartInfoData = Cart::where('customer_id', $customer_id)->get();
 
             $shipping_amount = 0;
-            if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
-                $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
-                $tmp = [];
-                log::info('cart shiprocket response');
-                if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
-                    // log::info($response['data']['available_courier_companies']);
-                    $available_courier_companies = (array)$response->data->available_courier_companies;
-                    $recommended_id = $response->data->recommended_by->id;
-                    log::info("cart recommended id is" . $recommended_id);
-                    // foreach ($available_courier_companies as $company) {
-                        if (isset($available_courier_companies[$recommended_id - 1])) {
-                            $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
-                            $shipping_amount = round($recommended_shipping_data->freight_charge);
-                            log::info("cart freight charge is: " . $shipping_amount);
-                            // break;
-                        }
-                    // }
-                $grand_total                = $grand_total + $shipping_amount;
-
+            foreach($cartInfoData as $cartInfo){
+                if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
+                    $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
+                    $tmp = [];
+                    log::info('cart shiprocket response');
+                    if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
+                        // log::info($response['data']['available_courier_companies']);
+                        $available_courier_companies = (array)$response->data->available_courier_companies;
+                        $recommended_id = $response->data->recommended_by->id;
+                        log::info("cart recommended id is" . $recommended_id);
+                        // foreach ($available_courier_companies as $company) {
+                            if (isset($available_courier_companies[$recommended_id - 1])) {
+                                $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
+                                $shipping_amount = $shipping_amount + round($recommended_shipping_data->freight_charge);
+                                log::info("cart freight charge is: " . $shipping_amount);
+                                // break;
+                            }
+                        // }
+    
+                    }
                 }
             }
+            $grand_total                = $grand_total + $shipping_amount;
+            
             // if (isset($coupon_data) && !empty($coupon_data)) {
             //     $grand_total = $grand_total - $coupon_data['discount_amount'] ?? 0;
             // }
