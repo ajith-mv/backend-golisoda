@@ -198,6 +198,7 @@ class ShipRocketService
                                 $is_free = 1;
                             } else {
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
+                                dd($createOrderData[$brandId]);
                                 $params = $this->getRequestForCreateOrderApi($createOrderData[$brandId]['citems'], $createOrderData[$brandId]['cartShipAddress'], $createOrderData[$brandId]['customer'], $createOrderData[$brandId]['cartItemsarr'], $createOrderData[$brandId]['measure'], $createOrderData[$brandId]['cartTotal'], $createOrderData[$brandId]['total_weight']);
                                 $createResponse = $this->createOrder($params);
                                 if (isset($createResponse) && !empty($createResponse['order_id'])) {
