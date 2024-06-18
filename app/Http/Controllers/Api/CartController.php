@@ -16,6 +16,7 @@ use App\Models\GlobalSettings;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Order;
 use App\Models\CartProductVariationOption;
+use App\Models\Master\Brands;
 use App\Models\Master\Variation;
 use App\Models\Offers\CouponCategory;
 use App\Models\Offers\Coupons;
@@ -1278,6 +1279,13 @@ class CartController extends Controller
         // dd( $all_cart );
         if (isset($all_cart) && !empty($all_cart)) {
             foreach ($all_cart as $item) {
+                $pro = $item->products;
+                $brandId = $pro->brand_id;
+                $brand_data = Brands::find($brandId);
+                if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                    $item->shipping_fee_id = 1;
+                    $item->update();
+                }
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
             }
         }

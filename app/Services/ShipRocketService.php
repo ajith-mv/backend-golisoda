@@ -115,7 +115,7 @@ class ShipRocketService
             $shipping_amount = 0;
             $shipping_text = "Standard Shipping";
             $is_free = 0;
-            $checkCart = Cart::where('customer_id', $customer_id)->get();
+            $checkCart = Cart::where(['customer_id', $customer_id])->whereNull('shipping_fee_id')->get();
             $customer = Customer::find($customer_id);
             $cartShipAddress = CartAddress::find($cart_address_id);
 
@@ -204,12 +204,12 @@ class ShipRocketService
                         log::info('different brand ids are in cart');
                         $cart_total = 0;
                         foreach ($uniqueBrandIds as $brandId) {
-                            $brand_data = Brands::find($brandId);
-                            if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
-                                $shipping_text = "Free Shipping";
-                                $shipping_amount = 0;
-                                $is_free = 1;
-                            } else {
+                            // $brand_data = Brands::find($brandId);
+                            // if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                            //     $shipping_text = "Free Shipping";
+                            //     $shipping_amount = 0;
+                            //     $is_free = 1;
+                            // } else {
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
                                 foreach ($createOrderData[$brandId] as $data) {
                                     $orderItems = $data['cartItemsarr'];
@@ -222,19 +222,19 @@ class ShipRocketService
                                     $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
 
                                     }
-                                }
+                                // }
                             }
                         }
                     } else {
                         log::info('same brand ids are in cart');
 
                         $cart_total = 0;
-                        $brand_data = Brands::find($uniqueBrandIds[0]);
-                        if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
-                            $shipping_amount = 0;
-                            $shipping_text = "Free Shipping";
-                            $is_free = 1;
-                        } else {
+                        // $brand_data = Brands::find($uniqueBrandIds[0]);
+                        // if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                        //     $shipping_amount = 0;
+                        //     $shipping_text = "Free Shipping";
+                        //     $is_free = 1;
+                        // } else {
                             $pickup_post_code = $this->getVendorPostCode($uniqueBrandIds[0]);
                             if (isset($createOrderData[$uniqueBrandIds[0]])) {
                                 foreach ($createOrderData[$uniqueBrandIds[0]] as $data) {
@@ -248,7 +248,7 @@ class ShipRocketService
                                     $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
                                 }
                             }
-                        }
+                        // }
                     }
                 }
             }
