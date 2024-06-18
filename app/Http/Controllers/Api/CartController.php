@@ -1108,7 +1108,7 @@ class CartController extends Controller
                 log::info('cart shiprocket response');
                 if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
                     // log::info($response['data']['available_courier_companies']);
-                    $available_courier_companies = json_decode($response['data']['available_courier_companies']);
+                    $available_courier_companies = json_decode($response->data->available_courier_companies);
                     $recommended_id = $response->data->recommended_by->id;
                     log::info("cart recommended id is" . $recommended_id);
                     foreach ($available_courier_companies as $company) {
