@@ -1100,7 +1100,7 @@ class CartController extends Controller
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
             $cartInfo = Cart::where('customer_id', $customer_id)->first();
-            $amount = 0;
+            $shipping_amount = 0;
             if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
                 $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
                 $tmp = [];
@@ -1111,12 +1111,12 @@ class CartController extends Controller
                     log::info("recommended id is" . $recommended_id);
                     foreach ($response['data']['available_courier_companies'] as $company) {
                         if (isset($company[$recommended_id - 1])) {
-                            $amount = $company[$recommended_id - 1]['freight_charge'];
-                            log::info("freight charge is: " . $amount);
+                            $shipping_amount = $company[$recommended_id - 1]['freight_charge'];
+                            log::info("freight charge is: " . $shipping_amount);
                             break;
                         }
                     }
-                $grand_total                = $grand_total + $amount;
+                $grand_total                = $grand_total + $shipping_amount;
 
                 }
             }
@@ -1172,7 +1172,7 @@ class CartController extends Controller
                 'product_tax_exclusive_total_without_format' => round($product_tax_exclusive_total),
                 'tax_total' => number_format(round($tax_total), 2),
                 'tax_percentage' => number_format(round($tax_percentage), 2),
-                'shipping_charge' => $amount,
+                'shipping_charge' => $shipping_amount,
                 'addon_amount' => $total_addon_amount,
                 'coupon_amount' => $coupon_amount ?? 0,
                 'total_variation_amount' => $total_variation_amount,
