@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\CartAddress;
+use App\Models\CartProductVariationOption;
 use App\Models\CartShiprocketResponse;
 use App\Models\Master\Brands;
 use App\Models\Master\BrandVendorLocation;
@@ -121,7 +122,7 @@ class ShipRocketService
                         if ($citems->products) {
                             $pro = $citems->products;
                             $product_id = $pro->id;
-                            $variationData = $citems->variationOptions;
+                            $variationData = CartProductVariationOption::where([['cart_id', $citems->id],['prodcut_id', $product_id]])->first();
                             if(isset($variationData) && !empty($variationData)){
                                 $variation_option_id = $variationData->variation_option_id;
                             }else{
