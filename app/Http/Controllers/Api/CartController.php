@@ -79,8 +79,9 @@ class CartController extends Controller
                         $cart_ids[] = $singleCart->id;
                     }
                 }
-                $check_cart_variation_option = CartProductVariationOption::select('product_id')->whereIn('cart_id', $cart_ids)->whereIn('variation_option_id', $variation_option_ids)->where('product_id', $product_id)->groupBy('product_id')->havingRaw('COUNT(DISTINCT variation_option_id) = 2')->exists();
+                $check_cart_variation_option = CartProductVariationOption::select('product_id')->whereIn('cart_id', $cart_ids)->whereIn('variation_option_id', $variation_option_ids)->where('product_id', $product_id)->groupBy('product_id')->havingRaw('COUNT(DISTINCT variation_option_id)  = ?', [count($variation_option_ids)])->exists();
                 if (!$check_cart_variation_option) {
+                    log::info('products with same variation does not exists in the cart');
                     $customer_info = Customer::find($request->customer_id);
                     $total_variation_amount = 0;
                     $total_discount_amount = 0;
@@ -136,6 +137,8 @@ class CartController extends Controller
                         $data = [];
                     }
                 } else {
+                    log::info('products with same variation exists in the cart');
+
                     if (isset($variation_option_ids) && !empty($variation_option_ids)) {
                         $allCart = Cart::when($customer_id != '', function ($q) use ($customer_id) {
                             $q->where('customer_id', $customer_id);
@@ -148,8 +151,9 @@ class CartController extends Controller
                                 $cart_ids[] = $singleCart->id;
                             }
                         }
-
-                        $check_cart_variation_option = CartProductVariationOption::whereIn('variation_option_id', $variation_option_ids)->where('product_id', $product_id)->whereIn('cart_id', $cart_ids)->groupBy('cart_id')->havingRaw('COUNT(DISTINCT variation_option_id) = 2')->get('cart_id');
+                        log::info('variation option is set to this product');
+                        $check_cart_variation_option = CartProductVariationOption::whereIn('variation_option_id', $variation_option_ids)->where('product_id', $product_id)->whereIn('cart_id', $cart_ids)->groupBy('cart_id')->havingRaw('COUNT(DISTINCT variation_option_id)  = ?', [count($variation_option_ids)])->get('cart_id');
+                        log::info('find the cart id in which quantity needs to be added');
                         $checkCart = Cart::find($check_cart_variation_option[0]->cart_id);
                         $product_quantity = $checkCart->quantity + $quantity;
                         if ($product_info->quantity <= $product_quantity) {
