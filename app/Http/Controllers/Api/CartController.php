@@ -1104,15 +1104,16 @@ class CartController extends Controller
             if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
                 $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
                 $tmp = [];
-
+                log::info('cart shiprocket response');
+log::info($response);
                 if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
                     // log::info($response['data']['available_courier_companies']);
                     $recommended_id = $response['data']['recommended_by']['id'];
-                    log::info("recommended id is" . $recommended_id);
+                    log::info("cart recommended id is" . $recommended_id);
                     foreach ($response['data']['available_courier_companies'] as $company) {
                         if (isset($response['data']['available_courier_companies'][$recommended_id - 1])) {
                             $shipping_amount = $response['data']['available_courier_companies'][$recommended_id - 1]['freight_charge'];
-                            log::info("freight charge is: " . $shipping_amount);
+                            log::info("cart freight charge is: " . $shipping_amount);
                             break;
                         }
                     }
