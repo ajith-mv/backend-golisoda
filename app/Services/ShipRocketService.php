@@ -122,7 +122,7 @@ class ShipRocketService
                         if ($citems->products) {
                             $pro = $citems->products;
                             $product_id = $pro->id;
-                            $variationData = CartProductVariationOption::where([['cart_id', $citems->id],['prodcut_id', $product_id]])->first();
+                            $variationData = CartProductVariationOption::where([['cart_id', $citems->id],['product_id', $product_id]])->first();
                             if(isset($variationData) && !empty($variationData)){
                                 $variation_option_id = $variationData->variation_option_id;
                             }else{
