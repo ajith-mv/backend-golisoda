@@ -1115,7 +1115,7 @@ class CartController extends Controller
                         // foreach ($available_courier_companies as $company) {
                             if (isset($available_courier_companies[$recommended_id - 1])) {
                                 $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
-                                $shipping_amount = $shipping_amount + $recommended_shipping_data->freight_charge;
+                                $shipping_amount = $shipping_amount + number_format($recommended_shipping_data->freight_charge, 2);
                                 log::info("cart freight charge is: " . $shipping_amount);
                                 // break;
                             }
@@ -1124,7 +1124,7 @@ class CartController extends Controller
                     }
                 }
             }
-            $grand_total                = $grand_total + round($shipping_amount);
+            $grand_total                = $grand_total + number_format($shipping_amount, 2);
             
             // if (isset($coupon_data) && !empty($coupon_data)) {
             //     $grand_total = $grand_total - $coupon_data['discount_amount'] ?? 0;
