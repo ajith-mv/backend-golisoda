@@ -1289,14 +1289,14 @@ class CartController extends Controller
             $data = $service->getShippingRocketOrderDimensions($customer_id, $cart_info->guest_token ?? null, $cart_address->id);
         }
         if (isset($data)) {
-            $shipping_charge = $data;
-            Log::debug("got the response from api for cart id " . $shipping_charge);
+            $chargeData = $data;
+            // Log::debug("got the response from api for cart id " . $shipping_charge);
         } else {
-            $shipping_charge = round($overall_flat_charges);
+            $chargeData = ['shipping_title' => "Flat Charge", 'is_free' => 0, 'charges' => round($overall_flat_charges)];
             Log::debug("did not get the response from api for cart id, calculated shipping charge based on volumetric calculation - " . $cart_info->id);
             Log::debug("overall flat charge" . $overall_flat_charges);
         }
-        $chargeData =  array('shiprocket_charges' => $data, 'flat_charge' => $shipping_charge);
+        // $chargeData =  array('shiprocket_charges' => $data, 'flat_charge' => $shipping_charge);
 
         return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $chargeData), 200);
     }

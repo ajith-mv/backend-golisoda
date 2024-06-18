@@ -55,7 +55,7 @@ class ShipRocketService
                 $ins_params['order_id'] = $response['order_id'];
 
                 CartShiprocketResponse::create($ins_params);
-            }else{
+            } else {
                 log::debug($response);
             }
 
@@ -102,6 +102,8 @@ class ShipRocketService
     {
         if (isset($customer_id) && !empty($customer_id)) {
             $shipping_amount = 0;
+            $shipping_text = "Standard Shipping";
+            $is_free = 0;
             $checkCart = Cart::where('customer_id', $customer_id)->get();
             $customer = Customer::find($customer_id);
             $cartShipAddress = CartAddress::find($cart_address_id);
@@ -185,7 +187,9 @@ class ShipRocketService
                         foreach ($uniqueBrandIds as $brandId) {
                             $brand_data = Brands::find($brandId);
                             if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                                $shipping_text = "Free Shipping";
                                 $shipping_amount = 0;
+                                $is_free = 1;
                             } else {
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
                                 $params = $this->getRequestForCreateOrderApi($createOrderData[$brandId]['citems'], $createOrderData[$brandId]['cartShipAddress'], $createOrderData[$brandId]['customer'], $createOrderData[$brandId]['cartItemsarr'], $createOrderData[$brandId]['measure'], $createOrderData[$brandId]['cartTotal'], $createOrderData[$brandId]['total_weight']);
@@ -202,6 +206,8 @@ class ShipRocketService
                         $brand_data = Brands::find($uniqueBrandIds[0]);
                         if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                             $shipping_amount = 0;
+                            $shipping_text = "Free Shipping";
+                            $is_free = 1;
                         } else {
                             $pickup_post_code = $this->getVendorPostCode($uniqueBrandIds[0]);
                             if (isset($createOrderData[$uniqueBrandIds[0]])) {
@@ -212,15 +218,15 @@ class ShipRocketService
                                     $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
                                 }
                                 $createResponse = $this->createOrder($params);
-                                    if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                                        $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
-                                    }
-                            } 
+                                if (isset($createResponse) && !empty($createResponse['order_id'])) {
+                                    $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
+                                }
+                            }
                         }
                     }
                 }
             }
-            return $shipping_amount;
+            return ['shipping_title' => $shipping_text, 'is_free' => $is_free, 'charges' => $shipping_amount];//$shipping_amount;
         }
     }
 
@@ -280,7 +286,7 @@ class ShipRocketService
         if (isset($vendor_location_data) && (!empty($vendor_location_data))) {
             $vendor_post_code = $vendor_location_data->pincode;
         }
-log::info('vendor post code'. $vendor_post_code);
+        log::info('vendor post code' . $vendor_post_code);
         return $vendor_post_code;
     }
 
@@ -357,5 +363,17 @@ log::info('vendor post code'. $vendor_post_code);
             "height" => isset($measure->height) ? $measure->height : 1,
             "weight" => $total_weight
         );
+    }
+
+    public function getPickupLocation($brand_id)
+    {
+        $vendor_pickup_location = 'Golisoda';
+
+        $vendor_pickup_location_data = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])->first();
+        if (isset($vendor_pickup_location_data) && (!empty($vendor_pickup_location_data))) {
+            $vendor_pickup_location = $vendor_pickup_location_data->pincode;
+        }
+        log::info('vendor pickup location' . $vendor_pickup_location);
+        return $vendor_pickup_location;
     }
 }
