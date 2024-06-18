@@ -1301,6 +1301,9 @@ class CartController extends Controller
                     $item->shipping_fee_id = 1;
                     $item->update();
                     $is_free[] = $brand_data->is_free_shipping;
+                }else{
+                    $item->shipping_fee_id = NULL;
+                    $item->update();
                 }
                 log::info($item->products->productMeasurement);
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
