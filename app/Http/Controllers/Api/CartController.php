@@ -1106,7 +1106,6 @@ class CartController extends Controller
                 $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
                 $tmp = [];
                 log::info('cart shiprocket response');
-log::debug($response);
                 if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
                     // log::info($response['data']['available_courier_companies']);
                     $recommended_id = $response['data']['recommended_by']['id'];
