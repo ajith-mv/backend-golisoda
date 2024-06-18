@@ -1113,7 +1113,8 @@ class CartController extends Controller
                     log::info("cart recommended id is" . $recommended_id);
                     foreach ($available_courier_companies as $company) {
                         if (isset($available_courier_companies[$recommended_id - 1])) {
-                            $shipping_amount = $available_courier_companies[$recommended_id - 1]['freight_charge'];
+                            $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
+                            $shipping_amount = $recommended_shipping_data->freight_charge;
                             log::info("cart freight charge is: " . $shipping_amount);
                             break;
                         }
