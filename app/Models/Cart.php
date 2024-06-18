@@ -29,7 +29,7 @@ class Cart extends Model
     }
 
     public function rocketResponse() {
-        return $this->hasOne(CartShiprocketResponse::class, 'cart_token', 'guest_token');
+        return $this->hasOne(CartShiprocketResponse::class, 'cart_token', 'cart_order_no');
     }
     
 }
