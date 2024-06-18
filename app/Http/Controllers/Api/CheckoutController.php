@@ -548,7 +548,7 @@ class CheckoutController extends Controller
         $order_ins['amount'] = $pay_amount;
         $order_ins['tax_amount'] = $checkout_data['tax_total'] ? str_replace(',', '', $checkout_data['tax_total']) : 0;
         $order_ins['tax_percentage'] = $checkout_data['tax_percentage'] ?? 0;
-        $order_ins['shipping_amount'] = $shipment_amount;
+        $order_ins['shipping_amount'] = $shipping_amount;
         $order_ins['coupon_amount'] = $coupon_amount ?? 0;
         $order_ins['coupon_code'] = $coupon_code ?? '';
         $order_ins['coupon_details'] = $coupon_details ?? '';
