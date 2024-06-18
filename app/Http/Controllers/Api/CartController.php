@@ -1177,7 +1177,7 @@ class CartController extends Controller
                 'product_tax_exclusive_total_without_format' => round($product_tax_exclusive_total),
                 'tax_total' => number_format(round($tax_total), 2),
                 'tax_percentage' => number_format(round($tax_percentage), 2),
-                'shipping_charge' => $shipping_amount,
+                'shipping_charge' => number_format($shipping_amount, 2),
                 'addon_amount' => $total_addon_amount,
                 'coupon_amount' => $coupon_amount ?? 0,
                 'total_variation_amount' => $total_variation_amount,
