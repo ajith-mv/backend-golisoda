@@ -120,8 +120,13 @@ class ShipRocketService
 
                         if ($citems->products) {
                             $pro = $citems->products;
-
                             $product_id = $pro->id;
+                            $variationData = $citems->variationOptions;
+                            if(isset($variationData) && !empty($variationData)){
+                                $variation_option_id = $variationData->variation_option_id;
+                            }else{
+                                $variation_option_id = '';
+                            }
                             $pro_measure = DB::table('product_measurements')
                                 ->select("weight")
                                 ->where('product_id', $product_id)->first();
@@ -145,7 +150,7 @@ class ShipRocketService
                             $tmp = [
                                 'hsn' => $pro->hsn_code ?? null,
                                 'name' => $pro->product_name,
-                                // 'sku' => $pro->sku,
+                                'sku' => $pro->sku.$variation_option_id,
                                 'tax' => $tax_total ?? '',
                                 'discount' => '',
                                 'units' => $citems->quantity,
