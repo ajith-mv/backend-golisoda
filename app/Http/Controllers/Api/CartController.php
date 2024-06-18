@@ -1119,6 +1119,7 @@ class CartController extends Controller
                 $grand_total                = $grand_total + $amount;
 
                 }
+            }
 
             // if (isset($coupon_data) && !empty($coupon_data)) {
             //     $grand_total = $grand_total - $coupon_data['discount_amount'] ?? 0;
