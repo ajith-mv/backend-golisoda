@@ -98,7 +98,17 @@ class ShipRocketService
 
         return $response;
     }
-
+    
+    /**
+     * Method getShippingRocketOrderDimensions
+     *
+     * @param $customer_id 
+     * @param $cart_token
+     * @param $cart_address_id
+     * shipping fee ids : 1- Free Shipping(brandwise free shipping), 2 - Standard Shipping(using shiprocket), 3 - Flat Shipping(by product measuremnet)
+     *
+     * @return void
+     */
     public function getShippingRocketOrderDimensions($customer_id, $cart_token, $cart_address_id)
     {
         if (isset($customer_id) && !empty($customer_id)) {
@@ -122,11 +132,13 @@ class ShipRocketService
                         if ($citems->products) {
                             $pro = $citems->products;
                             $product_id = $pro->id;
-                            $variationData = CartProductVariationOption::where([['cart_id', $citems->id],['product_id', $product_id]])->first();
+                            $variationData = CartProductVariationOption::where([['cart_id', $citems->id],['product_id', $product_id]])->get();
                             if(isset($variationData) && !empty($variationData)){
-                                $variation_option_id = $variationData->variation_option_id;
+                                foreach($variationData as $variationOptionData){
+                                    $variation_option_id[] = $variationOptionData->variation_option_id;
+                                }
                             }else{
-                                $variation_option_id = '';
+                                $variation_option_id = [];
                             }
                             $pro_measure = DB::table('product_measurements')
                                 ->select("weight")
@@ -151,7 +163,7 @@ class ShipRocketService
                             $tmp = [
                                 'hsn' => $pro->hsn_code ?? null,
                                 'name' => $pro->product_name,
-                                'sku' => $pro->sku.$variation_option_id,
+                                'sku' => $pro->sku.implode('-', $variation_option_id),
                                 'tax' => $tax_total ?? '',
                                 'discount' => '',
                                 'units' => $citems->quantity,
