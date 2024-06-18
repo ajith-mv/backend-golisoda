@@ -1099,15 +1099,27 @@ class CartController extends Controller
 
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
-            if (isset($shipping_info) && !empty($shipping_info) || (isset($selected_shipping) && !empty($selected_shipping))) {
-                $tmp['selected_shipping_fees'] = array(
-                    'shipping_id' => $shipping_info->id ?? $selected_shipping['shipping_id'],
-                    'shipping_charge_order' => $shipping_info->charges ?? $selected_shipping['shipping_charge_order'],
-                    'shipping_type' => $shipping_type ?? $selected_shipping['shipping_type'] ?? 'fees'
-                );
+            $cartInfo = Cart::where('customer_id', $customer_id)->first();
+            $amount = 0;
+            if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
+                $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
+                $tmp = [];
 
-                $grand_total                = $grand_total + ($shipping_info->charges ?? $selected_shipping['shipping_charge_order'] ?? 0);
-            }
+                if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
+                    // log::info($response['data']['available_courier_companies']);
+                    $recommended_id = $response['data']['recommended_by']['id'];
+                    log::info("recommended id is" . $recommended_id);
+                    foreach ($response['data']['available_courier_companies'] as $company) {
+                        if (isset($company[$recommended_id - 1])) {
+                            $amount = $company[$recommended_id - 1]['freight_charge'];
+                            log::info("freight charge is: " . $amount);
+                            break;
+                        }
+                    }
+                $grand_total                = $grand_total + $amount;
+
+                }
+
             // if (isset($coupon_data) && !empty($coupon_data)) {
             //     $grand_total = $grand_total - $coupon_data['discount_amount'] ?? 0;
             // }
@@ -1119,7 +1131,7 @@ class CartController extends Controller
             $amount         = filter_var($grand_total, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
             $charges        = ShippingCharge::select('id', 'shipping_title', 'minimum_order_amount', 'charges', 'is_free')->where('status', 'published')->where('minimum_order_amount', '<', $amount)->get();
 
-            $tmp['shipping_charges']    = $charges;
+            // $tmp['shipping_charges']    = $charges;
 
             $is_cod = 0;
             $cod_amount = 0;
@@ -1159,7 +1171,7 @@ class CartController extends Controller
                 'product_tax_exclusive_total_without_format' => round($product_tax_exclusive_total),
                 'tax_total' => number_format(round($tax_total), 2),
                 'tax_percentage' => number_format(round($tax_percentage), 2),
-                'shipping_charge' => $shipping_info->charges ?? 0,
+                'shipping_charge' => $amount,
                 'addon_amount' => $total_addon_amount,
                 'coupon_amount' => $coupon_amount ?? 0,
                 'total_variation_amount' => $total_variation_amount,
