@@ -1100,14 +1100,13 @@ class CartController extends Controller
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
             $cartInfo = Cart::where('customer_id', $customer_id)->first();
-log::info($cartInfo->rocketResponse);
 
             $shipping_amount = 0;
             if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
                 $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
                 $tmp = [];
                 log::info('cart shiprocket response');
-log::info($response);
+log::debug($response);
                 if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
                     // log::info($response['data']['available_courier_companies']);
                     $recommended_id = $response['data']['recommended_by']['id'];
