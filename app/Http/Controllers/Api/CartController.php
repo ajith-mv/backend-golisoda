@@ -1099,7 +1099,7 @@ class CartController extends Controller
 
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
-            $cartInfo = Cart::where('customer_id', $customer_id)->last();
+            $cartInfo = Cart::where('customer_id', $customer_id)->latest()->first();
 
             $shipping_amount = 0;
             if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
