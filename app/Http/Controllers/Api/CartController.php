@@ -1105,7 +1105,7 @@ class CartController extends Controller
             if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
                 $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
                 $tmp = [];
-                dd($response);
+                Log::info($cartInfo->rocketResponse->shipping_charge_response_data);
                 log::info('cart shiprocket response');
                 if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
                     // log::info($response['data']['available_courier_companies']);
