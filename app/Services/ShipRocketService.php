@@ -232,7 +232,7 @@ class ShipRocketService
                     }
                 }
             }
-            return ['shipping_title' => $shipping_text, 'is_free' => $is_free, 'charges' => $shipping_amount];//$shipping_amount;
+            return ['shipping_title' => $shipping_text, 'is_free' => $is_free, 'charges' =>  number_format($shipping_amount, 2)];
         }
     }
 

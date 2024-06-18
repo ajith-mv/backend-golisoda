@@ -1288,7 +1288,7 @@ class CartController extends Controller
             $cart_address = CartAddress::create($ins_cart);
             $data = $service->getShippingRocketOrderDimensions($customer_id, $cart_info->guest_token ?? null, $cart_address->id);
         }
-        if (isset($data)) {
+        if (isset($data) && ($data['charges'] != 0 && ($data['is_free'] == 0))) {
             $chargeData = $data;
             // Log::debug("got the response from api for cart id " . $shipping_charge);
         } else {
