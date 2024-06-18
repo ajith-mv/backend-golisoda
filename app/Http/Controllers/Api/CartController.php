@@ -1099,7 +1099,7 @@ class CartController extends Controller
 
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
-            $cartInfo = Cart::where('customer_id', $customer_id)->first();
+            $cartInfo = Cart::where('customer_id', $customer_id)->last();
 
             $shipping_amount = 0;
             if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
@@ -1123,7 +1123,6 @@ class CartController extends Controller
 
                 }
             }
-log::info('works here');
             // if (isset($coupon_data) && !empty($coupon_data)) {
             //     $grand_total = $grand_total - $coupon_data['discount_amount'] ?? 0;
             // }
