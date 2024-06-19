@@ -718,15 +718,56 @@ class Couponcontroller extends Controller
 
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
-            if (isset($shippingfee_info) && !empty($shippingfee_info)) {
-                $tmp['selected_shipping_fees'] = array(
-                    'id' => $shippingfee_info->id,
-                    'charges' => $shippingfee_info->charges,
-                    'shipping_title' => $shippingfee_info->shipping_title
-                );
+            // if (isset($shippingfee_info) && !empty($shippingfee_info)) {
+            //     $tmp['selected_shipping_fees'] = array(
+            //         'id' => $shippingfee_info->id,
+            //         'charges' => $shippingfee_info->charges,
+            //         'shipping_title' => $shippingfee_info->shipping_title
+            //     );
 
-                $grand_total                = $grand_total + ($shippingfee_info->charges ?? 0);
+            //     $grand_total                = $grand_total + ($shippingfee_info->charges ?? 0);
+            // }
+
+            $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
+
+            $shipping_amount = 0;
+            $flat_charges = 0;
+            if (isset($cartInfoData) && !empty($cartInfoData)) {
+                foreach ($cartInfoData as $cartInfo) {
+
+                    if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
+                        $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
+                        log::info('coupon shiprocket response');
+                        if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
+                            // log::info($response['data']['available_courier_companies']);
+                            $available_courier_companies = (array)$response->data->available_courier_companies;
+                            $recommended_id = $response->data->recommended_by->id;
+                            log::info("coupon recommended id is" . $recommended_id);
+                            // foreach ($available_courier_companies as $company) {
+                            if (isset($available_courier_companies[$recommended_id - 1])) {
+                                $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
+                                $shipping_amount = $shipping_amount + number_format($recommended_shipping_data->freight_charge, 2);
+                                log::info("coupon freight charge is: " . $shipping_amount);
+                                // break;
+                            }
+                            // }
+
+                        }
+                    }
+                }
+                if ($shipping_amount == 0) {
+                    $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
+                    if (!empty($flat_charges)) {
+
+                        $shipping_amount = round($flat_charges * 50) ?? 0;
+                    }
+                }
+            } else {
+                $shipping_amount = 0;
             }
+
+            $grand_total                = $grand_total + number_format($shipping_amount, 2);
+
             if (isset($coupon_amount) && !empty($coupon_amount)) {
                 $grand_total = (float)$grand_total - (float)$coupon_amount ?? 0;
             }

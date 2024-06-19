@@ -803,6 +803,7 @@ class CartController extends Controller
         if ($checkCart) {
             $checkCart->addons()->delete();
             $checkCart->variationOptions()->delete();
+            $checkCart->rocketResponse()->delete();
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;
             $checkCart->delete();
@@ -836,6 +837,7 @@ class CartController extends Controller
                 foreach ($data as $item) {
                     $item->addons()->delete();
                     $item->variationOptions()->delete();
+                    $item->rocketResponse()->delete();
                 }
             }
 
