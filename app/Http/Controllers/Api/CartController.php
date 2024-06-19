@@ -866,6 +866,7 @@ class CartController extends Controller
     {
         $guest_token = $request->guest_token;
         $customer_id    = $request->customer_id;
+        $address    = $request->address;
         $selected_shipping = $request->selected_shipping ?? '';
         if (!($request->has('customer_id')) && ($guest_token == '' || is_null($guest_token))) {
             $tmp                = [];
@@ -897,10 +898,10 @@ class CartController extends Controller
             return $tmp;
             // }
         }
-        return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null);
+        return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null, $address);
     }
 
-    function getCartListAll($customer_id = null, $guest_token = null,  $shipping_info = null, $shipping_type = null, $selected_shipping = null, $coupon_data = null)
+    function getCartListAll($customer_id = null, $guest_token = null,  $shipping_info = null, $shipping_type = null, $selected_shipping = null, $coupon_data = null, $address = null)
     {
 
         // dd( $coupon_data );
@@ -1106,6 +1107,9 @@ class CartController extends Controller
 
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
+            if(isset($address) && (!empty($address))){
+                $this->getShippingChargesFromShiprocket($address, $customer_id);
+            }
             $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
 
             $shipping_amount = 0;
@@ -1284,6 +1288,87 @@ class CartController extends Controller
         $address = $request->address;
         $shippingAddress = CustomerAddress::find($address);
         $customer_id = $request->customer_id;
+
+        $cart_info = Cart::where('customer_id', $customer_id)->first(); //get from token
+        /**
+         * get volume metric value for kg
+         */
+        $all_cart = Cart::where('customer_id', $customer_id)->get();
+        $is_free = [];
+        $flat_charges = 0;
+        $overall_flat_charges = 0;
+        // dd( $all_cart );
+        if (isset($all_cart) && !empty($all_cart)) {
+            foreach ($all_cart as $item) {
+                $pro = $item->products;
+                $brandId = $pro->brand_id;
+                $brand_data = Brands::find($brandId);
+                if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                    $item->shipping_fee_id = 1;
+                    $item->update();
+                    $is_free[] = $brand_data->is_free_shipping;
+                }else{
+                    $item->shipping_fee_id = NULL;
+                    $item->update();
+                }
+                log::info($item->products->productMeasurement);
+                $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
+            }
+        }
+        $uniqueIsFree = array_unique($is_free);
+        if (count($uniqueIsFree) === 1 && reset($uniqueIsFree) == 1) {
+            $chargeData = ['shipping_title' => "Free Shipping", 'is_free' => 1, 'charges' => 0];
+
+            return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $chargeData), 200);
+        }
+        if (!empty($flat_charges)) {
+
+            $overall_flat_charges = $flat_charges * 50 ?? 0;
+        }
+
+        /**
+         *  End Metric value calculation
+         */
+        if (isset($from_type) && !empty($from_type)) {
+
+            CartAddress::where('customer_id', $customer_id)
+                ->where('address_type', $from_type)->delete();
+            $ins_cart = [];
+            $ins_cart['cart_token'] = $cart_info->guest_token;
+            $ins_cart['customer_id'] = $customer_id;
+            $ins_cart['address_type'] = $from_type;
+            $ins_cart['name'] = isset($shippingAddress->name) ? $shippingAddress->name : 'No name';
+            $ins_cart['email'] = $shippingAddress->email;
+            $ins_cart['mobile_no'] = $shippingAddress->mobile_no;
+            $ins_cart['address_line1'] = $shippingAddress->address_line1;
+            $ins_cart['country'] = 'india';
+            $ins_cart['post_code'] = $shippingAddress->PostCode->pincode;
+            $ins_cart['state'] = $shippingAddress->state;
+            $ins_cart['city'] = $shippingAddress->city;
+
+            $cart_address = CartAddress::create($ins_cart);
+            $data = $service->getShippingRocketOrderDimensions($customer_id, $cart_info->guest_token ?? null, $cart_address->id);
+        }
+        if (isset($data) && ($data['charges'] != 0 && ($data['is_free'] == 0))) {
+            $chargeData = $data;
+            // Log::debug("got the response from api for cart id " . $shipping_charge);
+        } else {
+            $chargeData = ['shipping_title' => "Flat Charge", 'is_free' => 0, 'charges' => round($overall_flat_charges)];
+            Log::debug("did not get the response from api for cart id, calculated shipping charge based on volumetric calculation - " . $cart_info->id);
+            Log::debug("overall flat charge" . $overall_flat_charges);
+        }
+        // $chargeData =  array('shiprocket_charges' => $data, 'flat_charge' => $shipping_charge);
+
+        return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $chargeData), 200);
+    }
+
+    public function getShippingChargesFromShiprocket($address, $customer_id)
+    {
+
+        // $from_type = $request->from_type;
+        // $address = $request->address;
+        $shippingAddress = CustomerAddress::find($address);
+        // $customer_id = $request->customer_id;
 
         $cart_info = Cart::where('customer_id', $customer_id)->first(); //get from token
         /**
