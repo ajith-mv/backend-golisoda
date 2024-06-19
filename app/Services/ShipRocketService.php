@@ -111,6 +111,7 @@ class ShipRocketService
      */
     public function getShippingRocketOrderDimensions($customer_id, $cart_token, $cart_address_id)
     {
+        log::info('function called successfully');
         if (isset($customer_id) && !empty($customer_id)) {
             $shipping_amount = 0;
             $shipping_text = "Standard Shipping";
