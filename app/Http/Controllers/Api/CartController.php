@@ -1372,7 +1372,7 @@ class CartController extends Controller
 
     public function getShippingChargesFromShiprocket($address, $customer_id)
     {
-        // $from_type = $request->from_type;
+        $from_type = "shipping";
         // $address = $request->address;
         $shippingAddress = CustomerAddress::find($address);
         // $customer_id = $request->customer_id;
