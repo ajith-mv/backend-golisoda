@@ -254,6 +254,7 @@ class ShipRocketService
                     
                 }
             }
+            log::info('got the shipping amount as'.number_format($shipping_amount, 2));
             return ['shipping_title' => $shipping_text, 'is_free' => $is_free, 'charges' =>  number_format($shipping_amount, 2)];
         }
     }
