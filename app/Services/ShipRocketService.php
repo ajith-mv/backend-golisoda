@@ -132,13 +132,12 @@ class ShipRocketService
                         if ($citems->products) {
                             $pro = $citems->products;
                             $product_id = $pro->id;
+                            $variation_option_id = [];
                             $variationData = CartProductVariationOption::where([['cart_id', $citems->id],['product_id', $product_id]])->get();
                             if(isset($variationData) && !empty($variationData)){
                                 foreach($variationData as $variationOptionData){
                                     $variation_option_id[] = $variationOptionData->variation_option_id;
                                 }
-                            }else{
-                                $variation_option_id = [];
                             }
                             $pro_measure = DB::table('product_measurements')
                                 ->select("weight")
