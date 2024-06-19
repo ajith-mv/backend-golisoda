@@ -161,7 +161,7 @@ class ShipRocketService
                                 $tax_total =  $tax_total + ($tax['gstAmount'] * $citems->quantity) ?? 0;
                             }
                             $tmp = [
-                                'hsn' => $pro->hsn_code ?? null,
+                                // 'hsn' => $pro->hsn_code ?? null,
                                 'name' => $pro->product_name,
                                 'sku' => $pro->sku.implode('-', $variation_option_id),
                                 'tax' => $tax_total ?? '',
