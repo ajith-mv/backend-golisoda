@@ -1107,12 +1107,13 @@ class CartController extends Controller
 
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
+            $shipping_amount = 0;
             if(isset($address) && (!empty($address))){
-                $this->getShippingChargesFromShiprocket($address, $customer_id);
+                $shipping_charges = $this->getShippingChargesFromShiprocket($address, $customer_id);
             }
             $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
 
-            $shipping_amount = 0;
+           
             $flat_charges = 0;
             if (isset($cartInfoData) && !empty($cartInfoData)) {
                 foreach ($cartInfoData as $cartInfo) {
@@ -1435,11 +1436,10 @@ class CartController extends Controller
             // Log::debug("got the response from api for cart id " . $shipping_charge);
         } else {
             $chargeData = ['shipping_title' => "Flat Charge", 'is_free' => 0, 'charges' => round($overall_flat_charges)];
-            Log::debug("did not get the response from api for cart id, calculated shipping charge based on volumetric calculation - " . $cart_info->id);
-            Log::debug("overall flat charge" . $overall_flat_charges);
+            
         }
         // $chargeData =  array('shiprocket_charges' => $data, 'flat_charge' => $shipping_charge);
-
-        return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $chargeData), 200);
+        log::debug('got the value after adding to cart api');
+        return $chargeData;
     }
 }
