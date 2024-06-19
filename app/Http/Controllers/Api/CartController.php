@@ -1435,7 +1435,9 @@ class CartController extends Controller
             $ins_cart['city'] = $shippingAddress->city;
 
             $cart_address = CartAddress::create($ins_cart);
+            log::info('works here');
             $data = $this->rocketService->getShippingRocketOrderDimensions($customer_id, $cart_info->guest_token ?? null, $cart_address->id);
+            log::info('works here 1');
         }
         if (isset($data) && ($data['charges'] != 0 && ($data['is_free'] == 0))) {
             $chargeData = $data;
