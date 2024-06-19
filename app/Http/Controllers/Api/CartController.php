@@ -32,6 +32,13 @@ use Seshac\Shiprocket\Shiprocket;
 
 class CartController extends Controller
 {
+    protected $rocketService;
+
+    public function __construct(ShipRocketService $rocketService)
+    {
+        $this->rocketService = $rocketService;
+    }
+
     public function addToCart(Request $request)
     {
 
@@ -862,7 +869,7 @@ class CartController extends Controller
     }
 
 
-    public function getCarts(Request $request, ShipRocketService $service)
+    public function getCarts(Request $request)
     {
         $guest_token = $request->guest_token;
         $customer_id    = $request->customer_id;
@@ -897,9 +904,6 @@ class CartController extends Controller
             );
             return $tmp;
             // }
-        }
-        if(isset($address) && (!empty($address))){
-            $shipping_charges = $this->getShippingChargesFromShiprocket($address, $customer_id, $service);
         }
         return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null, $address);
     }
@@ -1111,7 +1115,9 @@ class CartController extends Controller
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
             $shipping_amount = 0;
-            
+            if(isset($address) && (!empty($address))){
+                $shipping_charges = $this->getShippingChargesFromShiprocket($address, $customer_id);
+            }
             $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
 
            
@@ -1364,7 +1370,7 @@ class CartController extends Controller
         return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $chargeData), 200);
     }
 
-    public function getShippingChargesFromShiprocket($address, $customer_id, $service)
+    public function getShippingChargesFromShiprocket($address, $customer_id)
     {
         // $from_type = $request->from_type;
         // $address = $request->address;
@@ -1429,7 +1435,7 @@ class CartController extends Controller
             $ins_cart['city'] = $shippingAddress->city;
 
             $cart_address = CartAddress::create($ins_cart);
-            $data = $service->getShippingRocketOrderDimensions($customer_id, $cart_info->guest_token ?? null, $cart_address->id);
+            $data = $this->rocketService->getShippingRocketOrderDimensions($customer_id, $cart_info->guest_token ?? null, $cart_address->id);
         }
         if (isset($data) && ($data['charges'] != 0 && ($data['is_free'] == 0))) {
             $chargeData = $data;
