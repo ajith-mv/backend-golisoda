@@ -15,7 +15,7 @@ class OrderMail extends Mailable
     public $title;
     public $filePath;
 
-    public function __construct($data, $title)
+    public function __construct($data, $title, $filePath)
     {
         $this->data = $data;
         $this->title = $title;
