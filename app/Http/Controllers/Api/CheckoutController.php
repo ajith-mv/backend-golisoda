@@ -1017,23 +1017,26 @@ class CheckoutController extends Controller
                     $order_info = $brandOrderData[0]->order;
                     $variations = $this->getVariations($order_info);
                     $brand_address = BrandVendorLocation::where([['brand_id', $singleBrandId], ['is_default', 1]])->first();
-                    $pdf = PDF::loadView('platform.vendor_invoice.index', compact('brand_address','order_info', 'globalInfo', 'variations', 'singleBrandId'));
-                    Storage::put('public/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf', $pdf->output());
-                    $email_slug = 'new-order';
-                    $to_email_address = 'dalbinshimy@gmail.com';
-                    $globalInfo = GlobalSettings::first();
-                    $filePath = 'storage/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf';
-                    $extract = array(
-                        'name' => $order_info->billing_name,
-                        'regards' => $globalInfo->site_name,
-                        'company_website' => '',
-                        'company_mobile_no' => $globalInfo->site_mobile_no,
-                        'company_address' => $globalInfo->address,
-                        'dynamic_content' => '',
-                        'order_id' => $order_info->order_no
-                    );
-
-                    $this->sendEmailNotificationByArray($email_slug, $extract, $to_email_address, $filePath);
+                    if(isset($brand_address) && (!empty($brand_address))){
+                        $pdf = PDF::loadView('platform.vendor_invoice.index', compact('brand_address','order_info', 'globalInfo', 'variations', 'singleBrandId'));
+                        Storage::put('public/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf', $pdf->output());
+                        $email_slug = 'new-order-vendor';
+                        $to_email_address = $brand_address->email_id;
+                        $globalInfo = GlobalSettings::first();
+                        $filePath = 'storage/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf';
+                        $extract = array(
+                            'name' => $brand_address->branch_name,
+                            'regards' => $globalInfo->site_name,
+                            'company_website' => '',
+                            'company_mobile_no' => $globalInfo->site_mobile_no,
+                            'company_address' => $globalInfo->address,
+                            'dynamic_content' => '',
+                            'order_id' => $order_info->order_no
+                        );
+    
+                        $this->sendEmailNotificationByArray($email_slug, $extract, $to_email_address, $filePath);
+                    }
+                    
                 }
             }
         }
