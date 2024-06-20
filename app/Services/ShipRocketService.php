@@ -310,7 +310,7 @@ class ShipRocketService
 
     public function getVendorPostCode($brand_id)
     {
-        $vendor_post_code = '600002';
+        $vendor_post_code = env('DEFAULT_VENDOR_POSTCODE');
 
         $vendor_location_data = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])->first();
         if (isset($vendor_location_data) && (!empty($vendor_location_data))) {
