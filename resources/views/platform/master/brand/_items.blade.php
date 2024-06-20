@@ -7,7 +7,7 @@
             @if (isset($info->vendorLocation) && count($info->vendorLocation) > 0)
                 @foreach ($info->vendorLocation as $vendor_location)
                     <div class="mb-8" data-repeater-item>
-                        <div class="form-group row">
+                        <div class="form-group row mb-8">
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">Branch name</label>
                                 <input type="text" name="branch_name" class="form-control  required"

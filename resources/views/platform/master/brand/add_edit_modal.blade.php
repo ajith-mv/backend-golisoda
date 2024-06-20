@@ -34,7 +34,7 @@
                         <input type="hidden" name="id" value="{{ $info->id ?? '' }}">
                         <input type="hidden" name="from" id="from" value="{{ $from ?? '' }}">
 
-                        <div class="fv-row mb-7">
+                        <div class="row mb-7">
                             <div class="col-md-6">
                                 <label class="required fw-bold fs-6 mb-2">Brand Name</label>
                                 <input type="text" name="brand_name"
