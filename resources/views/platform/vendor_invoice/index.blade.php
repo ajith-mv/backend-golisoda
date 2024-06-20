@@ -197,6 +197,7 @@
                 $i = 1;
             @endphp
             @foreach ($order_info->orderItems as $item)
+            @if($item->product->brand_id == $singleBrandId)
             @php
             $id=$item->id;
             $OrderProductVariationOption =  App\Models\OrderProductVariationOption::where('order_product_id', $id)->get();
@@ -246,6 +247,7 @@
                 @php
                     $i++;
                 @endphp
+                @endif
             @endforeach
         @endif
         @if (isset($order_info->orderAddons) && count($order_info->orderAddons))
