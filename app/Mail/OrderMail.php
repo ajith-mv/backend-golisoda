@@ -13,13 +13,13 @@ class OrderMail extends Mailable
 
     public $data;
     public $title;
-    // public $filePath;
+    public $filePath;
 
     public function __construct($data, $title)
     {
         $this->data = $data;
         $this->title = $title;
-        // $this->filePath = $filePath;
+        $this->filePath = $filePath;
     }
 
     /**
@@ -29,8 +29,8 @@ class OrderMail extends Mailable
      */
     public function build()
     {
-        return $this->markdown('email.common.dynamicContent')->subject($this->title);
-        // ->attach( public_path($this->filePath))
+        return $this->markdown('email.common.dynamicContent')->subject($this->title)
+        ->attach( public_path($this->filePath));
         // return $this->markdown('email.testEmail');
     }
 }
