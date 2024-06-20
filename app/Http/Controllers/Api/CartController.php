@@ -1391,20 +1391,23 @@ class CartController extends Controller
         $flat_charges = 0;
         // dd( $all_cart );
         if (isset($all_cart) && !empty($all_cart)) {
+            log::info('works here');
             foreach ($all_cart as $item) {
+                log::info('works here 1');
                 $pro = $item->products;
                 $brandId = $pro->brand_id;
                 $brand_data = Brands::find($brandId);
                 if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                    log::info('works here 1');
                     $item->shipping_fee_id = 1;
                     $item->update();
                     $is_free[] = $brand_data->is_free_shipping;
-                    log::info($brand_data->is_free_shipping);
+                    log::debug($brand_data->is_free_shipping);
                 }else{
                     $item->shipping_fee_id = NULL;
                     $item->update();
                 }
-                log::info($item->products->productMeasurement);
+                log::debug($item->products->productMeasurement);
                 $all_flat_charges[] = getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
 
                 // $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
@@ -1417,8 +1420,8 @@ class CartController extends Controller
             }
         }
         $uniqueIsFree = array_unique($is_free);
-        log::info($is_free);
-        log::info($uniqueIsFree);
+        log::debug($is_free);
+        log::debug($uniqueIsFree);
         if (count($uniqueIsFree) === 1 && reset($uniqueIsFree) == 1) {
             $chargeData = ['shipping_title' => "Free Shipping", 'is_free' => 1, 'charges' => 0];
 
