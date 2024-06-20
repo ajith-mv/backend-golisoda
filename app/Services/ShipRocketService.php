@@ -206,6 +206,7 @@ class ShipRocketService
                             log::info($uniqueBrandIds);
                             $cart_total = 0;
                             foreach ($uniqueBrandIds as $brandId) {
+                                log::info($createOrderData[$brandId]);
                                 // $brand_data = Brands::find($brandId);
                                 // if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                                 //     $shipping_text = "Free Shipping";
