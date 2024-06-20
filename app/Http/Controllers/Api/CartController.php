@@ -1328,7 +1328,7 @@ class CartController extends Controller
         }
         $uniqueIsFree = array_unique($is_free);
         if (count($uniqueIsFree) === 1 && reset($uniqueIsFree) == 1) {
-            $chargeData = ['shipping_title' => "Free Shipping", 'is_free' => 1, 'charges' => 0];
+            $chargeData = ['shipping_title' => "Free Shipping1", 'is_free' => 1, 'charges' => 0];
 
             return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $chargeData), 200);
         }
