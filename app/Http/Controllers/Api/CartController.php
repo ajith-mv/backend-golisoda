@@ -1399,6 +1399,7 @@ class CartController extends Controller
                     $item->shipping_fee_id = 1;
                     $item->update();
                     $is_free[] = $brand_data->is_free_shipping;
+                    log::info($brand_data->is_free_shipping);
                 }else{
                     $item->shipping_fee_id = NULL;
                     $item->update();
