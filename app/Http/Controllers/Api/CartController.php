@@ -1383,8 +1383,9 @@ class CartController extends Controller
          */
         $all_cart = Cart::where('customer_id', $customer_id)->get();
         $is_free = [];
-        $flat_charges = 0;
+        $all_flat_charges = [];
         $overall_flat_charges = 0;
+        $flat_charges = 0;
         // dd( $all_cart );
         if (isset($all_cart) && !empty($all_cart)) {
             foreach ($all_cart as $item) {
@@ -1400,7 +1401,15 @@ class CartController extends Controller
                     $item->update();
                 }
                 log::info($item->products->productMeasurement);
-                $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
+                $all_flat_charges[] = getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
+
+                // $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
+            }
+            if (!empty($flat_charges)) {
+
+                $volume_metric_weight = max($all_flat_charges);
+    
+                $flat_charges = $volume_metric_weight * 50 ?? 0;
             }
         }
         $uniqueIsFree = array_unique($is_free);
