@@ -1116,18 +1116,18 @@ class CartController extends Controller
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
             $shipping_amount = 0;
-            if(isset($address) && (!empty($address))){
+            if (isset($address) && (!empty($address))) {
                 $shipping_charges = $this->getShippingChargesFromShiprocket($address, $customer_id);
             }
             $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
 
-           
+
             $flat_charges = 0;
             if (isset($cartInfoData) && !empty($cartInfoData)) {
                 foreach ($cartInfoData as $cartInfo) {
 
                     if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
-                        log::info('cart shiprocket response'.$cartInfo->rocketResponse->cart_token);
+                        log::info('cart shiprocket response' . $cartInfo->rocketResponse->cart_token);
                         $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
                         log::info('cart shiprocket response');
                         if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
@@ -1136,14 +1136,13 @@ class CartController extends Controller
                             $recommended_id = $response->data->recommended_courier_company_id;
                             log::info("checkout recommended id is" . $recommended_id);
                             foreach ($available_courier_companies as $company) {
-                            if ($company->courier_company_id == $recommended_id) {
-                                // $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
-                                $shipping_amount = $shipping_amount + number_format($company->freight_charge, 2);
-                                log::info("checkout freight charge is: " . $shipping_amount);
-                                break;
+                                if ($company->courier_company_id == $recommended_id) {
+                                    // $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
+                                    $shipping_amount = $shipping_amount + number_format($company->freight_charge, 2);
+                                    log::info("checkout freight charge is: " . $shipping_amount);
+                                    break;
+                                }
                             }
-                            }
-    
                         }
                     }
                 }
@@ -1314,20 +1313,21 @@ class CartController extends Controller
                 $brandId = $pro->brand_id;
                 CartShiprocketResponse::where('cart_token', $item->cart_order_no)->delete();
                 $brand_data = Brands::find($brandId);
-                if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
-                    $item->shipping_fee_id = 1;
-                    $item->update();
-                    $is_free[] = $brand_data->is_free_shipping;
-                }else{
-                    $item->shipping_fee_id = NULL;
-                    $item->update();
+                if (isset($brand_data)) {
+                    if ($brand_data->is_free_shipping == 1) {
+                        $item->shipping_fee_id = 1;
+                        $item->update();
+                        $is_free[] = $brand_data->is_free_shipping;
+                    } else {
+                        $item->shipping_fee_id = NULL;
+                        $item->update();
+                    }
                 }
                 log::info($item->products->productMeasurement);
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
             }
         }
         $uniqueIsFree = array_unique($is_free);
-        dd($is_free);
         if (count($uniqueIsFree) === 1 && reset($uniqueIsFree) == 1) {
             $chargeData = ['shipping_title' => "Free Shipping1", 'is_free' => 1, 'charges' => 0];
 
@@ -1404,7 +1404,7 @@ class CartController extends Controller
                     $item->update();
                     $is_free[] = $brand_data->is_free_shipping;
                     log::debug($brand_data->is_free_shipping);
-                }else{
+                } else {
                     $item->shipping_fee_id = NULL;
                     $item->update();
                 }
@@ -1416,7 +1416,7 @@ class CartController extends Controller
             if (!empty($flat_charges)) {
 
                 $volume_metric_weight = max($all_flat_charges);
-    
+
                 $flat_charges = $volume_metric_weight * 50 ?? 0;
             }
         }
@@ -1463,7 +1463,6 @@ class CartController extends Controller
             // Log::debug("got the response from api for cart id " . $shipping_charge);
         } else {
             $chargeData = ['shipping_title' => "Flat Charge", 'is_free' => 0, 'charges' => round($overall_flat_charges)];
-            
         }
         // $chargeData =  array('shiprocket_charges' => $data, 'flat_charge' => $shipping_charge);
         log::debug('got the value after adding to cart api');
