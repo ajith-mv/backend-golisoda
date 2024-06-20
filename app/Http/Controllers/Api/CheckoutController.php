@@ -8,6 +8,7 @@ use App\Models\BrandOrder;
 use App\Models\Cart;
 use App\Models\GlobalSettings;
 use App\Models\Master\Brands;
+use App\Models\Master\BrandVendorLocation;
 use App\Models\Master\EmailTemplate;
 use App\Models\Master\OrderStatus;
 use App\Models\Offers\Coupons;
@@ -1015,7 +1016,8 @@ class CheckoutController extends Controller
                 if ($brandOrderData) {
                     $order_info = $brandOrderData[0]->order;
                     $variations = $this->getVariations($order_info);
-                    $pdf = PDF::loadView('platform.invoice.index', compact('order_info', 'globalInfo', 'variations'));
+                    $brand_address = BrandVendorLocation::where([['brand_id', $singleBrandId], ['is_default', 1]])->first();
+                    $pdf = PDF::loadView('platform.vendor_invoice.index', compact('brand_address','order_info', 'globalInfo', 'variations'));
                     Storage::put('public/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf', $pdf->output());
                     $email_slug = 'new-order';
                     $to_email_address = 'dalbinshimy@gmail.com';
