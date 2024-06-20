@@ -16,6 +16,7 @@ use App\Models\GlobalSettings;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Order;
 use App\Models\CartProductVariationOption;
+use App\Models\CartShiprocketResponse;
 use App\Models\Master\Brands;
 use App\Models\Master\Variation;
 use App\Models\Offers\CouponCategory;
@@ -1311,6 +1312,7 @@ class CartController extends Controller
             foreach ($all_cart as $item) {
                 $pro = $item->products;
                 $brandId = $pro->brand_id;
+                CartShiprocketResponse::where('cart_token', $item->cart_order_no)->delete();
                 $brand_data = Brands::find($brandId);
                 if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                     $item->shipping_fee_id = 1;
