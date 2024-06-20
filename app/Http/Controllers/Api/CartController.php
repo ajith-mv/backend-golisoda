@@ -1327,7 +1327,7 @@ class CartController extends Controller
             }
         }
         $uniqueIsFree = array_unique($is_free);
-        dd($uniqueIsFree);
+        dd($is_free);
         if (count($uniqueIsFree) === 1 && reset($uniqueIsFree) == 1) {
             $chargeData = ['shipping_title' => "Free Shipping1", 'is_free' => 1, 'charges' => 0];
 
