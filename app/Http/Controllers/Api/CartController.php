@@ -1399,15 +1399,16 @@ class CartController extends Controller
                 $pro = $item->products;
                 $brandId = $pro->brand_id;
                 $brand_data = Brands::find($brandId);
-                if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
-                    log::info('works here 1');
-                    $item->shipping_fee_id = 1;
-                    $item->update();
-                    $is_free[] = $brand_data->is_free_shipping;
-                    log::debug($brand_data->is_free_shipping);
-                } else {
-                    $item->shipping_fee_id = NULL;
-                    $item->update();
+                if (isset($brand_data)) {
+                        $is_free[] = $brand_data->is_free_shipping;
+
+                    if ($brand_data->is_free_shipping == 1) {
+                        $item->shipping_fee_id = 1;
+                        $item->update();
+                    } else {
+                        $item->shipping_fee_id = NULL;
+                        $item->update();
+                    }
                 }
                 log::debug($item->products->productMeasurement);
                 $all_flat_charges[] = getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
