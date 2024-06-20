@@ -297,13 +297,12 @@ class ShipRocketService
         $amount = null;
         if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
             // log::info($response['data']['available_courier_companies']);
-            $recommended_id = $response['data']['recommended_by']['id'];
+            $recommended_id = $response['data']['recommended_courier_company_id'];
             log::info("recommended id is" . $recommended_id);
             foreach ($response['data']['available_courier_companies'] as $company) {
-                if (isset($response['data']['available_courier_companies'][$recommended_id - 1])) {
-                    $amount = $response['data']['available_courier_companies'][$recommended_id - 1]['freight_charge'];
+                if ($company['courier_company_id'] == $recommended_id) {
+                    $amount = $company['freight_charge'];
                     log::info("freight charge is: " . $amount);
-                    break;
                 }
             }
         }
