@@ -740,18 +740,18 @@ class Couponcontroller extends Controller
                         log::info('coupon shiprocket response');
                         if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
                             // log::info($response['data']['available_courier_companies']);
-                            $available_courier_companies = (array)$response->data->available_courier_companies;
-                            $recommended_id = $response->data->recommended_by->id;
-                            log::info("coupon recommended id is" . $recommended_id);
+                            $available_courier_companies = $response->data->available_courier_companies;
+                            $recommended_id = $response->data->recommended_courier_company_id;
+                            log::info("checkout recommended id is" . $recommended_id);
                             // foreach ($available_courier_companies as $company) {
-                            if (isset($available_courier_companies[$recommended_id - 1])) {
-                                $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
-                                $shipping_amount = $shipping_amount + number_format($recommended_shipping_data->freight_charge, 2);
-                                log::info("coupon freight charge is: " . $shipping_amount);
+                            if ($available_courier_companies->courier_company_id == $recommended_id) {
+                                // $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
+                                $shipping_amount = $shipping_amount + number_format($available_courier_companies->freight_charge, 2);
+                                log::info("checkout freight charge is: " . $shipping_amount);
                                 // break;
                             }
                             // }
-
+    
                         }
                     }
                 }
