@@ -753,9 +753,11 @@ class Couponcontroller extends Controller
                             }
     
                         }
+                        $shipping_name = "Standard Shipping";
                     }
                 }
                 if ($shipping_amount == 0) {
+                    $shipping_name = "Flat Shipping";
                     $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
                     if (!empty($flat_charges)) {
 
@@ -763,6 +765,7 @@ class Couponcontroller extends Controller
                     }
                 }
             } else {
+                $shipping_name = "Free Shipping";
                 $shipping_amount = 0;
             }
 
@@ -807,6 +810,7 @@ class Couponcontroller extends Controller
                 'product_tax_exclusive_total_without_format' => round($product_tax_exclusive_total),
                 'tax_total' => number_format($tax_total, 2),
                 'tax_percentage' => number_format(round($tax_percentage), 2),
+                'shipping_name' => $shipping_name,
                 'shipping_charge' => $shippingfee_info->charges ?? 0,
                 'coupon_amount' => $coupon_amount ?? 0,
                 'addon_amount' => $total_addon_amount,
