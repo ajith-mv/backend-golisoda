@@ -811,7 +811,7 @@ class Couponcontroller extends Controller
                 'tax_total' => number_format($tax_total, 2),
                 'tax_percentage' => number_format(round($tax_percentage), 2),
                 'shipping_name' => $shipping_name,
-                'shipping_charge' => $shippingfee_info->charges ?? 0,
+                'shipping_charge' => number_format($shipping_amount, 2),
                 'coupon_amount' => $coupon_amount ?? 0,
                 'addon_amount' => $total_addon_amount,
                 'has_pickup_store' => $has_pickup_store,
