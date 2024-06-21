@@ -742,12 +742,12 @@ class Couponcontroller extends Controller
                             // log::info($response['data']['available_courier_companies']);
                             $available_courier_companies = $response->data->available_courier_companies;
                             $recommended_id = $response->data->recommended_courier_company_id;
-                            log::info("checkout recommended id is" . $recommended_id);
+                            log::info("coupon recommended id is" . $recommended_id);
                             foreach ($available_courier_companies as $company) {
                             if ($company->courier_company_id == $recommended_id) {
                                 // $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
                                 $shipping_amount = $shipping_amount + number_format($company->freight_charge, 2);
-                                log::info("checkout freight charge is: " . $shipping_amount);
+                                log::info("coupon freight charge is: " . $shipping_amount);
                                 break;
                             }
                             }
