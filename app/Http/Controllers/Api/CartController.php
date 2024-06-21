@@ -70,7 +70,7 @@ class CartController extends Controller
             $q->where('guest_token', $guest_token);
         })->first();
 
-
+        if (isset($variation_option_ids) && !empty($variation_option_ids)) {
         if (isset($checkCart) && !empty($checkCart)) {
             if ($type == 'delete') {
                 $checkCart->delete();
@@ -88,6 +88,7 @@ class CartController extends Controller
                         $cart_ids[] = $singleCart->id;
                     }
                 }
+                
                 $check_cart_variation_option = CartProductVariationOption::select('product_id')->whereIn('cart_id', $cart_ids)->whereIn('variation_option_id', $variation_option_ids)->where('product_id', $product_id)->groupBy('product_id')->havingRaw('COUNT(DISTINCT variation_option_id)  = ?', [count($variation_option_ids)])->exists();
                 if (!$check_cart_variation_option) {
                     log::info('products with same variation does not exists in the cart');
@@ -241,6 +242,51 @@ class CartController extends Controller
                 $data = [];
             }
         }
+    }else{
+        if (isset($checkCart) && !empty($checkCart)) {
+            if ($type == 'delete') {
+                $checkCart->delete();
+            } else {
+                $error = 0;
+                $message = 'Cart added successful';
+                $product_quantity = $checkCart->quantity + $quantity;
+                if ($product_info->quantity <= $product_quantity) {
+                    $product_quantity = $product_info->quantity;
+                }
+
+                $checkCart->quantity  = $product_quantity;
+                $checkCart->sub_total = $product_quantity * $checkCart->price;
+                $checkCart->update();
+
+                $data = $this->getCartListAll($customer_id, $guest_token);
+            }
+        } else {
+            $customer_info = Customer::find($request->customer_id);
+
+            if (isset($customer_info) && !empty($customer_info) || !empty($request->guest_token)) {
+
+                if ($product_info->quantity <= $quantity) {
+                    $quantity = $product_info->quantity;
+                }
+                $ins['customer_id']     = $request->customer_id;
+                $ins['product_id']      = $product_id;
+                $ins['guest_token']     = $request->guest_token ?? null;
+                $ins['quantity']        = $quantity ?? 1;
+                $ins['price']           = (float)$product_info->mrp;
+                $ins['sub_total']       = $product_info->mrp * $quantity ?? 1;
+                $ins['cart_order_no']   = 'ORD' . date('ymdhis');
+
+                $cart_id = Cart::create($ins)->id;
+                $error = 0;
+                $message = 'Cart added successful';
+                $data = $this->getCartListAll($customer_id, $guest_token);
+            } else {
+                $error = 1;
+                $message = 'Customer Data not available';
+                $data = [];
+            }
+        }
+    }
 
 
 
