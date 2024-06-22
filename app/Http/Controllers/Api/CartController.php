@@ -1347,6 +1347,7 @@ class CartController extends Controller
         $address = $request->address;
         $shippingAddress = CustomerAddress::find($address);
         log::debug($shippingAddress);
+        log::debug('address id is'. $address);
         $customer_id = $request->customer_id;
 
         $cart_info = Cart::where('customer_id', $customer_id)->first(); //get from token
