@@ -199,7 +199,7 @@ class CustomerController extends Controller
                             }
                         }
                     }
-                    
+                }
                 $cart_count = Cart::where('customer_id', $checkCustomer->id)->get();
                 $total_cart_count = count($cart_count);
             } else {
