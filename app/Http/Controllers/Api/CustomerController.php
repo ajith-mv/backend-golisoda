@@ -159,39 +159,47 @@ class CustomerController extends Controller
                     }
                     $cartItems = Cart::where('customer_id', $checkCustomer->id)->get();
 
+
                     if ($cartItems->count() > 0) {
-                        // Aggregate quantities for duplicate products
+                        // Aggregate quantities for duplicate product-variation combinations
                         $aggregatedCart = [];
                         foreach ($cartItems as $item) {
                             $product_id = $item->product_id;
-                            if (isset($aggregatedCart[$product_id])) {
-                                $aggregatedCart[$product_id]['quantity'] += $item->quantity;
-                                $aggregatedCart[$product_id]['ids'][] = $item->id;
+                            $variation_option_ids = [];
+                    
+                            if (isset($item->variationOptions) && !empty($item->variationOptions)) {
+                                foreach ($item->variationOptions as $variationids) {
+                                    $variation_option_ids[] = $variationids->variation_option_id;
+                                }
+                            }
+                            // Sort the variation option IDs to ensure the key is consistent regardless of the order
+                            sort($variation_option_ids);
+                            $key = $product_id . '_' . implode('_', $variation_option_ids); // Unique key for each product-variation combination
+                    
+                            if (isset($aggregatedCart[$key])) {
+                                $aggregatedCart[$key]['quantity'] += $item->quantity;
+                                $aggregatedCart[$key]['ids'][] = $item->id;
                             } else {
-                                $aggregatedCart[$product_id] = [
+                                $aggregatedCart[$key] = [
                                     'quantity' => $item->quantity,
                                     'ids' => [$item->id],
                                     'first_id' => $item->id,
-                                    'other_ids' => [],
                                 ];
                             }
                         }
-
-                        // Update quantities for the first occurrence and collect IDs for duplicates
-                        foreach ($aggregatedCart as $product_id => $data) {
+                    
+                        // Update quantities for all occurrences and set others' quantities to 0
+                        foreach ($aggregatedCart as $key => $data) {
                             // Update the quantity of the first occurrence
                             Cart::where('id', $data['first_id'])->update(['quantity' => $data['quantity']]);
-
-                            // Collect other IDs for deletion
-                            $data['other_ids'] = array_slice($data['ids'], 1);
-
-                            if (!empty($data['other_ids'])) {
-                                // Remove duplicates
-                                Cart::whereIn('id', $data['other_ids'])->delete();
+                    
+                            // Set the quantities of the other occurrences to 0
+                            if (count($data['ids']) > 1) {
+                                Cart::whereIn('id', array_slice($data['ids'], 1))->update(['quantity' => 0]);
                             }
                         }
                     }
-                }
+                    
                 $cart_count = Cart::where('customer_id', $checkCustomer->id)->get();
                 $total_cart_count = count($cart_count);
             } else {
