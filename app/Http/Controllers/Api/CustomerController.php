@@ -184,18 +184,22 @@ class CustomerController extends Controller
                                     'quantity' => $item->quantity,
                                     'ids' => [$item->id],
                                     'first_id' => $item->id,
+                                    'other_ids' => [],
                                 ];
                             }
                         }
                     
-                        // Update quantities for all occurrences and set others' quantities to 0
+                        // Update quantities for the first occurrence and collect IDs for duplicates
                         foreach ($aggregatedCart as $key => $data) {
                             // Update the quantity of the first occurrence
                             Cart::where('id', $data['first_id'])->update(['quantity' => $data['quantity']]);
                     
-                            // Set the quantities of the other occurrences to 0
-                            if (count($data['ids']) > 1) {
-                                Cart::whereIn('id', array_slice($data['ids'], 1))->update(['quantity' => 0]);
+                            // Collect other IDs for deletion
+                            $data['other_ids'] = array_slice($data['ids'], 1);
+                    
+                            if (!empty($data['other_ids'])) {
+                                // Remove duplicates
+                                Cart::whereIn('id', $data['other_ids'])->delete();
                             }
                         }
                     }
