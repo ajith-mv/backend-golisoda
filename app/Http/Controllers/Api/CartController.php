@@ -1397,7 +1397,7 @@ class CartController extends Controller
             CartAddress::where('customer_id', $customer_id)
                 ->where('address_type', $from_type)->delete();
             $ins_cart = [];
-            $ins_cart['cart_token'] = $cart_info->guest_token;
+            $ins_cart['cart_token'] = $cart_info->cart_order_no;
             $ins_cart['customer_id'] = $customer_id;
             $ins_cart['address_type'] = $from_type;
             $ins_cart['name'] = isset($shippingAddress->name) ? $shippingAddress->name : 'No name';
