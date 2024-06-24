@@ -1162,6 +1162,7 @@ class CartController extends Controller
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
             $shipping_amount = 0;
+            $shipping_name = '';
             if (isset($address) && (!empty($address))) {
                 $shipping_charges = $this->getShippingChargesFromShiprocket($address, $customer_id);
             }
