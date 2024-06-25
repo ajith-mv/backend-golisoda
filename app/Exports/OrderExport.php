@@ -10,7 +10,7 @@ class OrderExport implements FromView
 {
     public function view(): View
     {
-        $list = Order::all();
+        $list = Order::with('payments')->get();
         return view('platform.order._excel', compact('list'));
     }
 }
