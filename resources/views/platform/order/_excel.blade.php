@@ -17,6 +17,7 @@
             <th> Billing Address </th>
             <th> Billing City </th>
             <th> Billing State </th>
+            <th> Billing Postcode </th>
             <th> Product SubTotal </th>
             <th> Tax Amount</th>
             <th> Tax Percentage </th>
@@ -42,6 +43,7 @@
                 <td> {{ $item->billing_address_line1 }}</td>
                 <td> {{ $item->billing_city }}</td>
                 <td> {{ $item->billing_state }}</td>
+                <td> {{ $item->billing_pincode->pincode }}</td>
                 <td>{{ $item->sub_total }}</td>
                 <td> {{ $item->tax_amount }} </td>
                 <td> {{ $item->tax_percentage }} %</td>
