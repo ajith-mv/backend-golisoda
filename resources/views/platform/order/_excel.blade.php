@@ -22,7 +22,7 @@
             <th> Tax Percentage </th>
             <th> Coupon Amount </th>
             <th> Shipping Amount </th>
-            <th> Order Amount </th>
+            <th> Total Order Amount </th>
             <th> Order Status </th>
             <th> Payment id </th>
             <th> Payment Mode </th>
