@@ -36,4 +36,8 @@ class OrderProduct extends Model
     public function chosenVariation(){
         return $this->hasMany(OrderProductVariationOption::class, 'order_product_id', 'id');
     }
+
+    public function vendorTracking(){
+        return $this->hasOne(BrandOrder::class, 'order_product_id', 'id');
+    }
 }

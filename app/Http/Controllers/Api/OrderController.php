@@ -179,6 +179,8 @@ class OrderController extends Controller
                     $tmp1['tax_percentage'] = $pro->tax_percentage;
                     $tmp1['quantity'] = $pro->quantity;
                     $tmp1['sub_total'] = $pro->sub_total;
+                    $tmp1['tracking_id'] = $pro->vendorTracking->tracking_id;
+                    $tmp1['estimated_arrival_date'] = $pro->vendorTracking->estimated_arrival_date;
 
                     $imagePath              = $pro->products->base_image;
 

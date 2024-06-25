@@ -116,13 +116,13 @@
                                 <label class="required fw-bold fs-6 mb-2">Commission type</label>
 
                                 <div class="form-check form-check-custom form-check-solid">
-                                    <input name="commission_type" class="form-check-input" {{ $info->commission_type == 'fixed' ? 'checked' : '' }} type="radio" value="fixed" id="fixed"/>
+                                    <input name="commission_type" class="form-check-input" {{ (isset($info->commission_type) && !empty($info->commission_type)) ? $info->commission_type == 'fixed' ? 'checked' : '' : '' }} type="radio" value="fixed" id="fixed"/>
                                     <label class="form-check-label" for="flexRadioDefault">
                                         Fixed
                                     </label>
                                 </div>
                                 <div class="form-check form-check-custom form-check-solid">
-                                    <input name="commission_type" class="form-check-input" type="radio" {{ $info->commission_type == 'percentage' ? 'checked' : '' }} value="percentage" id="percentage"/>
+                                    <input name="commission_type" class="form-check-input" type="radio" {{ (isset($info->commission_type) && !empty($info->commission_type)) ? $info->commission_type == 'percentage' ? 'checked' : '' : '' }} value="percentage" id="percentage"/>
                                     <label class="form-check-label" for="flexRadioDefault">
                                         Percentage
                                     </label>

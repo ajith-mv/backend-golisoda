@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Exports\OrderExport;
 use App\Mail\DynamicMail;
 use App\Mail\OrderMail;
+use App\Models\BrandOrder;
 use App\Models\GlobalSettings;
+use App\Models\Master\Brands;
 use App\Models\Master\EmailTemplate;
 use App\Models\Master\OrderStatus;
 use App\Models\Order;
@@ -138,9 +140,21 @@ class OrderController extends Controller
         $modal_title        = 'Update Order Status';
 
         $info = Order::find($order_id);
+
+        $brandOrders = BrandOrder::select('brand_id', 'tracking_id', 'estimated_arrival_date')
+            ->where('order_id', $order_id)
+            ->groupBy('brand_id') // Ensure unique brand_ids
+            ->get();
+
+        // Get brand names for each brand_id
+        foreach ($brandOrders as $brandOrder) {
+            $brand = Brands::find($brandOrder->brand_id);
+            $brandOrder->brand_name = $brand->brand_name;
+        }
+
         $order_status_info = OrderStatus::where('status', 'published')->get();
 
-        return view('platform.order.order_status_modal', compact('info', 'order_status_info'));
+        return view('platform.order.order_status_modal', compact('info', 'order_status_info', 'brandOrders'));
     }
 
     public function changeOrderStatus(Request $request)
@@ -151,12 +165,30 @@ class OrderController extends Controller
             'description' => 'required|string',
         ]);
         if ($validator->passes()) {
+
+           
+                $trackingIds = $request->input('tracking_id');
+                $arrivalDates = $request->input('estimated_arrival_date');
+            
+                foreach ($trackingIds as $brandId => $trackingId) {
+                    $brandOrders = BrandOrder::where([['order_id', $id], ['brand_id', $brandId]])->get();
+                    foreach($brandOrders as $brandOrder){
+                        $brandOrder->tracking_id = $trackingId;
+                        $brandOrder->estimated_arrival_date = $arrivalDates[$brandId];
+                        $brandOrder->save();
+                    }
+                    
+                }
+            
+            
+
            if($request->order_status_id==6){
                return response()->json(['error' => 1, 'message' => 'Admin cannot raise a cancel request as this will be raised by the website customers.']); 
            }
             $info = Order::find($id);
             $info->notification_status = 'yes';
             $info->order_status_id = $request->order_status_id;
+            $info->description = $request->description;
 
             switch ($request->order_status_id) {
                 case '1':
