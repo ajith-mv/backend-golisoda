@@ -922,7 +922,7 @@ class CartController extends Controller
         $customer_id    = $request->customer_id;
         $address    = $request->address;
         $selected_shipping = $request->selected_shipping ?? '';
-        if (!($request->has('customer_id')) && ($guest_token == '' || is_null($guest_token))) {
+        if (empty($customer_id) && empty($guest_token)) {
             $tmp                = [];
             // if ($guest_token == null) {
             $tmp['carts'] = [];
@@ -952,21 +952,41 @@ class CartController extends Controller
             return $tmp;
             // }
         }
-        return $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null, $address);
+        $cart_list = $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null, $address);
+        if ($cart_list['cart_count'] > 15) {
+            log::info('---------------------Cart count Debug Begin----------------------');
+            log::debug($request->all());
+            log::debug($cart_list);
+            log::info('---------------------Cart count Debug End----------------------');
+        }
+        return $cart_list;
     }
 
     function getCartListAll($customer_id = null, $guest_token = null,  $shipping_info = null, $shipping_type = null, $selected_shipping = null, $coupon_data = null, $address = null)
     {
 
         // dd( $coupon_data );
-        $checkCart          = Cart::with(['products', 'products.productCategory', 'variationOptions'])->when($customer_id != '', function ($q) use ($customer_id) {
-            $q->where('customer_id', $customer_id);
-        })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
-            $q->where('guest_token', $guest_token);
-        })->get();
+        // $checkCart          = Cart::with(['products', 'products.productCategory', 'variationOptions'])->when($customer_id != '', function ($q) use ($customer_id) {
+        //     $q->where('customer_id', $customer_id);
+        // })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
+        //     $q->where('guest_token', $guest_token);
+        // })->get();
         // foreach ($checkCart as $cartItem) {
 
         // }
+        $checkCart = Cart::with(['products', 'products.productCategory', 'variationOptions']);
+        if (!empty($customer_id)) {
+            $checkCart = $checkCart->where('customer_id', $customer_id);
+        }
+        if (!empty($guest_token) && empty($customer_id)) {
+            $checkCart = $checkCart->where('guest_token', $guest_token);
+        }
+        $checkCart = $checkCart->get();
+
+        if (empty($customer_id) && empty($guest_token)) {
+            $checkCart = 0;
+        }
+
         $globel = GlobalSettings::find(1);
         $tmp                = [];
         $grand_total        = 0;
