@@ -251,15 +251,15 @@
                     @if ($order_info->coupon_amount > 0 && isset($item->coupon_id))
                         @if ($order_info->coupon_type == 'fixed_amount')
                             @if (!$fixed_discount_shown_product_rate)
-                                <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
+                                <td>{{ number_format($item->strice_price, 2) }}</td>
                                 @php
                                     $fixed_discount_shown_product_rate = true;
                                 @endphp
                             @else
-                                <td>{{ number_format($item->price * $item->quantity, 2) }}</td>
+                                <td>{{ number_format($item->price, 2) }}</td>
                             @endif
                         @else
-                            <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
+                            <td>{{ number_format($item->strice_price, 2) }}</td>
                         @endif
                     @else
                         <td>{{ number_format($item->price, 2) }}</td>
@@ -279,13 +279,13 @@
                                     $fixed_discount_shown_product_amount = true;
                                 @endphp
                             @else
-                                <td>flag true{{ number_format($item->sub_total * $item->quantity, 2) }}</td>
+                                <td>flag true{{ number_format($item->price * $item->quantity, 2) }}</td>
                             @endif
                         @else
                             <td>not fixed amount{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
                         @endif
                     @else
-                        <td>no coupon{{ number_format($item->sub_total, 2) }}</td>
+                        <td>no coupon{{ number_format($item->price * $item->quantity, 2) }}</td>
                     @endif
 
                 </tr>
