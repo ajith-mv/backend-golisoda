@@ -183,7 +183,7 @@
             <th rowspan="2" style="width: 40px;"> HSN</th>
             <th rowspan="2" style="width: 30px;"> QTY</th>
             <th rowspan="2" style="width: 30px;"> RATE </th>
-            <th rowspan="2" style="width: 40px;"> TAXABLE VALUE </th>
+            {{-- <th rowspan="2" style="width: 40px;"> TAXABLE VALUE </th> --}}
             <th colspan="2" style="width: 100px;"> CGST </th>
             <th colspan="2" style="width: 100px;"> SGST </th>
             <th rowspan="2" style="width: 40px;"> NET Amount </th>
@@ -237,13 +237,15 @@
                     </td>
                     <td> {{ $item->hsn_code ?? '85044030' }} </td>
                     <td> {{ $item->quantity }} nos</td>
-                    <td> {{ number_format($item->price, 2) }} </td>
-                    <td>{{ number_format($item->price, 2) }}</td>
+                    <td> {{ ($order_info->coupon_amount > 0) ? number_format($item->strice_price, 2) : number_format($item->price, 2) }} </td>
+                    
+                    {{-- <td>{{ number_format($item->price, 2) }}</td> --}}
                     <td>{{ $item->tax_percentage / 2 }}%</td>
                     <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
                     <td>{{ $item->tax_percentage / 2 }}%</td>
                     <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
-                    <td>{{ number_format($item->sub_total, 2) }}</td>
+                    <td> {{ ($order_info->coupon_amount > 0) ? (number_format($item->strice_price, 2) * $item->quantity) : number_format($item->sub_total, 2) }} </td>
+
                 </tr>
                 @php
                     $i++;
