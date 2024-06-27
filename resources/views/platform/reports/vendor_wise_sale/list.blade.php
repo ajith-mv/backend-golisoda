@@ -285,16 +285,15 @@
                 },
                 success: function(res) {
 
-                    //Hide scrollbar in drawer
-                    $(document).ready(function() {
-                        $('body').toggleClass('hide-scrollbar');
+                    Swal.fire({
+                        html: res.message,
+                        icon: "error",
+                        buttonsStyling: false,
+                        confirmButtonText: "Mail sent successfully!",
+                        customClass: {
+                            confirmButton: "btn btn-primary"
+                        }
                     });
-
-                    //Drawer data
-                    $('#form-common-content').html(res);
-                    const drawerEl = document.querySelector("#kt_common_add_form");
-                    const commonDrawer = KTDrawer.getInstance(drawerEl);
-                    commonDrawer.show();
                     return false;
 
                 },

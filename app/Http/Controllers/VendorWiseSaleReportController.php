@@ -260,10 +260,10 @@ class VendorWiseSaleReportController extends Controller
             // if ($request->has('download')) {
             $pdf = PDF::loadView('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location'));
 
-            // Storage::put('public/vendor_invoice/' . $brand_id . '.pdf', $pdf->output());
+            Storage::put('public/vendor_invoice/' . $brand_id . date('d-m-Y_H_i'). '.pdf', $pdf->output());
             // dd('works here');
 
-            return $pdf->download('vendor_invoice.pdf');
+            return $pdf->download('public/vendor_invoice/' . $brand_id . date('d-m-Y_H_i'). '.pdf');
             // }
             // 
 
