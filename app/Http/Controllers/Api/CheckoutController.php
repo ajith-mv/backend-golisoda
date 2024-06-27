@@ -234,6 +234,7 @@ class CheckoutController extends Controller
                 $items_ins['tax_amount'] = ($item['tax']['gstAmount'] ?? 0) * $item['quantity'];
                 $items_ins['tax_percentage'] = $item['tax']['tax_percentage'] ?? 0;
                 $items_ins['sub_total'] = $item['sub_total'];
+                $items_ins['coupon_id'] = $item['coupon_id'];
 
                 $order_product_info = OrderProduct::create($items_ins);
 
@@ -244,6 +245,7 @@ class CheckoutController extends Controller
                 $ins['qty'] = $order_product_info->quantity;
                 $ins['price'] = $order_product_info->price;
                 $ins['sub_total'] = $order_product_info->sub_total;
+                $ins['total_excluding_tax'] = $order_product_info->sub_total - $order_product_info->tax_amount;
                 $ins['order_status_id'] = $order_status->id;
                 $brand_data = Brands::find($ins['brand_id']);
                 $ins['commission_value'] = $brand_data->commission_value;
@@ -622,6 +624,7 @@ class CheckoutController extends Controller
                 $items_ins['tax_amount'] = ($item['tax']['gstAmount'] ?? 0) * $item['quantity'];
                 $items_ins['tax_percentage'] = $item['tax']['tax_percentage'] ?? 0;
                 $items_ins['sub_total'] = $item['sub_total'];
+                $items_ins['coupon_id'] = $item['coupon_id'];
 
                 $order_product_info = OrderProduct::create($items_ins);
                 $brandIds[] = $product_info->brand_id;
@@ -630,7 +633,8 @@ class CheckoutController extends Controller
                 $ins['order_product_id'] = $order_product_info->id;
                 $ins['qty'] = $order_product_info->quantity;
                 $ins['price'] = $order_product_info->price;
-                $ins['sub_total'] = $order_product_info->sub_total;
+                $ins['sub_total'] = $order_product_info->sub_total;//total amount including tax
+                $ins['total_excluding_tax'] = $order_product_info->sub_total - $order_product_info->tax_amount;
                 $ins['order_status_id'] = $order_status->id;
                 $brand_data = Brands::find($ins['brand_id']);
                 $ins['commission_value'] = $brand_data->commission_value;
