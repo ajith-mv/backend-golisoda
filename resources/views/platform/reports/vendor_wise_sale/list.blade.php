@@ -287,7 +287,7 @@
 
                     Swal.fire({
                         html: res.message,
-                        icon: "error",
+                        icon: "success",
                         buttonsStyling: false,
                         confirmButtonText: "Mail sent successfully!",
                         customClass: {
