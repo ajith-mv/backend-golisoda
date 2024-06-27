@@ -264,7 +264,7 @@ class VendorWiseSaleReportController extends Controller
             Storage::put('public/vendor_invoice/' . $brand_id . date('d-m-Y_H_i'). '.pdf', $pdf->output());
             // dd('works here');
 
-            return $pdf->download('public/vendor_invoice/' . $brand_id . date('d-m-Y_H_i'). '.pdf');
+            return $pdf->download($brand_id . date('d-m-Y_H_i'). '.pdf');
             // }
             // 
 
