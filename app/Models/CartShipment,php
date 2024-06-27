@@ -6,30 +6,30 @@ use App\Models\Master\Brands;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BrandOrder extends Model
+class CartShipment extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'order_id',
+        'cart_id',
         'brand_id',
-        'order_product_id',
-        'qty',
-        'price',
-        'sub_total',
-        'total_excluding_tax',
-        'commission_percentage',
-        'order_status_id'
+        'shipment_type',
+        'shipment_amount',
     ];
 
-    public function order()
+    /**
+     * Get the cart that owns the shipment.
+     */
+    public function cart()
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(Cart::class);
     }
 
+    /**
+     * Get the brand that owns the shipment.
+     */
     public function brand()
     {
         return $this->belongsTo(Brands::class);
     }
 }
-

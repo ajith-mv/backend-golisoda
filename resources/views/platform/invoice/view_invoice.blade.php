@@ -201,8 +201,6 @@
         @if (isset($order_info->orderItems) && !empty($order_info->orderItems))
             @php
                 $i = 1;
-                $fixed_discount_shown_product_amount = false;
-                $fixed_discount_shown_product_rate = false;
             @endphp
             @foreach ($order_info->orderItems as $item)
                 @php
@@ -246,21 +244,9 @@
                     </td>
                     <td> {{ $item->hsn_code ?? '85044030' }} </td>
                     <td> {{ $item->quantity }} nos</td>
-                    {{-- <td> {{ $order_info->coupon_amount > 0 && isset($item->coupon_id) ? number_format($item->strice_price, 2) : number_format($item->price, 2) }}
-                    </td> --}}
+
                     @if ($order_info->coupon_amount > 0 && isset($item->coupon_id))
-                        {{-- @if ($order_info->coupon_type == 'fixed_amount')
-                            @if (!$fixed_discount_shown_product_rate)
-                                <td>{{ number_format($item->strice_price, 2) }}</td>
-                                @php
-                                    $fixed_discount_shown_product_rate = true;
-                                @endphp
-                            @else --}}
-                                <td>{{ number_format($item->strice_price, 2) }}</td>
-                            {{-- @endif
-                        @else
-                            <td>{{ number_format($item->strice_price, 2) }}</td>
-                        @endif --}}
+                        <td>{{ number_format($item->strice_price, 2) }}</td>
                     @else
                         <td>{{ number_format($item->price, 2) }}</td>
                     @endif
@@ -272,11 +258,7 @@
                     <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
 
                     @if ($order_info->coupon_amount > 0 && isset($item->coupon_id))
-                        {{-- @if ($order_info->coupon_type == 'fixed_amount') --}}
-                            <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
-                        {{-- @else
-                            <td>{{ number_format($item->price * $item->quantity, 2) }}</td>
-                        @endif --}}
+                        <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
                     @else
                         <td>{{ number_format($item->price * $item->quantity, 2) }}</td>
                     @endif

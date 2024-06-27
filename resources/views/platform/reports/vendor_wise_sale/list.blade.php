@@ -1,16 +1,16 @@
 @extends('platform.layouts.template')
 @section('toolbar')
-<style>
-    .content {
-  padding: 10px 0;
-}
-</style>
-<div class="toolbar" id="kt_toolbar">
-    <div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
-        @include('platform.layouts.parts._breadcrum')
-{{--        @include('platform.reports.productwise_sale._export_button')--}}
+    <style>
+        .content {
+            padding: 10px 0;
+        }
+    </style>
+    <div class="toolbar" id="kt_toolbar">
+        <div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
+            @include('platform.layouts.parts._breadcrum')
+            {{--        @include('platform.reports.productwise_sale._export_button') --}}
+        </div>
     </div>
-</div>
 @endsection
 @section('content')
     <div id="kt_content_container" class="container-xxl">
@@ -23,13 +23,15 @@
             <!--begin::Card body-->
             <div class="card-body py-4">
                 <div class="table-responsive">
-                    <table class="table align-middle table-row-dashed fs-6 gy-2 mb-0 dataTable no-footer" id="product-table">
+                    <table class="table align-middle table-row-dashed fs-6 gy-2 mb-0 dataTable no-footer"
+                        id="product-table">
                         <thead>
                             <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
                                 <th> Vendor Name</th>
                                 <th> Sale Amount </th>
                                 <th> Commission Percentage </th>
                                 <th> Commission Amount </th>
+                                <th> Action </th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -46,9 +48,9 @@
     <script src="{{ asset('assets/js/datatable.min.js') }}"></script>
 
     <script>
-        $( document ).ready(function() {
-            $('.date_range').val('');
-});
+        // $(document).ready(function() {
+        //     $('.date_range').val('');
+        // });
         var dtTable = $('#product-table').DataTable({
 
             processing: true,
@@ -62,7 +64,7 @@
                 }
             },
             columns: [
-                
+
                 {
                     data: 'brand_name',
                     name: 'brand_name'
@@ -78,7 +80,13 @@
                 {
                     data: 'com_amount',
                     name: 'com_amount'
-                }
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false
+                },
             ],
             language: {
                 paginate: {
@@ -99,10 +107,10 @@
             dtTable.draw();
             e.preventDefault();
         });
-        $('#search-form').on('reset', function(e) {           
+        $('#search-form').on('reset', function(e) {
             $('#filter_search_data').val('').trigger('change');
             $('.date_range').val('').trigger('change');
-            $('#filter_product_name').val('');           
+            $('#filter_product_name').val('');
             dtTable.draw();
             e.preventDefault();
         });
@@ -142,7 +150,7 @@
 
                     link.click();
                     document.body.removeChild(link);
-                    
+
                 }
             });
 
@@ -154,7 +162,7 @@
         var input = $("#kt_ecommerce_report_views_daterangepicker");
 
         function cb(start, end) {
-            input.html(start.format("D MMMM, YYYY") + " - " + end.format("D MMMM, YYYY"));
+            input.val(start.format("D MMMM, YYYY") + " - " + end.format("D MMMM, YYYY"));
         }
 
         input.daterangepicker({
@@ -169,13 +177,94 @@
                 "Last 7 Days": [moment().subtract(6, "days"), moment()],
                 "Last 30 Days": [moment().subtract(29, "days"), moment()],
                 "This Month": [moment().startOf("month"), moment().endOf("month")],
-                "Last Month": [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")]
+                "Last Month": [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf(
+                    "month")]
             }
         }, cb);
 
         cb(start, end);
 
+        function viewInvoice(id, start_date, end_date) {
 
-        
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $.ajax({
+                url: "{{ route('vendor_wise_sale.view') }}",
+                type: 'POST',
+                data: {
+                    id: id,
+                    start_date: start_date,
+                    end_date: end_date
+                },
+                success: function(res) {
+
+                    //Hide scrollbar in drawer
+                    $(document).ready(function() {
+                        $('body').toggleClass('hide-scrollbar');
+                    });
+
+                    //Drawer data
+                    $('#form-common-content').html(res);
+                    const drawerEl = document.querySelector("#kt_common_add_form");
+                    const commonDrawer = KTDrawer.getInstance(drawerEl);
+                    commonDrawer.show();
+                    return false;
+
+                },
+                error: function(xhr, err) {
+
+                    if (xhr.status == 403) {
+                        toastr.error(xhr.statusText, 'UnAuthorized Access');
+                    }
+
+                }
+            });
+
+        }
+
+        function downloadInvoice(id, start_date, end_date) {
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $.ajax({
+                url: "{{ route('vendor_wise_sale.download') }}",
+                type: 'POST',
+                data: {
+                    id: id,
+                    start_date: start_date,
+                    end_date: end_date,
+                    download: 'pdf'
+                },
+                success: function(res) {
+
+                    const data = res;
+                    const link = document.createElement('a');
+                    link.setAttribute('href', data);
+                    link.setAttribute('download', 'vendor_invoice.pdf'); // Need to modify filename ...
+                    link.click();
+                    const drawerEl = document.querySelector("#kt_common_add_form");
+                    const commonDrawer = KTDrawer.getInstance(drawerEl);
+                    commonDrawer.show();
+                    return false;
+
+                },
+                error: function(xhr, err) {
+
+                    if (xhr.status == 403) {
+                        toastr.error(xhr.statusText, 'UnAuthorized Access');
+                    }
+
+                }
+            });
+
+        }
     </script>
 @endsection
