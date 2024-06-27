@@ -235,7 +235,7 @@ class CheckoutController extends Controller
                 $items_ins['tax_percentage'] = $item['tax']['tax_percentage'] ?? 0;
                 $items_ins['sub_total'] = $item['sub_total'];
                 $cart_data_coupon = Cart::find( $item['cart_id']);
-                $items_ins['coupon_id'] = isset($cart_data_coupon) ? $cart_data_coupon->id : NULL;
+                $items_ins['coupon_id'] = isset($cart_data_coupon) ? $cart_data_coupon->coupon_id : NULL;
 
                 $order_product_info = OrderProduct::create($items_ins);
 
@@ -626,7 +626,7 @@ class CheckoutController extends Controller
                 $items_ins['tax_percentage'] = $item['tax']['tax_percentage'] ?? 0;
                 $items_ins['sub_total'] = $item['sub_total'];
                 $cart_data_coupon = Cart::find( $item['cart_id']);
-                $items_ins['coupon_id'] = isset($cart_data_coupon) ? $cart_data_coupon->id : NULL;
+                $items_ins['coupon_id'] = isset($cart_data_coupon) ? $cart_data_coupon->coupon_id : NULL;
 
                 $order_product_info = OrderProduct::create($items_ins);
                 $brandIds[] = $product_info->brand_id;
