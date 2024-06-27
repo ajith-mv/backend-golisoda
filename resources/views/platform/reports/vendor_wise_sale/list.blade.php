@@ -245,15 +245,15 @@
                 },
                 success: function(res) {
 
-                    const data = res;
-                    const link = document.createElement('a');
-                    link.setAttribute('href', data);
-                    link.setAttribute('download', 'vendor_invoice.pdf'); // Need to modify filename ...
-                    link.click();
-                    // const drawerEl = document.querySelector("#kt_common_add_form");
-                    // const commonDrawer = KTDrawer.getInstance(drawerEl);
-                    // commonDrawer.show();
-                    // return false;
+                    // const data = res;
+                    // const link = document.createElement('a');
+                    // link.setAttribute('href', data);
+                    // link.setAttribute('download', 'vendor_invoice.pdf'); // Need to modify filename ...
+                    // link.click();
+                    const drawerEl = document.querySelector("#kt_common_add_form");
+                    const commonDrawer = KTDrawer.getInstance(drawerEl);
+                    commonDrawer.show();
+                    return false;
 
                 },
                 error: function(xhr, err) {
