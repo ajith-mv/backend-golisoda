@@ -257,32 +257,33 @@
                                 @endphp
                             @else
                                 <td>{{ number_format($item->price * $item->quantity, 2) }}</td>
-                            @else
-                                <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
                             @endif
                         @else
-                            <td>{{ number_format($item->price, 2) }}</td>
+                            <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
                         @endif
+                    @else
+                        <td>{{ number_format($item->price, 2) }}</td>
+                    @endif
 
-                        {{-- <td>{{ number_format($item->price, 2) }}</td> --}}
-                        <td>{{ $item->tax_percentage / 2 }}%</td>
-                        <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
-                        <td>{{ $item->tax_percentage / 2 }}%</td>
-                        <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
+                    {{-- <td>{{ number_format($item->price, 2) }}</td> --}}
+                    <td>{{ $item->tax_percentage / 2 }}%</td>
+                    <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
+                    <td>{{ $item->tax_percentage / 2 }}%</td>
+                    <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
 
-                        {{-- <td> {{ ($order_info->coupon_amount > 0 && (isset($item->coupon_id))) ? (number_format($item->strice_price, 2) * $item->quantity) : number_format($item->sub_total, 2) }} </td> --}}
-                        @if ($order_info->coupon_amount > 0 && isset($item->coupon_id))
-                            @if ($order_info->coupon_type == 'fixed_amount' && !$fixed_discount_shown_product_amount)
-                                <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
-                                @php
-                                    $fixed_discount_shown_product_amount = true;
-                                @endphp
-                            @else
-                                <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
-                            @endif
+                    {{-- <td> {{ ($order_info->coupon_amount > 0 && (isset($item->coupon_id))) ? (number_format($item->strice_price, 2) * $item->quantity) : number_format($item->sub_total, 2) }} </td> --}}
+                    @if ($order_info->coupon_amount > 0 && isset($item->coupon_id))
+                        @if ($order_info->coupon_type == 'fixed_amount' && !$fixed_discount_shown_product_amount)
+                            <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
+                            @php
+                                $fixed_discount_shown_product_amount = true;
+                            @endphp
                         @else
-                            <td>{{ number_format($item->sub_total, 2) }}</td>
+                            <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
                         @endif
+                    @else
+                        <td>{{ number_format($item->sub_total, 2) }}</td>
+                    @endif
 
                 </tr>
                 @php
