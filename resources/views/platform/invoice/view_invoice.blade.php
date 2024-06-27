@@ -201,7 +201,7 @@
         @if (isset($order_info->orderItems) && !empty($order_info->orderItems))
             @php
                 $i = 1;
-                $fixed_discount_shown_product = false;
+                $fixed_discount_shown_product_amount = false;
                 $fixed_discount_shown_product_rate = false;
             @endphp
             @foreach ($order_info->orderItems as $item)
