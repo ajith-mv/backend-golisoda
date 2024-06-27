@@ -86,7 +86,7 @@ class VendorWiseSaleReportController extends Controller
                 </a>';
                     $download_btn = '<a onclick="return downloadInvoice(' . $row->id . ', ' . $start_date . ', ' . $end_date . ')" href="javascript:void(0)" tooltip="Download Invoice" class="btn btn-icon btn-active-success btn-light-success mx-1 w-30px h-30px" > 
                 <i class="fa fa-download"></i></a>';
-                    $send_email_btn = '<a href="javascript:void(0);" onclick="return commonDelete(' . $row->id . ', \'products\')" class="btn btn-icon btn-active-primary btn-light-primary mx-1 w-30px h-30px" > 
+                    $send_email_btn = '<a href="javascript:void(0);" onclick="return sendInvoice(' . $row->id . ', ' . $start_date . ', ' . $end_date . ')" class="btn btn-icon btn-active-primary btn-light-primary mx-1 w-30px h-30px" > 
                 <i class="fa fa-envelope"></i></a>';
 
                     return $view_btn . ' | ' . $download_btn . ' | ' . $send_email_btn;

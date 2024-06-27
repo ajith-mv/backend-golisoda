@@ -266,5 +266,47 @@
             });
 
         }
+
+        function sendInvoice(id, start_date, end_date) {
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $.ajax({
+                url: "{{ route('vendor_wise_sale.send') }}",
+                type: 'POST',
+                data: {
+                    id: id,
+                    start_date: start_date,
+                    end_date: end_date
+                },
+                success: function(res) {
+
+                    //Hide scrollbar in drawer
+                    $(document).ready(function() {
+                        $('body').toggleClass('hide-scrollbar');
+                    });
+
+                    //Drawer data
+                    $('#form-common-content').html(res);
+                    const drawerEl = document.querySelector("#kt_common_add_form");
+                    const commonDrawer = KTDrawer.getInstance(drawerEl);
+                    commonDrawer.show();
+                    return false;
+
+                },
+                error: function(xhr, err) {
+
+                    if (xhr.status == 403) {
+                        toastr.error(xhr.statusText, 'UnAuthorized Access');
+                    }
+
+                }
+            });
+
+        }
     </script>
 @endsection

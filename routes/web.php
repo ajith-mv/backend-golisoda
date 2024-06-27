@@ -218,6 +218,8 @@ Route::middleware(['auth'])->group(function(){
         Route::get('/vendor-wise-sale', [App\Http\Controllers\VendorWiseSaleReportController::class, 'index'])->name('reports.vendor.wise');
         Route::post('/vendor-wise-sale/view', [App\Http\Controllers\VendorWiseSaleReportController::class, 'viewInvoice'])->name('vendor_wise_sale.view');
         Route::post('/vendor-wise-sale/download', [App\Http\Controllers\VendorWiseSaleReportController::class, 'downloadInvoice'])->name('vendor_wise_sale.download');
+        Route::post('/vendor-wise-sale/send-invoice', [App\Http\Controllers\VendorWiseSaleReportController::class, 'sendInvoice'])->name('vendor_wise_sale.send');
+
 
     });
     
