@@ -84,11 +84,12 @@ class VendorWiseSaleReportController extends Controller
                     $view_btn = '<a href="javascript:void(0)" onclick="return viewInvoice(' . $row->id . ', ' . $start_date . ', ' . $end_date . ')" class="btn btn-icon btn-active-info btn-light-info mx-1 w-30px h-30px" > 
                     <i class="fa fa-eye"></i>
                 </a>';
-                    $download_btn = '<a onclick="return downloadInvoice(' . $row->id . ', ' . $start_date . ', ' . $end_date . ')" href="javascript:void(0)" tooltip="Download Invoice" class="btn btn-icon btn-active-success btn-light-success mx-1 w-30px h-30px" > 
-                <i class="fa fa-download"></i></a>';
+                    $download_btn = '<a href="' . route('vendor_wise_sale.download', ["id" => $row->id, "start_date" => $start_date, "end_date" => $end_date]) . '" tooltip="Download Invoice" class="btn btn-icon btn-active-success btn-light-success mx-1 w-30px h-30px">
+                    <i class="fa fa-download"></i>
+                </a>';
                     $send_email_btn = '<a href="javascript:void(0);" onclick="return sendInvoice(' . $row->id . ', ' . $start_date . ', ' . $end_date . ')" class="btn btn-icon btn-active-primary btn-light-primary mx-1 w-30px h-30px" > 
                 <i class="fa fa-envelope"></i></a>';
-
+//onclick="return downloadInvoice(' . $row->id . ', ' . $start_date . ', ' . $end_date . ')"
                     return $view_btn . ' | ' . $download_btn . ' | ' . $send_email_btn;
                 })
 

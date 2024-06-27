@@ -217,7 +217,7 @@ Route::middleware(['auth'])->group(function(){
         Route::post('/export/excel', [App\Http\Controllers\PaymentReportController::class, 'export'])->name('payment-reports.export.excel');
         Route::get('/vendor-wise-sale', [App\Http\Controllers\VendorWiseSaleReportController::class, 'index'])->name('reports.vendor.wise');
         Route::post('/vendor-wise-sale/view', [App\Http\Controllers\VendorWiseSaleReportController::class, 'viewInvoice'])->name('vendor_wise_sale.view');
-        Route::post('/vendor-wise-sale/download', [App\Http\Controllers\VendorWiseSaleReportController::class, 'downloadInvoice'])->name('vendor_wise_sale.download');
+        Route::get('/vendor-wise-sale/download', [App\Http\Controllers\VendorWiseSaleReportController::class, 'downloadInvoice'])->name('vendor_wise_sale.download');
         Route::post('/vendor-wise-sale/send-invoice', [App\Http\Controllers\VendorWiseSaleReportController::class, 'sendInvoice'])->name('vendor_wise_sale.send');
 
 
