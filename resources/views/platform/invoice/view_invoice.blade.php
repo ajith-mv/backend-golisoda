@@ -237,14 +237,14 @@
                     </td>
                     <td> {{ $item->hsn_code ?? '85044030' }} </td>
                     <td> {{ $item->quantity }} nos</td>
-                    <td> {{ ($order_info->coupon_amount > 0) ? number_format($item->strice_price, 2) : number_format($item->price, 2) }} </td>
+                    <td> {{ ($order_info->coupon_amount > 0 && (isset($item->coupon_id))) ? number_format($item->strice_price, 2) : number_format($item->price, 2) }} </td>
                     
                     {{-- <td>{{ number_format($item->price, 2) }}</td> --}}
                     <td>{{ $item->tax_percentage / 2 }}%</td>
                     <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
                     <td>{{ $item->tax_percentage / 2 }}%</td>
                     <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
-                    <td> {{ ($order_info->coupon_amount > 0) ? (number_format($item->strice_price, 2) * $item->quantity) : number_format($item->sub_total, 2) }} </td>
+                    <td> {{ ($order_info->coupon_amount > 0 && (isset($item->coupon_id))) ? (number_format($item->strice_price, 2) * $item->quantity) : number_format($item->sub_total, 2) }} </td>
 
                 </tr>
                 @php

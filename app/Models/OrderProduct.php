@@ -25,7 +25,8 @@ class OrderProduct extends Model
         'discount_price',
         'tax_amount',
         'tax_percentage',
-        'sub_total'
+        'sub_total',
+        'coupon_id'
     ];
 
     public function products()
