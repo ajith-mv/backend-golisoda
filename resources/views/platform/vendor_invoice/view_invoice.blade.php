@@ -90,8 +90,8 @@
                                     height="75"></span> </td>
                         <td class="w-30">
                             <div> Invoice No: </div>
-                            <div> Invoice Date: </div>
-                            <div> Date Range: </div>
+                            <div> Invoice Date: {{ date('d-m-Y')}}</div>
+                            <div> Date Range: {{ isset($statDate) ? $startDate : ''}} to {{ isset($sendDate) ? $endDate : ''}}</div>
 
                         </td>
 
@@ -171,7 +171,8 @@
         </tr>
         <tr>
             <td> Shipping Charges</td>
-            <td> {{ $data->total_shipments ?? '' }} </td>
+            {{-- <td> {{ $data->total_shipments ?? '' }} </td> --}}
+            <td> 0 </td>
         </tr>
         <tr>
             <td> CGST on Commission + Shipping (9%) ©</td>
@@ -195,6 +196,7 @@
         <tr>
             <td>
                 <div><b>Terms & Conditions:</b></div>
+                <br/>
                 <div>All commissions are calculated based on product Selling prices (inclusive of taxes).</div>
                 <div>For any discrepancies or questions regarding this Invoice, please mail us on
                     info@golisodastore.com. Any discrepancy reported after 7 days is not admissible.</div>
@@ -208,7 +210,7 @@
     <table cellspacing="0" padding="0" class="w-100 item-table">
 
         <tr>
-            <th>S.No</th>
+            <th class="w-30">S.No</th>
             <th>Date</th>
             <th>Order Id</th>
             <th>Payment Mode</th>

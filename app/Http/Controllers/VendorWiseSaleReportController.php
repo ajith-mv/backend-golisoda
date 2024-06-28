@@ -175,15 +175,8 @@ class VendorWiseSaleReportController extends Controller
             $modal_title = 'View Invoice';
             $globalInfo = GlobalSettings::first();
 
-            $view_order = view('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location'));
-            if ($request->has('download')) {
-                $pdf = PDF::loadView('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location'));
-
-                Storage::put('public/vendor_invoice/' . $brand_id . '.pdf', $pdf->output());
-                return $pdf->download('vendor_invoice.pdf');
-            }
-
-
+            $view_order = view('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location', 'startDate', 'endDate'));
+            
             return view('platform.vendor_invoice.view_modal', compact('view_order', 'modal_title'));
         } catch (\Exception $e) {
             DB::rollBack();
@@ -259,7 +252,7 @@ class VendorWiseSaleReportController extends Controller
 
             // $view_order = view('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location'));
             // if ($request->has('download')) {
-            $pdf = PDF::loadView('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location'));
+            $pdf = PDF::loadView('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location', 'startDate', 'endDate'));
 
             Storage::put('public/vendor_invoice/' . $brand_id . date('d-m-Y_H_i'). '.pdf', $pdf->output());
             // dd('works here');
@@ -325,8 +318,7 @@ class VendorWiseSaleReportController extends Controller
 
                 ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
-                // ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$startDate])
-                // ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$endDate])
+                ->whereBetween('orders.created_at', [$startDate, $endDate]) // Add whereBetween clause here
                 ->select(
                     'brands.brand_name',
                     'brand_orders.tracking_id',
@@ -341,7 +333,7 @@ class VendorWiseSaleReportController extends Controller
             $modal_title = 'View Invoice';
             $globalInfo = GlobalSettings::first();
 
-            $pdf = PDF::loadView('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location'));
+            $pdf = PDF::loadView('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location', 'startDate', 'endDate'));
 
             Storage::put('public/vendor_invoice/' . $brand_id . date('d-m-Y_H_i') . '.pdf', $pdf->output());
             $email_slug = 'vendor-tax-invoice';
