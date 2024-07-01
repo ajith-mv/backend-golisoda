@@ -140,7 +140,7 @@ Route::middleware(['client'])->group(function () {
 
     Route::post('/get/shipping/rocket/charges', [App\Http\Controllers\Api\CartController::class, 'getShippingRocketCharges']);
 
-    Route::get('/get/me', [App\Http\Controllers\Api\CustomerController::class, 'getCustomerData']);
+    Route::post('/get/me', [App\Http\Controllers\Api\CustomerController::class, 'getCustomerData']);
 
 
 });
