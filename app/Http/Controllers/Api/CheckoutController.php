@@ -249,6 +249,7 @@ class CheckoutController extends Controller
                 $ins['total_excluding_tax'] = $order_product_info->sub_total - $order_product_info->tax_amount;
                 $ins['order_status_id'] = $order_status->id;
                 $brand_data = Brands::find($ins['brand_id']);
+                $ins['commission_type'] = $brand_data->commission_type;
                 $ins['commission_value'] = $brand_data->commission_value;
                 $brand_order = BrandOrder::create($ins);
 
@@ -639,6 +640,7 @@ class CheckoutController extends Controller
                 $ins['total_excluding_tax'] = $order_product_info->sub_total - $order_product_info->tax_amount;
                 $ins['order_status_id'] = $order_status->id;
                 $brand_data = Brands::find($ins['brand_id']);
+                $ins['commission_type'] = $brand_data->commission_type;
                 $ins['commission_value'] = $brand_data->commission_value;
                 $brand_order = BrandOrder::create($ins);
 

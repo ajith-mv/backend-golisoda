@@ -19,7 +19,9 @@ class BrandOrder extends Model
         'sub_total',
         'total_excluding_tax',
         'commission_percentage',
-        'order_status_id'
+        'order_status_id',
+        'commission_type',
+        'commission_value'
     ];
 
     public function order()
