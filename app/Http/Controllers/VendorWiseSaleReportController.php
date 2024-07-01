@@ -38,14 +38,11 @@ class VendorWiseSaleReportController extends Controller
                 $where = "WHERE DATE(gbs_brand_orders.created_at) >= '$start_date' AND DATE(gbs_brand_orders.created_at) <= '$end_date' AND gbs_orders.status != 'pending'";
             }
 
-            $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
+            $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name, gbs_brands.commission_value as com_percentage, gbs_brands.commission_type as commission_type,
             sum(qty*price) as sale_amount,
             CASE
-        WHEN gbs_brand_orders.commission_type = 'percentage' THEN ROUND(SUM(qty*price * gbs_brand_orders.commission_value / 100),2)
-        ELSE 0
-    END AS com_percentage,
-    CASE
-        WHEN gbs_brand_orders.commission_type = 'fixed' THEN ROUND(SUM(qty * gbs_brand_orders.commission_value),2)
+        WHEN gbs_brand_orders.commission_type = 'percentage' THEN ROUND(SUM(qty * price * gbs_brand_orders.commission_value / 100), 2)
+        WHEN gbs_brand_orders.commission_type = 'fixed' THEN ROUND(SUM(qty * gbs_brand_orders.commission_value), 2)
         ELSE 0
     END AS com_amount
             FROM gbs_brand_orders
