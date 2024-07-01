@@ -17,6 +17,7 @@ use App\Models\Master\State;
 use App\Models\Product\Product;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Mail;
@@ -166,7 +167,7 @@ class CustomerController extends Controller
                         foreach ($cartItems as $item) {
                             $product_id = $item->product_id;
                             $variation_option_ids = [];
-                    
+
                             if (isset($item->variationOptions) && !empty($item->variationOptions)) {
                                 foreach ($item->variationOptions as $variationids) {
                                     $variation_option_ids[] = $variationids->variation_option_id;
@@ -175,7 +176,7 @@ class CustomerController extends Controller
                             // Sort the variation option IDs to ensure the key is consistent regardless of the order
                             sort($variation_option_ids);
                             $key = $product_id . '_' . implode('_', $variation_option_ids); // Unique key for each product-variation combination
-                    
+
                             if (isset($aggregatedCart[$key])) {
                                 $aggregatedCart[$key]['quantity'] += $item->quantity;
                                 $aggregatedCart[$key]['ids'][] = $item->id;
@@ -188,15 +189,15 @@ class CustomerController extends Controller
                                 ];
                             }
                         }
-                    
+
                         // Update quantities for the first occurrence and collect IDs for duplicates
                         foreach ($aggregatedCart as $key => $data) {
                             // Update the quantity of the first occurrence
                             Cart::where('id', $data['first_id'])->update(['quantity' => $data['quantity']]);
-                    
+
                             // Collect other IDs for deletion
                             $data['other_ids'] = array_slice($data['ids'], 1);
-                    
+
                             if (!empty($data['other_ids'])) {
                                 // Remove duplicates
                                 Cart::whereIn('id', $data['other_ids'])->delete();
@@ -530,5 +531,22 @@ class CustomerController extends Controller
         }
 
         return $wishlist_arr;
+    }
+
+    public function getCustomerData(Request $request)
+    {
+        $customer_id = $request->id;
+        $user = Customer::whereId($customer_id)->first();
+        $checkCustomer = Customer::with(['customerAddress', 'customerAddress.subCategory'])->where('email', $user->email)->first();
+        if ($checkCustomer) {
+
+            $customer_address = $checkCustomer->customerAddress ?? [];
+            $cart_count = Cart::where('customer_id', $checkCustomer->id)->get();
+            $data = ['customer' => $checkCustomer, 'customer_address' => $customer_address, 'cart_count' => $cart_count];
+
+            return new Response(array('error' => 0, 'status_code' => 200, 'message' => 'Customer data loaded successfully', 'status' => 'success', 'data' => $data), 200);
+        } else {
+            return new Response(array('error' => 1, 'status_code' => 400, 'message' => 'Customer not found', 'status' => 'failure', 'data' => []), 400);
+        }
     }
 }
