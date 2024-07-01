@@ -477,23 +477,35 @@ class ProductController extends Controller
             if (isset($request->kt_docs_repeater_nested_outer) && !empty($request->kt_docs_repeater_nested_outer)) {
                 $kt_docs_repeater_nested_outer = $request->kt_docs_repeater_nested_outer;
                 $product_id = $request->id;
-            
+
+                // Retrieve all existing options for the product and variation IDs
+                $existingOptions = ProductVariationOption::where('product_id', $product_id)
+                    ->whereIn('variation_id', collect($kt_docs_repeater_nested_outer)->pluck('variation_id')->filter())
+                    ->get();
+
+                // Loop through existing options and mark them as not found initially
+                $optionsNotFound = $existingOptions->keyBy('id')->map(function ($option) {
+                    $option->found = false;
+                    return $option;
+                });
+
+
                 foreach ($kt_docs_repeater_nested_outer as $outer) {
                     if (!empty($outer['variation_id'])) {
                         $variation_id = $outer['variation_id'];
                         $kt_docs_repeater_nested_inner = $outer['kt_docs_repeater_nested_inner'];
-            
+
                         foreach ($kt_docs_repeater_nested_inner as $inner) {
                             $value = $inner['variation_value'];
                             $amount = $inner['amount'];
                             $discount_amount = $inner['discount_amount'];
                             $is_default = $inner['is_default'][0] ?? 0;
-            
+
                             $existingOption = ProductVariationOption::where('product_id', $product_id)
                                 ->where('variation_id', $variation_id)
                                 ->where('value', $value)
                                 ->first();
-            
+
                             if ($existingOption) {
                                 // Update existing record
                                 $existingOption->amount = $amount;
@@ -514,6 +526,12 @@ class ProductController extends Controller
                         }
                     }
                 }
+                // Delete options that were not found (not updated or inserted)
+                $optionsNotFound->each(function ($option) {
+                    if (!$option->found) {
+                        $option->delete();
+                    }
+                });
             }
 
             $meta_ins['meta_title']         = $request->meta_title ?? '';
