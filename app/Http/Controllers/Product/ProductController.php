@@ -483,11 +483,8 @@ class ProductController extends Controller
                     ->whereIn('variation_id', collect($kt_docs_repeater_nested_outer)->pluck('variation_id')->filter())
                     ->get();
             
-                // Loop through existing options and mark them as not found initially
-                $optionsNotFound = $existingOptions->keyBy('id')->map(function ($option) {
-                    $option->found = false;
-                    return $option;
-                });
+                // Initialize a collection to track found options
+                $optionsFound = collect();
             
                 foreach ($kt_docs_repeater_nested_outer as $outer) {
                     if (!empty($outer['variation_id'])) {
@@ -512,8 +509,8 @@ class ProductController extends Controller
                                 $existingOption->is_default = $is_default;
                                 $existingOption->save();
             
-                                // Mark option as found
-                                $optionsNotFound[$existingOption->id]->found = true;
+                                // Add to found options collection
+                                $optionsFound->push($existingOption);
                             } else {
                                 // Insert new record
                                 ProductVariationOption::create([
@@ -530,15 +527,14 @@ class ProductController extends Controller
                 }
             
                 // Delete options that were not found (not updated or inserted)
-                $optionsNotFound->each(function ($option) {
-                    if (!$option->found) {
-                        $option->delete();
-                    }
+                $existingOptions->diff($optionsFound)->each(function ($option) {
+                    $option->delete();
                 });
             } else {
                 // If $request->kt_docs_repeater_nested_outer is empty or not set, delete all options for the product
                 ProductVariationOption::where('product_id', $product_id)->delete();
             }
+            
             
 
             $meta_ins['meta_title']         = $request->meta_title ?? '';
