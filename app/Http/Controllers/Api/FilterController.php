@@ -266,7 +266,7 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
 
         $attr_response = $this->getAttributeFilter($category_slug,$brand_slug);
 
-        $response['exclusive'] =  [array('id' => null, 'name' => 'Goli Soda', 'slug' => 'goli_soda')];
+        $response['exclusive'] =  [array('id' => null, 'name' => 'Goli Soda', 'slug' => 'goli-soda')];
         $response['categories'] =  $categories;
         if (!empty($attr_response['brands'])) {
             $response['brands'] =  $attr_response['brands'];
@@ -391,7 +391,7 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
         }
 
         $take_limit = $take ?? 12;
-        $total = Product::select('products.*')->where('products.status', 'published')
+        $total_data = Product::select('products.*')->where('products.status', 'published')
             ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
             ->leftJoin('product_categories as parent', 'parent.id', '=', 'product_categories.parent_id')
             ->join('brands', 'brands.id', '=', 'products.brand_id')
@@ -540,9 +540,10 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
             } )
             ->where('products.stock_status', 'in_stock')
             ->groupBy('products.id')
+            ->selectRaw('MIN(mrp) AS min_value, MAX(mrp) AS max_value')
             ->get();
 
-        $total = count($total);
+        $total = count($total_data);
 
         $details = Product::select('products.*')->where('products.status', 'published')
             ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
@@ -708,8 +709,8 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
         // }
         $to = count($details);
 
-         $minValue = $details->min('min_value');
-         $maxValue = $details->max('max_value');
+         $minValue = $total_data->min('min_value');
+         $maxValue = $total_data->max('max_value');
          return array('products' => $tmp, 'total_count' => $total, 'from' => ($total == 0 ? '0' : '1'), 'to' => $to,'min_value'=>$minValue??0,'max_value'=>$maxValue??0);
     }
 
