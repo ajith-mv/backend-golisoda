@@ -159,15 +159,15 @@
         </tr>
         <tr>
             <td>Total Sales (Inclusive Tax)</td>
-            <td>{{ $data->sale_amount }}</td>
+            <td>{{ isset($data->sale_amount) ? $data->sale_amount : '' }}</td>
         </tr>
         <tr>
             <td> Total Sales (Exclusive Tax)</td>
-            <td> {{ $data->sale_amount_excluding_tax }} </td>
+            <td> {{ isset($data->sale_amount_excluding_tax) ? $data->sale_amount_excluding_tax : '' }} </td>
         </tr>
         <tr>
-            <td> Commission(B) @ {{$data->com_percentage}} </td>
-            <td> {{ $data->com_percentage ?? '' }} </td>
+            <td> Commission(B) @ {{isset($data->com_percentage) ? $data->com_percentage :  '' }} </td>
+            <td> {{ isset($data->com_amount) ? $data->com_amount :  '' }} </td>
         </tr>
         <tr>
             <td> Shipping Charges</td>
@@ -176,19 +176,19 @@
         </tr>
         <tr>
             <td> CGST on Commission + Shipping (9%) ©</td>
-            <td> {{ $data->cgst_commission ?? '' }} </td>
+            <td> {{ isset($data->cgst_commission) ? $data->cgst_commission : '' }} </td>
         </tr>
         <tr>
             <td> SGST on Commission + Shipping (9%) ©</td>
-            <td> {{ $data->sgst_commission ?? '' }} </td>
+            <td> {{ isset($data->sgst_commission) ? $data->sgst_commission : '' }} </td>
         </tr>
         <tr>
             <td> TDS (1 %)</td>
-            <td> {{ $data->tds_commission ?? '' }} </td>
+            <td> {{ isset($data->tds_commission) ? $data->tds_commission : '' }} </td>
         </tr>
         <tr>
             <td> <b>Net Payable Amount</b> </td>
-            <td> <b>{{ $data->sale_amount + $data->com_amount + $data->cgst_commission + $data->sgst_commission + $data->tds_commission ?? '' }}</b> </td>
+            <td> <b>{{ (isset($data->sale_amount) ? $data->sale_amount : 0 ) + (isset($data->com_amount) ? $data->com_amount : 0) + (isset($data->cgst_commission) ? $data->cgst_commission : 0) + (isset($data->sgst_commission) ? $data->sgst_commission : 0) + isset($data->tds_commission) ? $data->tds_commission : 0 }}</b> </td>
         </tr>
     </table>
     <br/>
