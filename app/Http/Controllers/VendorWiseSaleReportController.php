@@ -138,11 +138,11 @@ class VendorWiseSaleReportController extends Controller
                     DB::raw('SUM(sale_amount) as sale_amount'),
                     DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('SUM(com_percentage) as com_percentage'),
-                    DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as com_amount'),
+                    DB::raw('SUM(com_amount) as com_amount'),
                     DB::raw('SUM(shipment_count) as total_shipments'),
-                    DB::raw('(0.09 * (SUM(sale_amount) - SUM(total_tax_amount))) as cgst_commission'),
-                    DB::raw('(0.09 * (SUM(sale_amount) - SUM(total_tax_amount))) as sgst_commission'),
-                    DB::raw('(0.01 * (SUM(sale_amount) - SUM(total_tax_amount))) as tds_commission')
+                    DB::raw('(0.09 * SUM(com_amount)) as cgst_commission'),
+                    DB::raw('(0.09 * SUM(com_amount)) as sgst_commission'),
+                    DB::raw('(0.01 * SUM(com_amount)) as tds_commission')
 
                 )
                 ->groupBy('id')->first();
