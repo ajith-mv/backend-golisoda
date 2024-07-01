@@ -535,7 +535,7 @@ class CustomerController extends Controller
 
     public function getCustomerData(Request $request)
     {
-        $customer_id = $request->id;
+        $customer_id = $request->customer_id;
         $user = Customer::whereId($customer_id)->first();
         $checkCustomer = Customer::with(['customerAddress', 'customerAddress.subCategory'])->where('email', $user->email)->first();
         if ($checkCustomer) {
