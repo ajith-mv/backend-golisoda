@@ -29,7 +29,8 @@
                             <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
                                 <th> Vendor Name</th>
                                 <th> Sale Amount </th>
-                                <th> Commission Percentage </th>
+                                <th> Commission Type </th>
+                                <th> Commission Value </th>
                                 <th> Commission Amount </th>
                                 <th> Action </th>
                             </tr>
@@ -72,6 +73,10 @@
                 {
                     data: 'sale_amount',
                     name: 'sale_amount'
+                },
+                {
+                    data: 'commission_type',
+                    name: 'commission_type'
                 },
                 {
                     data: 'com_percentage',
