@@ -74,7 +74,7 @@ class VendorWiseSaleReportController extends Controller
                         $query->Where('brand_name', 'like', "%{$keywords}%");
                     }
                 })
-                
+
                 ->addColumn('action', function ($row) use ($start_date, $end_date) {
                     if (empty($start_date) && empty($end_date)) {
                         $start_date = date("Y-m-d");
@@ -121,15 +121,13 @@ class VendorWiseSaleReportController extends Controller
                 $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
-            sum(qty*price) as sale_amount,total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count,
+            sum(qty*price) as sale_amount,total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count, gbs_brand_orders.commission_value as com_percentage,
             CASE
-        WHEN gbs_brand_orders.commission_type = 'percentage' THEN ROUND(SUM(qty*price * gbs_brand_orders.commission_value / 100),2)
+        WHEN gbs_brand_orders.commission_type = 'percentage' THEN ROUND(SUM(qty * price * gbs_brand_orders.commission_value / 100), 2)
+        WHEN gbs_brand_orders.commission_type = 'fixed' THEN ROUND(SUM(qty * gbs_brand_orders.commission_value), 2)
         ELSE 0
-    END AS com_percentage,
-    CASE
-        WHEN gbs_brand_orders.commission_type = 'fixed' THEN ROUND(SUM(qty * gbs_brand_orders.commission_value),2)
-        ELSE 0
-    END AS com_amount
+    END AS com_amount,
+    sum(tax_amount) as total_tax_amount
             FROM gbs_brand_orders
             JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
             JOIN gbs_brands ON gbs_brands.id = gbs_brand_orders.brand_id $where
@@ -138,10 +136,14 @@ class VendorWiseSaleReportController extends Controller
                     'id',
                     'brand_name',
                     DB::raw('SUM(sale_amount) as sale_amount'),
-                    DB::raw('SUM(total_excluding_tax) as sale_amount_excluding_tax'),
+                    DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('SUM(com_percentage) as com_percentage'),
                     DB::raw('SUM(com_amount) as com_amount'),
-                    DB::raw('SUM(shipment_count) as total_shipments')
+                    DB::raw('SUM(shipment_count) as total_shipments'),
+                    DB::raw('(0.09 * SUM(com_amount)) as cgst_commission'),
+                    DB::raw('(0.09 * SUM(com_amount)) as sgst_commission'),
+                    DB::raw('(0.01 * SUM(com_amount)) as tds_commission')
+
                 )
                 ->groupBy('id')->first();
 
@@ -197,15 +199,13 @@ class VendorWiseSaleReportController extends Controller
                 $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
-            sum(qty*price) as sale_amount,total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count,
+            sum(qty*price) as sale_amount,total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count, gbs_brand_orders.commission_value as com_percentage,
             CASE
-        WHEN gbs_brand_orders.commission_type = 'percentage' THEN ROUND(SUM(qty*price * gbs_brand_orders.commission_value / 100),2)
+        WHEN gbs_brand_orders.commission_type = 'percentage' THEN ROUND(SUM(qty * price * gbs_brand_orders.commission_value / 100), 2)
+        WHEN gbs_brand_orders.commission_type = 'fixed' THEN ROUND(SUM(qty * gbs_brand_orders.commission_value), 2)
         ELSE 0
-    END AS com_percentage,
-    CASE
-        WHEN gbs_brand_orders.commission_type = 'fixed' THEN ROUND(SUM(qty * gbs_brand_orders.commission_value),2)
-        ELSE 0
-    END AS com_amount
+    END AS com_amount,
+    sum(tax_amount) as total_tax_amount
             FROM gbs_brand_orders
             JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
             JOIN gbs_brands ON gbs_brands.id = gbs_brand_orders.brand_id $where
@@ -214,10 +214,14 @@ class VendorWiseSaleReportController extends Controller
                     'id',
                     'brand_name',
                     DB::raw('SUM(sale_amount) as sale_amount'),
-                    DB::raw('SUM(total_excluding_tax) as sale_amount_excluding_tax'),
+                    DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('SUM(com_percentage) as com_percentage'),
                     DB::raw('SUM(com_amount) as com_amount'),
-                    DB::raw('SUM(shipment_count) as total_shipments')
+                    DB::raw('SUM(shipment_count) as total_shipments'),
+                    DB::raw('(0.09 * SUM(com_amount)) as cgst_commission'),
+                    DB::raw('(0.09 * SUM(com_amount)) as sgst_commission'),
+                    DB::raw('(0.01 * SUM(com_amount)) as tds_commission')
+
                 )
                 ->groupBy('id')->first();
 
@@ -281,15 +285,13 @@ class VendorWiseSaleReportController extends Controller
                 $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
-            sum(qty*price) as sale_amount,total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count,
+            sum(qty*price) as sale_amount,total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count, gbs_brand_orders.commission_value as com_percentage,
             CASE
-        WHEN gbs_brand_orders.commission_type = 'percentage' THEN ROUND(SUM(qty*price * gbs_brand_orders.commission_value / 100),2)
+        WHEN gbs_brand_orders.commission_type = 'percentage' THEN ROUND(SUM(qty * price * gbs_brand_orders.commission_value / 100), 2)
+        WHEN gbs_brand_orders.commission_type = 'fixed' THEN ROUND(SUM(qty * gbs_brand_orders.commission_value), 2)
         ELSE 0
-    END AS com_percentage,
-    CASE
-        WHEN gbs_brand_orders.commission_type = 'fixed' THEN ROUND(SUM(qty * gbs_brand_orders.commission_value),2)
-        ELSE 0
-    END AS com_amount
+    END AS com_amount,
+    sum(tax_amount) as total_tax_amount
             FROM gbs_brand_orders
             JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
             JOIN gbs_brands ON gbs_brands.id = gbs_brand_orders.brand_id $where
@@ -298,13 +300,16 @@ class VendorWiseSaleReportController extends Controller
                     'id',
                     'brand_name',
                     DB::raw('SUM(sale_amount) as sale_amount'),
-                    DB::raw('SUM(total_excluding_tax) as sale_amount_excluding_tax'),
+                    DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('SUM(com_percentage) as com_percentage'),
                     DB::raw('SUM(com_amount) as com_amount'),
-                    DB::raw('SUM(shipment_count) as total_shipments')
+                    DB::raw('SUM(shipment_count) as total_shipments'),
+                    DB::raw('(0.09 * SUM(com_amount)) as cgst_commission'),
+                    DB::raw('(0.09 * SUM(com_amount)) as sgst_commission'),
+                    DB::raw('(0.01 * SUM(com_amount)) as tds_commission')
+
                 )
                 ->groupBy('id')->first();
-
 
             // Step 1: Create the subquery with the brand_id filter
 

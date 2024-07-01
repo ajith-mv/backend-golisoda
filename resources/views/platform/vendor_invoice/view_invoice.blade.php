@@ -166,7 +166,7 @@
             <td> {{ $data->sale_amount_excluding_tax }} </td>
         </tr>
         <tr>
-            <td> Commission(B) @ 20% </td>
+            <td> Commission(B) @ {{$data->com_percentage}} </td>
             <td> {{ $data->com_percentage ?? '' }} </td>
         </tr>
         <tr>
@@ -176,19 +176,19 @@
         </tr>
         <tr>
             <td> CGST on Commission + Shipping (9%) ©</td>
-            <td> {{ $data->com_amount ?? '' }} </td>
+            <td> {{ $data->cgst_commission ?? '' }} </td>
         </tr>
         <tr>
             <td> SGST on Commission + Shipping (9%) ©</td>
-            <td> {{ $data->com_amount ?? '' }} </td>
+            <td> {{ $data->sgst_commission ?? '' }} </td>
         </tr>
         <tr>
-            <td> TDS (1 %)(D)</td>
-            <td> {{ $data->com_amount ?? '' }} </td>
+            <td> TDS (1 %)</td>
+            <td> {{ $data->tds_commission ?? '' }} </td>
         </tr>
         <tr>
             <td> <b>Net Payable Amount</b> </td>
-            <td> <b>{{ $data->com_amount ?? '' }}</b> </td>
+            <td> <b>{{ $data->sale_amount + $data->com_amount + $data->cgst_commission + $data->sgst_commission + $data->tds_commission ?? '' }}</b> </td>
         </tr>
     </table>
     <br/>
