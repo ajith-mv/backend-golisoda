@@ -155,7 +155,7 @@
         </tr>
         <tr>
             <td>Total Shipments</td>
-            <td>{{ $data->total_shipments }}</td>
+            <td>{{ isset($data->total_shipments) ? $data->total_shipments : '' }}</td>
         </tr>
         <tr>
             <td>Total Sales (Inclusive Tax)</td>
