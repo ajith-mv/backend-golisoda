@@ -478,16 +478,7 @@ class ProductController extends Controller
                 $kt_docs_repeater_nested_outer = $request->kt_docs_repeater_nested_outer;
                 $product_id = $request->id;
 
-                // Retrieve all existing options for the product and variation IDs
-                $existingOptions = ProductVariationOption::where('product_id', $product_id)
-                    ->whereIn('variation_id', collect($kt_docs_repeater_nested_outer)->pluck('variation_id')->filter())
-                    ->get();
-
-                // Loop through existing options and mark them as not found initially
-                $optionsNotFound = $existingOptions->keyBy('id')->map(function ($option) {
-                    $option->found = false;
-                    return $option;
-                });
+               
 
 
                 foreach ($kt_docs_repeater_nested_outer as $outer) {
@@ -526,12 +517,12 @@ class ProductController extends Controller
                         }
                     }
                 }
-                // Delete options that were not found (not updated or inserted)
-                $optionsNotFound->each(function ($option) {
-                    if (!$option->found) {
-                        $option->delete();
-                    }
-                });
+                
+            }else{
+                 // Retrieve all existing options for the product and variation IDs
+                 $existingOptions = ProductVariationOption::where('product_id', $product_id)
+                //  ->whereIn('variation_id', collect($kt_docs_repeater_nested_outer)->pluck('variation_id')->filter())
+                 ->delete();
             }
 
             $meta_ins['meta_title']         = $request->meta_title ?? '';
