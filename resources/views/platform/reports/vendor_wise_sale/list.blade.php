@@ -185,7 +185,6 @@
         cb(start, end);
 
         function viewInvoice(id, start_date, end_date) {
-
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

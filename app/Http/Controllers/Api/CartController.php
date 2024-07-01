@@ -776,6 +776,7 @@ class CartController extends Controller
         $guest_token    = $request->guest_token;
         $customer_id    = $request->customer_id;
         $quantity       = $request->quantity ?? 1;
+        $selected_shipping = $request->selected_shipping ?? '';
         $addon_id   = $request->addon_id;
         $addon_item_id   = $request->addon_item_id;
 
@@ -806,7 +807,7 @@ class CartController extends Controller
 
             $error = 0;
             $message = 'Cart updated successful';
-            $data = $this->getCartListAll($checkCart->customer_id, $checkCart->guest_token);
+            $data = $this->getCartListAll($checkCart->customer_id, $checkCart->guest_token, $selected_shipping);
         } else {
 
             $error = 1;

@@ -91,7 +91,7 @@
                         <td class="w-30">
                             <div> Invoice No: </div>
                             <div> Invoice Date: {{ date('d-m-Y')}}</div>
-                            <div> Date Range: {{ isset($statDate) ? $startDate : ''}} to {{ isset($sendDate) ? $endDate : ''}}</div>
+                            <div> Date Range: {{ isset($end_date) ? $end_date : ''}} to {{ isset($start_date) ? $start_date : ''}}</div>
 
                         </td>
 
@@ -227,7 +227,7 @@
                 <td>{{ $order->order_no}}</td>
                 <td>{{ isset($item->payments) ? $item->payments->payment_type : '' }}</td>
                 <td>{{ $order->tracking_id}}</td>
-                <td>{{ $order->sub_total}}</td>
+                <td>{{ $order->vendor_order_amount}}</td>
             </tr>
             @php
                 $count++;
