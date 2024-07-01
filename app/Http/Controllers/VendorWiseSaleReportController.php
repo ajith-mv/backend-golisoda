@@ -33,9 +33,9 @@ class VendorWiseSaleReportController extends Controller
                 $end_date = date('Y-m-d', strtotime(trim(str_replace('/', '-', $dates[1]))));
             }
 
-            $where = "";
+            $where = "WHERE gbs_orders.status != 'pending'";
             if (!empty($start_date) && !empty($end_date)) {
-                $where = "WHERE DATE(gbs_brand_orders.created_at) >= '$start_date' AND DATE(gbs_brand_orders.created_at) <= '$end_date'";
+                $where = "WHERE DATE(gbs_brand_orders.created_at) >= '$start_date' AND DATE(gbs_brand_orders.created_at) <= '$end_date' AND gbs_orders.status != 'pending'";
             }
 
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
@@ -49,6 +49,7 @@ class VendorWiseSaleReportController extends Controller
         ELSE 0
     END AS com_amount
             FROM gbs_brand_orders
+            JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
             JOIN gbs_brands ON gbs_brands.id = gbs_brand_orders.brand_id $where
             GROUP BY gbs_brand_orders.brand_id, gbs_brand_orders.commission_type) as a"))
                 ->select(
@@ -115,9 +116,9 @@ class VendorWiseSaleReportController extends Controller
         try {
 
             DB::beginTransaction();
-            $where = "WHERE brand_id = '$brand_id'";
+            $where = "WHERE brand_id = '$brand_id' AND gbs_orders.status != 'pending'";
             if (!empty($start_date) && !empty($end_date)) {
-                $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'";
+                $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
             sum(qty*price) as sale_amount,total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count,
@@ -130,6 +131,7 @@ class VendorWiseSaleReportController extends Controller
         ELSE 0
     END AS com_amount
             FROM gbs_brand_orders
+            JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
             JOIN gbs_brands ON gbs_brands.id = gbs_brand_orders.brand_id $where
             GROUP BY gbs_brand_orders.brand_id, gbs_brand_orders.commission_type) as a"))
                 ->select(
@@ -190,11 +192,10 @@ class VendorWiseSaleReportController extends Controller
         try {
 
             DB::beginTransaction();
-            $where = "WHERE brand_id = '$brand_id'";
+            $where = "WHERE brand_id = '$brand_id' AND gbs_orders.status != 'pending'";
             if (!empty($start_date) && !empty($end_date)) {
-                $where = "WHERE DATE(gbs_brand_orders.created_at) >= '$end_date' AND DATE(gbs_brand_orders.created_at) <= '$start_date' AND brand_id = '$brand_id'";
+                $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
-
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
             sum(qty*price) as sale_amount,total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count,
             CASE
@@ -206,6 +207,7 @@ class VendorWiseSaleReportController extends Controller
         ELSE 0
     END AS com_amount
             FROM gbs_brand_orders
+            JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
             JOIN gbs_brands ON gbs_brands.id = gbs_brand_orders.brand_id $where
             GROUP BY gbs_brand_orders.brand_id, gbs_brand_orders.commission_type) as a"))
                 ->select(
@@ -227,7 +229,6 @@ class VendorWiseSaleReportController extends Controller
             $order_info = DB::table('brand_orders')
                 ->join('brands', 'brand_orders.brand_id', '=', 'brands.id')
                 ->join('orders', 'brand_orders.order_id', '=', 'orders.id')
-
                 ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
                 ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$start_date])
@@ -235,10 +236,11 @@ class VendorWiseSaleReportController extends Controller
                 ->select(
                     'brands.brand_name',
                     'brand_orders.tracking_id',
+                    DB::raw('SUM(gbs_brand_orders.sub_total) as vendor_order_amount'),
                     'brand_orders.estimated_arrival_date',
                     'orders.*'
                 )
-                ->distinct()
+                ->groupBy('brand_orders.brand_id', 'brand_orders.order_id')
                 ->get();
             $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])->first();
 
@@ -274,11 +276,10 @@ class VendorWiseSaleReportController extends Controller
         try {
 
             DB::beginTransaction();
-            $where = "WHERE brand_id = '$brand_id'";
+            $where = "WHERE brand_id = '$brand_id' AND gbs_orders.status != 'pending'";
             if (!empty($start_date) && !empty($end_date)) {
-                $where = "WHERE DATE(gbs_brand_orders.created_at) >= '$end_date' AND DATE(gbs_brand_orders.created_at) <= '$start_date' AND brand_id = '$brand_id'";
+                $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
-
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
             sum(qty*price) as sale_amount,total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count,
             CASE
@@ -290,6 +291,7 @@ class VendorWiseSaleReportController extends Controller
         ELSE 0
     END AS com_amount
             FROM gbs_brand_orders
+            JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
             JOIN gbs_brands ON gbs_brands.id = gbs_brand_orders.brand_id $where
             GROUP BY gbs_brand_orders.brand_id, gbs_brand_orders.commission_type) as a"))
                 ->select(
@@ -311,7 +313,6 @@ class VendorWiseSaleReportController extends Controller
             $order_info = DB::table('brand_orders')
                 ->join('brands', 'brand_orders.brand_id', '=', 'brands.id')
                 ->join('orders', 'brand_orders.order_id', '=', 'orders.id')
-
                 ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
                 ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$start_date])
@@ -319,10 +320,11 @@ class VendorWiseSaleReportController extends Controller
                 ->select(
                     'brands.brand_name',
                     'brand_orders.tracking_id',
+                    DB::raw('SUM(gbs_brand_orders.sub_total) as vendor_order_amount'),
                     'brand_orders.estimated_arrival_date',
                     'orders.*'
                 )
-                ->distinct()
+                ->groupBy('brand_orders.brand_id', 'brand_orders.order_id')
                 ->get();
             $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])->first();
 
