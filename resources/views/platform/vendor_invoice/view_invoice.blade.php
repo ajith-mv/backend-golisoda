@@ -187,9 +187,16 @@
             <td> {{ isset($data->tds_commission) ? $data->tds_commission : '' }} </td>
         </tr>
         <tr>
-            <td> <b>Net Payable Amount</b> </td>
-            <td> <b>{{ (isset($data->sale_amount) ? $data->sale_amount : 0 ) + (isset($data->com_amount) ? $data->com_amount : 0) + (isset($data->cgst_commission) ? $data->cgst_commission : 0) + (isset($data->sgst_commission) ? $data->sgst_commission : 0) + isset($data->tds_commission) ? $data->tds_commission : 0 }}</b> </td>
+            <td><b>Net Payable Amount</b></td>
+            <td><b>{{ 
+                (isset($data->sale_amount) ? $data->sale_amount : 0) 
+                - (isset($data->com_amount) ? $data->com_amount : 0) 
+                - (isset($data->cgst_commission) ? $data->cgst_commission : 0) 
+                - (isset($data->sgst_commission) ? $data->sgst_commission : 0) 
+                - (isset($data->tds_commission) ? $data->tds_commission : 0) 
+            }}</b></td>
         </tr>
+        
     </table>
     <br/>
     <table cellspacing="0" padding="0" class="w-100">
