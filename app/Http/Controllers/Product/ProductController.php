@@ -512,6 +512,7 @@ class ProductController extends Controller
                                 $existingOption->discount_amount = $discount_amount;
                                 $existingOption->is_default = $is_default;
                                 $existingOption->save();
+                                $optionsNotFound[$existingOption->id]->found = true; // Mark option as found
                             } else {
                                 // Insert new record
                                 ProductVariationOption::create([
