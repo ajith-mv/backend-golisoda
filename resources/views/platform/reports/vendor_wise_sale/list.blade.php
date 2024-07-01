@@ -31,7 +31,7 @@
                                 <th> Sale Amount </th>
                                 <th> Commission Type </th>
                                 <th> Commission Value </th>
-                                <th> Commission Amount </th>
+                                {{-- <th> Commission Amount </th> --}}
                                 <th> Action </th>
                             </tr>
                         </thead>
@@ -82,10 +82,10 @@
                     data: 'com_percentage',
                     name: 'com_percentage'
                 },
-                {
-                    data: 'com_amount',
-                    name: 'com_amount'
-                },
+                // {
+                //     data: 'com_amount',
+                //     name: 'com_amount'
+                // },
                 {
                     data: 'action',
                     name: 'action',
