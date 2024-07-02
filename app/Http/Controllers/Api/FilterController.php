@@ -406,7 +406,7 @@ class FilterController extends Controller
                 DB::raw('CASE WHEN COUNT(gbs_product_variation_options.product_id) > 0 
                      THEN MIN(gbs_products.strike_price + COALESCE(gbs_pvo_total.amount_total, 0))
                      ELSE MIN(gbs_products.mrp)
-                END AS max_value'),
+                END AS min_value'),
                 DB::raw('CASE WHEN COUNT(gbs_product_variation_options.product_id) > 0 
                      THEN MAX(gbs_products.strike_price + COALESCE(gbs_pvo_total.amount_total, 0))
                      ELSE MAX(gbs_products.mrp)
