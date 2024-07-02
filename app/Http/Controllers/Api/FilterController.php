@@ -399,7 +399,7 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
                 $join->on('product_variation_options.product_id', '=', 'products.id')
                      ->where('product_variation_options.is_default', 1); // Consider only default variations
             })
-            ->selectRaw('MIN(gbs_products.mrp + COALESCE(gbs_product_variation_options.amount - gbs_product_variation_options.discount_amount, 0)) AS min_value, MAX(gbs_products.mrp + COALESCE(pvo.amount - gbs_product_variation_options.discount_amount, 0)) AS max_value')
+            ->selectRaw('MIN(gbs_products.mrp + COALESCE(gbs_product_variation_options.amount - gbs_product_variation_options.discount_amount, 0)) AS min_value, MAX(gbs_products.mrp + COALESCE(gbs_product_variation_options.amount - gbs_product_variation_options.discount_amount, 0)) AS max_value')
             ->when($filter_category != '', function ($q) use ($filter_category) {
                 $q->where(function ($query) use ($filter_category) {
                     return $query->where('product_categories.slug', $filter_category)->orWhere('parent.slug', $filter_category);
