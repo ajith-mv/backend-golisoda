@@ -395,6 +395,11 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
             ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
             ->leftJoin('product_categories as parent', 'parent.id', '=', 'product_categories.parent_id')
             ->join('brands', 'brands.id', '=', 'products.brand_id')
+            ->leftJoin('product_variation_options as pvo', function ($join) {
+                $join->on('pvo.product_id', '=', 'products.id')
+                     ->where('pvo.is_default', 1); // Consider only default variations
+            })
+            ->selectRaw('MIN(products.mrp + COALESCE(pvo.amount - pvo.discount_amount, 0)) AS min_value, MAX(products.mrp + COALESCE(pvo.amount - pvo.discount_amount, 0)) AS max_value')
             ->when($filter_category != '', function ($q) use ($filter_category) {
                 $q->where(function ($query) use ($filter_category) {
                     return $query->where('product_categories.slug', $filter_category)->orWhere('parent.slug', $filter_category);
@@ -540,7 +545,7 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
             } )
             ->where('products.stock_status', 'in_stock')
             ->groupBy('products.id')
-            ->selectRaw('MIN(mrp) AS min_value, MAX(mrp) AS max_value')
+            // ->selectRaw('MIN(mrp) AS min_value, MAX(mrp) AS max_value')
             ->get();
 
         $total = count($total_data);
