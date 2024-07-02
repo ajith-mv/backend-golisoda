@@ -505,7 +505,7 @@ class FilterController extends Controller
 
                             $q->where(function ($query) use ($test_price) {
                                 return $query->where('products.mrp', '>=', current($test_price))
-                                    ->where('products.mr', '<=', end($test_price));
+                                    ->where('products.mrp', '<=', end($test_price));
                             });
                         } else {
                             $q->orWhere(function ($query) use ($test_price) {
