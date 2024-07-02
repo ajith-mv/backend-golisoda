@@ -395,9 +395,9 @@ $top_slide_menu['child_category']= array_values($uniqueObjects);
             ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
             ->leftJoin('product_categories as parent', 'parent.id', '=', 'product_categories.parent_id')
             ->join('brands', 'brands.id', '=', 'products.brand_id')
-            ->leftJoin('product_variation_options as pvo', function ($join) {
-                $join->on('pvo.product_id', '=', 'products.id')
-                     ->where('pvo.is_default', 1); // Consider only default variations
+            ->leftJoin('product_variation_options', function ($join) {
+                $join->on('product_variation_options.product_id', '=', 'products.id')
+                     ->where('product_variation_options.is_default', 1); // Consider only default variations
             })
             ->selectRaw('MIN(gbs_products.mrp + COALESCE(gbs_product_variation_options.amount - gbs_product_variation_options.discount_amount, 0)) AS min_value, MAX(gbs_products.mrp + COALESCE(pvo.amount - gbs_product_variation_options.discount_amount, 0)) AS max_value')
             ->when($filter_category != '', function ($q) use ($filter_category) {
