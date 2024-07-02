@@ -496,7 +496,7 @@ class FilterController extends Controller
             })
 
             ->when($filter_price_array != '', function ($q) use ($filter_price_array) {
-                // dd( $filter_price_array );
+                dd( $filter_price_array );
                 if (count($filter_price_array) > 0) {
                     $j = 1;
                     foreach ($filter_price_array as $price_var) {
@@ -566,6 +566,14 @@ class FilterController extends Controller
             ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
             ->leftJoin('product_categories as parent', 'parent.id', '=', 'product_categories.parent_id')
             ->join('brands', 'brands.id', '=', 'products.brand_id')
+            ->leftJoin('product_variation_options', function ($join) {
+                $join->on('product_variation_options.product_id', '=', 'products.id')
+                    ->where('product_variation_options.is_default', 1); // Consider only default variations
+            })
+            ->leftJoin(DB::raw('(SELECT product_id, SUM(amount - discount_amount) AS amount_total
+                        FROM gbs_product_variation_options
+                        WHERE is_default = 1
+                        GROUP BY product_id) AS gbs_pvo_total'), 'pvo_total.product_id', '=', 'products.id')
             ->when($filter_category != '', function ($q) use ($filter_category) {
                 $q->where(function ($query) use ($filter_category) {
                     return $query->where('product_categories.slug', $filter_category)->orWhere('parent.slug', $filter_category);
