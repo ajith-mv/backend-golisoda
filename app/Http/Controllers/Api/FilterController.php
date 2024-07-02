@@ -504,11 +504,11 @@ class FilterController extends Controller
                         if ($j == 1) {
 
                             $q->where(function ($query) use ($test_price) {
-                                return $query->whereBetween(DB::raw('COALESCE(gbs_products.strike_price + gbs_pvo_total.amount_total, products.mrp)'), [current($test_price), end($test_price)]);
+                                return $query->whereBetween(DB::raw('COALESCE(gbs_products.strike_price + gbs_pvo_total.amount_total, gbs_products.mrp)'), [current($test_price), end($test_price)]);
                             });
                         } else {
                             $q->orWhere(function ($query) use ($test_price) {
-                                return $query->whereBetween(DB::raw('COALESCE(gbs_products.strike_price + gbs_pvo_total.amount_total, products.mrp)'), [current($test_price), end($test_price)]);
+                                return $query->whereBetween(DB::raw('COALESCE(gbs_products.strike_price + gbs_pvo_total.amount_total, gbs_products.mrp)'), [current($test_price), end($test_price)]);
                             });
                         }
                         $j++;
@@ -664,11 +664,11 @@ class FilterController extends Controller
                         if ($j == 1) {
 
                             $q->where(function ($query) use ($test_price) {
-                                return $query->whereBetween(DB::raw('COALESCE(gbs_products.strike_price + gbs_pvo_total.amount_total, products.mrp)'), [current($test_price), end($test_price)]);
+                                return $query->whereBetween(DB::raw('COALESCE(gbs_products.strike_price + gbs_pvo_total.amount_total, gbs_products.mrp)'), [current($test_price), end($test_price)]);
                             });
                         } else {
                             $q->orWhere(function ($query) use ($test_price) {
-                                return $query->whereBetween(DB::raw('COALESCE(gbs_products.strike_price + gbs_pvo_total.amount_total, products.mrp)'), [current($test_price), end($test_price)]);
+                                return $query->whereBetween(DB::raw('COALESCE(gbs_products.strike_price + gbs_pvo_total.amount_total, gbs_products.mrp)'), [current($test_price), end($test_price)]);
                             });
                         }
                         $j++;
