@@ -496,7 +496,7 @@ class FilterController extends Controller
             })
 
             ->when($filter_price_array != '', function ($q) use ($filter_price_array) {
-                dd( $filter_price_array );
+                // dd( $filter_price_array );
                 if (count($filter_price_array) > 0) {
                     $j = 1;
                     foreach ($filter_price_array as $price_var) {
@@ -505,7 +505,7 @@ class FilterController extends Controller
 
                             $q->where(function ($query) use ($test_price) {
                                 return $query->where('products.mrp', '>=', current($test_price))
-                                    ->where('products.mrp', '<=', end($test_price));
+                                    ->where('products.mr', '<=', end($test_price));
                             });
                         } else {
                             $q->orWhere(function ($query) use ($test_price) {
