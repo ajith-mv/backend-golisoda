@@ -19,18 +19,12 @@ use App\Models\CartProductVariationOption;
 use App\Models\CartShiprocketResponse;
 use App\Models\Master\Brands;
 use App\Models\Master\Variation;
-use App\Models\Offers\CouponCategory;
 use App\Models\Offers\Coupons;
 use App\Models\Product\ProductVariationOption;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Master\CustomerAddress;
 use App\Services\ShipRocketService;
-use Seshac\Shiprocket\Shiprocket;
-
-
-
-
 class CartController extends Controller
 {
     protected $rocketService;
