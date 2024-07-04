@@ -179,6 +179,14 @@
                                         value="1" @if (isset($info->is_free_shipping) && $info->is_free_shipping == 1) checked @endif />
                                 </div>
                             </div>
+                            <div class="col-md-4">
+                                <label class="fw-bold fs-6 mb-2"> Shipping charge bared by Golisoda </label>
+                                <div
+                                    class="form-check form-switch form-check-custom form-check-solid fw-bold fs-6 mb-2">
+                                    <input class="form-check-input" type="checkbox" name="is_shipping_bared_golisoda"
+                                        value="1" @if (isset($info->is_shipping_bared_golisoda) && $info->is_shipping_bared_golisoda == 1) checked @endif />
+                                </div>
+                            </div>
                         </div>
 
 

@@ -21,7 +21,11 @@ class BrandOrder extends Model
         'commission_percentage',
         'order_status_id',
         'commission_type',
-        'commission_value'
+        'commission_value',
+        'shipping_id',
+        'shipping_type',
+        'shipping_amount',
+        'shiprocket_amount'
     ];
 
     public function order()

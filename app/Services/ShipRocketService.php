@@ -5,16 +5,12 @@ namespace App\Services;
 use App\Models\Cart;
 use App\Models\CartAddress;
 use App\Models\CartProductVariationOption;
+use App\Models\CartShipment;
 use App\Models\CartShiprocketResponse;
 use App\Models\Master\Brands;
 use App\Models\Master\BrandVendorLocation;
 use App\Models\Master\Customer;
-use App\Models\Master\Pincode;
-use App\Models\Master\State;
-use App\Models\MerchantProduct;
 use App\Models\Product\Product;
-use App\Models\Seller\Merchant;
-use App\Models\Seller\MerchantShopsData;
 use App\Models\Settings\Tax;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +39,7 @@ class ShipRocketService
         try {
             $token =  $this->getToken();
             $response =  Shiprocket::order($token)->create($params);
-            log::info('status code for create order'.$response['status_code']);
+            log::info('status code for create order' . $response['status_code']);
             // $response = json_decode($response);
             if ($response['status_code'] == 1) {
 
@@ -98,7 +94,7 @@ class ShipRocketService
 
         return $response;
     }
-    
+
     /**
      * Method getShippingRocketOrderDimensions
      *
@@ -114,9 +110,9 @@ class ShipRocketService
         log::info('function called successfully');
         if (isset($customer_id) && !empty($customer_id)) {
             $shipping_amount = 0;
-            $shipping_text = "Standard Shipping";
+            $shipping_text = "standard_shipping";
             $is_free = 0;
-            $checkCart = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
+            $checkCart = Cart::where('customer_id', $customer_id)->get();
             $customer = Customer::find($customer_id);
             $cartShipAddress = CartAddress::find($cart_address_id);
             $brandIds = [];
@@ -134,9 +130,9 @@ class ShipRocketService
                             $pro = $citems->products;
                             $product_id = $pro->id;
                             $variation_option_id = [];
-                            $variationData = CartProductVariationOption::where([['cart_id', $citems->id],['product_id', $product_id]])->get();
-                            if(isset($variationData) && !empty($variationData)){
-                                foreach($variationData as $variationOptionData){
+                            $variationData = CartProductVariationOption::where([['cart_id', $citems->id], ['product_id', $product_id]])->get();
+                            if (isset($variationData) && !empty($variationData)) {
+                                foreach ($variationData as $variationOptionData) {
                                     $variation_option_id[] = $variationOptionData->variation_option_id;
                                 }
                             }
@@ -163,7 +159,7 @@ class ShipRocketService
                             $tmp = [
                                 // 'hsn' => $pro->hsn_code ?? null,
                                 'name' => $pro->product_name,
-                                'sku' => $pro->sku.implode('-', $variation_option_id),
+                                'sku' => $pro->sku . implode('-', $variation_option_id),
                                 'tax' => $tax_total ?? '',
                                 'discount' => '',
                                 'units' => $citems->quantity,
@@ -198,7 +194,7 @@ class ShipRocketService
                             ];
                         }
                     }
-                    if($brandIds && (!empty($brandIds))){
+                    if ($brandIds && (!empty($brandIds))) {
                         $uniqueBrandIds = array_unique($brandIds);
 
                         if (count($uniqueBrandIds) > 1) {
@@ -206,59 +202,89 @@ class ShipRocketService
                             log::info($uniqueBrandIds);
                             $cart_total = 0;
                             foreach ($uniqueBrandIds as $brandId) {
-                                // log::info($createOrderData[$brandId]);
                                 $brand_data = Brands::find($brandId);
+
+                                // log::info($createOrderData[$brandId]);
+                                // if (isset($brand_data) && ($brand_data->is_free_shipping != 1)) {
                                 if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
-                                    $shipping_text = "Free Shipping";
                                     $shipping_amount = 0;
+                                    $shipping_text = "free_shipping";
                                     $is_free = 1;
-                                } else {
-                                    $pickup_post_code = $this->getVendorPostCode($brandId);
-                                    foreach ($createOrderData[$brandId] as $data) {
-                                        $orderItems = $data['cartItemsarr'];
-                                        $cart_total += $data['cartTotal'];
-                                        $measure_ment = $data['measurement'];
-                                        $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
-                                        $createResponse = $this->createOrder($params);
-                                        if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                                            // $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
+                                }
+                                $pickup_post_code = $this->getVendorPostCode($brandId);
+                                foreach ($createOrderData[$brandId] as $data) {
+                                    $orderItems = $data['cartItemsarr'];
+                                    $cart_total += $data['cartTotal'];
+                                    $measure_ment = $data['measurement'];
+                                    $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
+                                    $createResponse = $this->createOrder($params);
+                                    if (isset($createResponse) && !empty($createResponse['order_id'])) {
+                                        // $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
                                         $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
-    
+                                        if (isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount != 0)) {
+                                            $shipment['shiprocket_amount'] = $shipping_amount;
+                                            $shipment['shipping_amount'] = $shipping_amount;
+                                            $shipment['shipping_type'] = 'standard_shipping';
+                                        } else {
+                                            $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['width'], $data['measurement']['height']);
+                                            $shipment['shipping_amount'] = $flat_shipping * 50;
+                                            $shipment['shipping_type'] = 'flat_shipping';
                                         }
-                                        break;
+                                        if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                                            $shipment['shipping_amount'] = 0;
+                                            $shipment['shipping_type'] = 'free_shipping';
+                                        }
+                                        $shipment['cart_id'] = $data['citems']->id;
+                                        $shipment['brand_id'] = $brandId;
+                                        CartShipment::create($shipment);
                                     }
+                                    break;
                                 }
                             }
                         } else {
                             log::info('same brand ids are in cart');
-    
+
                             $cart_total = 0;
                             $brand_data = Brands::find($uniqueBrandIds[0]);
                             if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                                 $shipping_amount = 0;
-                                $shipping_text = "Free Shipping";
+                                $shipping_text = "free_shipping";
                                 $is_free = 1;
-                            } else {
-                                $pickup_post_code = $this->getVendorPostCode($uniqueBrandIds[0]);
-                                if (isset($createOrderData[$uniqueBrandIds[0]])) {
-                                    foreach ($createOrderData[$uniqueBrandIds[0]] as $data) {
-                                        $orderItems = $data['cartItemsarr'];
-                                        $cart_total += $data['cartTotal'];
-                                        $measure_ment = $data['measurement'];
-                                        $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
+                            }
+                            $pickup_post_code = $this->getVendorPostCode($uniqueBrandIds[0]);
+                            if (isset($createOrderData[$uniqueBrandIds[0]])) {
+                                foreach ($createOrderData[$uniqueBrandIds[0]] as $data) {
+                                    $orderItems = $data['cartItemsarr'];
+                                    $cart_total += $data['cartTotal'];
+                                    $measure_ment = $data['measurement'];
+                                    $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
+                                }
+                                $createResponse = $this->createOrder($params);
+                                if (isset($createResponse) && !empty($createResponse['order_id'])) {
+                                    $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
+                                    if (isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount != 0)) {
+                                        $shipment['shiprocket_amount'] = $shipping_amount;
+                                        $shipment['shipping_amount'] = $shipping_amount;
+                                        $shipment['shipping_type'] = 'standard_shipping';
+                                    } else {
+                                        $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['width'], $data['measurement']['height']);
+                                        $shipment['shipping_amount'] = $flat_shipping * 50;
+                                        $shipment['shipping_type'] = 'flat_shipping';
                                     }
-                                    $createResponse = $this->createOrder($params);
-                                    if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                                        $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
+                                    if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                                        $shipment['shipping_amount'] = 0;
+                                        $shipment['shipping_type'] = 'free_shipping';
                                     }
+                                    $shipment['cart_id'] = $data['citems']->id;
+                                    $shipment['brand_id'] = $uniqueBrandIds[0];
+                                    CartShipment::create($shipment);
                                 }
                             }
                         }
                     }
-                    
                 }
             }
-            log::info('got the shipping amount as'.number_format($shipping_amount, 2));
+            log::info('got the shipping amount as' . number_format($shipping_amount, 2));
             return ['shipping_title' => $shipping_text, 'is_free' => $is_free, 'charges' =>  number_format($shipping_amount, 2)];
         }
     }
@@ -297,12 +323,24 @@ class ShipRocketService
         $amount = null;
         if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
             // log::info($response['data']['available_courier_companies']);
-            $recommended_id = $response['data']['recommended_courier_company_id'];
-            log::info("recommended id is" . $recommended_id);
-            foreach ($response['data']['available_courier_companies'] as $company) {
-                if ($company['courier_company_id'] == $recommended_id) {
-                    $amount = $company['freight_charge'];
-                    log::info("freight charge is: " . $amount);
+            if (env('SHIPROCKET_CALCULATION') == 'recommended') {
+                $recommended_id = $response['data']['recommended_courier_company_id'];
+                log::info("recommended id is" . $recommended_id);
+                foreach ($response['data']['available_courier_companies'] as $company) {
+                    if ($company['courier_company_id'] == $recommended_id) {
+                        $amount = $company['freight_charge'];
+                        log::info("freight charge is calculated using recommended value: " . $amount);
+                    }
+                }
+            } else {
+                $maxRating = -1;
+                foreach ($response['data']['available_courier_companies'] as $company) {
+                    if ($company['rating'] > $maxRating) {
+                        // Update maximum rating and corresponding freight charge
+                        $maxRating = $company['rating'];
+                        $amount = $company['freight_charge'];
+                        log::info("freight charge is calculated using rating: " . $amount);
+                    }
                 }
             }
         }

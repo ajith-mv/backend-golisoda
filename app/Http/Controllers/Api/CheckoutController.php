@@ -19,7 +19,7 @@ use App\Models\OrderProductWarranty;
 use App\Models\Payment;
 use App\Models\Product\OrderProductAddon;
 use App\Models\Product\Product;
-use App\Models\ShippingCharge;
+use App\Models\CartShipment;
 use App\Models\Master\CustomerAddress;
 use App\Models\Master\Variation;
 use App\Models\OrderProductVariationOption;
@@ -115,45 +115,41 @@ class CheckoutController extends Controller
         $checkout_total = str_replace(',', '', $checkout_data['total']);
         $pay_amount  = filter_var($checkout_total, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 
-        $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
-        $shipping_amount = 0;
-        $flat_charges = 0;
-        if (isset($cartInfoData) && !empty($cartInfoData)) {
-            foreach ($cartInfoData as $cartInfo) {
+        $query = Cart::where('customer_id', $customer_id)
+                    ->select(
+                        DB::raw('SUM(cart_shipments.shipment_amount) as total_shipment_amount'),
+                        'cart_shipments.shipping_type'
+                    )
+                    ->join('cart_shipments', function ($join) {
+                        $join->on('carts.id', '=', 'cart_shipments.cart_id')
+                            ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
+                    })
+                    ->groupBy('carts.id');
 
-                if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
-                    $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
-                    log::info('checkout shiprocket response');
-                    if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
-                        // log::info($response['data']['available_courier_companies']);
-                        $available_courier_companies = $response->data->available_courier_companies;
-                        $recommended_id = $response->data->recommended_courier_company_id;
-                        log::info("checkout recommended id is" . $recommended_id);
-                        foreach ($available_courier_companies as $company) {
-                        if ($company->courier_company_id == $recommended_id) {
-                            // $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
-                            $shipping_amount = $shipping_amount + number_format($company->freight_charge, 2);
-                            log::info("checkout freight charge is: " . $shipping_amount);
-                            break;
-                        }
-                        }
+                // Adding conditions to filter carts with more than one unique brand
+                $query->havingRaw('COUNT(DISTINCT carts.brand_id) > 1');
 
-                    }
-                    $shipping_type = "Standard Shipping";
+                // Execute the query to get results
+                $results = $query->get();
+
+                // Initialize variables for processing
+                $shipping_amount = 0;
+                $shippingTypes = [];
+
+                // Processing each cart result to calculate total shipment amount and collect shipping types
+                foreach ($results as $result) {
+                    $shipping_amount += $result->total_shipment_amount;
+                    $shippingTypes[] = $result->shipping_type;
                 }
-            }
-            if ($shipping_amount == 0) {
-                $shipping_type = "Flat Shipping";
-                $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
-                if (!empty($flat_charges)) {
 
-                    $shipping_amount = round($flat_charges * 50) ?? 0;
-                }
-            }
-        } else {
-            $shipping_type = "Free Shipping";
-            $shipping_amount = 0;
-        }
+                // Determine the final shipping type based on the rules provided
+                $shipping_name = $this->determineFinalShippingType($shippingTypes);
+
+                // Logging the total shipment amount and final shipping type
+                Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
+                Log::info("Final Shipping Type: " . $shipping_name);
+
+
 
         $order_ins['customer_id'] = $customer_id;
         $order_ins['customer_id'] = $customer_id;
@@ -234,7 +230,7 @@ class CheckoutController extends Controller
                 $items_ins['tax_amount'] = ($item['tax']['gstAmount'] ?? 0) * $item['quantity'];
                 $items_ins['tax_percentage'] = $item['tax']['tax_percentage'] ?? 0;
                 $items_ins['sub_total'] = $item['sub_total'];
-                $cart_data_coupon = Cart::find( $item['cart_id']);
+                $cart_data_coupon = Cart::find($item['cart_id']);
                 $items_ins['coupon_id'] = isset($cart_data_coupon) ? $cart_data_coupon->coupon_id : NULL;
 
                 $order_product_info = OrderProduct::create($items_ins);
@@ -251,6 +247,11 @@ class CheckoutController extends Controller
                 $brand_data = Brands::find($ins['brand_id']);
                 $ins['commission_type'] = $brand_data->commission_type;
                 $ins['commission_value'] = $brand_data->commission_value;
+                $cart_shipment = CartShipment::where('cart_id', $item['cart_id'])->first();
+                $ins['shipping_amount'] = isset($cart_shipment) ? $cart_shipment->shipping_amount : NULL;
+                $ins['shiprocket_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : NULL;
+                $ins['shipping_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : NULL;
+                $ins['shipping_type'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : NULL;
                 $brand_order = BrandOrder::create($ins);
 
                 //insert variations
@@ -511,45 +512,39 @@ class CheckoutController extends Controller
         $checkout_total = str_replace(',', '', $checkout_data['total']);
         $pay_amount  = filter_var($checkout_total, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 
-        $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
-        $shipping_amount = 0;
-        $flat_charges = 0;
-        if (isset($cartInfoData) && !empty($cartInfoData)) {
-            foreach ($cartInfoData as $cartInfo) {
+        $query = Cart::where('customer_id', $customer_id)
+                    ->select(
+                        DB::raw('SUM(cart_shipments.shipment_amount) as total_shipment_amount'),
+                        'cart_shipments.shipping_type'
+                    )
+                    ->join('cart_shipments', function ($join) {
+                        $join->on('carts.id', '=', 'cart_shipments.cart_id')
+                            ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
+                    })
+                    ->groupBy('carts.id');
 
-                if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
-                    $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
-                    log::info('checkout shiprocket response');
-                    if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
-                        // log::info($response['data']['available_courier_companies']);
-                        $available_courier_companies = (array)$response->data->available_courier_companies;
-                        $recommended_id = $response->data->recommended_by->id;
-                        log::info("checkout recommended id is" . $recommended_id);
-                        // foreach ($available_courier_companies as $company) {
-                        if (isset($available_courier_companies[$recommended_id - 1])) {
-                            $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
-                            $shipping_amount = $shipping_amount + number_format($recommended_shipping_data->freight_charge, 2);
-                            log::info("checkout freight charge is: " . $shipping_amount);
-                            // break;
-                        }
-                        // }
+                // Adding conditions to filter carts with more than one unique brand
+                $query->havingRaw('COUNT(DISTINCT carts.brand_id) > 1');
 
-                    }
+                // Execute the query to get results
+                $results = $query->get();
+
+                // Initialize variables for processing
+                $shipping_amount = 0;
+                $shippingTypes = [];
+
+                // Processing each cart result to calculate total shipment amount and collect shipping types
+                foreach ($results as $result) {
+                    $shipping_amount += $result->total_shipment_amount;
+                    $shippingTypes[] = $result->shipping_type;
                 }
-                $shipping_type = "Standard Shipping";
-            }
-            if ($shipping_amount == 0) {
-                $shipping_type = "Flat Shipping";
-                $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
-                if (!empty($flat_charges)) {
 
-                    $shipping_amount = round($flat_charges * 50) ?? 0;
-                }
-            }
-        } else {
-            $shipping_type = "Free Shipping";
-            $shipping_amount = 0;
-        }
+                // Determine the final shipping type based on the rules provided
+                $shipping_name = $this->determineFinalShippingType($shippingTypes);
+
+                // Logging the total shipment amount and final shipping type
+                Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
+                Log::info("Final Shipping Type: " . $shipping_name);
 
         $order_ins['customer_id'] = $customer_id;
         $order_ins['customer_id'] = $customer_id;
@@ -626,7 +621,7 @@ class CheckoutController extends Controller
                 $items_ins['tax_amount'] = ($item['tax']['gstAmount'] ?? 0) * $item['quantity'];
                 $items_ins['tax_percentage'] = $item['tax']['tax_percentage'] ?? 0;
                 $items_ins['sub_total'] = $item['sub_total'];
-                $cart_data_coupon = Cart::find( $item['cart_id']);
+                $cart_data_coupon = Cart::find($item['cart_id']);
                 $items_ins['coupon_id'] = isset($cart_data_coupon) ? $cart_data_coupon->coupon_id : NULL;
 
                 $order_product_info = OrderProduct::create($items_ins);
@@ -636,12 +631,17 @@ class CheckoutController extends Controller
                 $ins['order_product_id'] = $order_product_info->id;
                 $ins['qty'] = $order_product_info->quantity;
                 $ins['price'] = $order_product_info->price;
-                $ins['sub_total'] = $order_product_info->sub_total;//total amount including tax
+                $ins['sub_total'] = $order_product_info->sub_total; //total amount including tax
                 $ins['total_excluding_tax'] = $order_product_info->sub_total - $order_product_info->tax_amount;
                 $ins['order_status_id'] = $order_status->id;
                 $brand_data = Brands::find($ins['brand_id']);
                 $ins['commission_type'] = $brand_data->commission_type;
                 $ins['commission_value'] = $brand_data->commission_value;
+                $cart_shipment = CartShipment::where('cart_id', $item['cart_id'])->first();
+                $ins['shipping_amount'] = isset($cart_shipment) ? $cart_shipment->shipping_amount : NULL;
+                $ins['shiprocket_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : NULL;
+                $ins['shipping_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : NULL;
+                $ins['shipping_type'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : NULL;
                 $brand_order = BrandOrder::create($ins);
 
                 if (isset($product_info->warranty_id) && !empty($product_info->warranty_id)) {
@@ -1019,14 +1019,14 @@ class CheckoutController extends Controller
         if (!empty($uniqueBrandIds)) {
             foreach ($uniqueBrandIds as $singleBrandId) {
                 $brandOrderData = BrandOrder::join('orders', 'orders.id', '=', 'brand_orders.order_id')
-                    ->where([['brand_id', $singleBrandId],['order_id', $order_id]])
+                    ->where([['brand_id', $singleBrandId], ['order_id', $order_id]])
                     ->get();
                 if ($brandOrderData) {
                     $order_info = $brandOrderData[0]->order;
                     $variations = $this->getVariations($order_info);
                     $brand_address = BrandVendorLocation::where([['brand_id', $singleBrandId], ['is_default', 1]])->first();
-                    if(isset($brand_address) && (!empty($brand_address))){
-                        $pdf = PDF::loadView('platform.vendor_invoice.index', compact('brand_address','order_info', 'globalInfo', 'variations', 'singleBrandId'));
+                    if (isset($brand_address) && (!empty($brand_address))) {
+                        $pdf = PDF::loadView('platform.vendor_invoice.index', compact('brand_address', 'order_info', 'globalInfo', 'variations', 'singleBrandId'));
                         Storage::put('public/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf', $pdf->output());
                         $email_slug = 'new-order-vendor';
                         $to_email_address = $brand_address->email_id;
@@ -1041,10 +1041,9 @@ class CheckoutController extends Controller
                             'dynamic_content' => '',
                             'order_id' => $order_info->order_no
                         );
-    
+
                         $this->sendEmailNotificationByArray($email_slug, $extract, $to_email_address, $filePath);
                     }
-                    
                 }
             }
         }
@@ -1073,9 +1072,9 @@ class CheckoutController extends Controller
         eval("\$templateMessage = \"$templateMessage\";");
 
         $title = $emailTemplate->title;
-            $title = str_replace("{", "", addslashes($title));
-            $title = str_replace("}", "", $title);
-            eval("\$title = \"$title\";");
+        $title = str_replace("{", "", addslashes($title));
+        $title = str_replace("}", "", $title);
+        eval("\$title = \"$title\";");
 
         // $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
         $send_mail = new OrderMail($templateMessage, $title, $filePath);
@@ -1108,4 +1107,26 @@ class CheckoutController extends Controller
         }
         return $variations;
     }
+
+    
+    public function determineFinalShippingType($shippingTypes)
+    {
+        // Determine the final shipping type based on the rules provided
+        if (count(array_unique($shippingTypes)) === 1) {
+            // All carts have the same shipping type
+            return $shippingTypes[0];
+        } else {
+            // Different shipping types exist, apply the specified rules
+            if (in_array('free_shipping', $shippingTypes) && in_array('standard_shipping', $shippingTypes)) {
+                return 'standard_shipping';
+            } elseif (in_array('free_shipping', $shippingTypes) && in_array('flat_shipping', $shippingTypes)) {
+                return 'flat_shipping';
+            } elseif (in_array('flat_shipping', $shippingTypes) && in_array('standard_shipping', $shippingTypes)) {
+                return 'standard_shipping';
+            }
+            // Default fallback (optional based on your needs)
+            return null;
+        }
+    }
+    
 }

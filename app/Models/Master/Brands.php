@@ -27,7 +27,8 @@ class Brands extends Model
         'is_free_shipping',
         'commission_type',
         'commission_value',
-        'minimum_shipping_amount'
+        'minimum_shipping_amount',
+        'is_shipping_bared_golisoda'
     ];
 
     public function products() {

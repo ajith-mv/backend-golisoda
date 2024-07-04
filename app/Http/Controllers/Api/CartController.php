@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Master\CustomerAddress;
 use App\Services\ShipRocketService;
+
 class CartController extends Controller
 {
     protected $rocketService;
@@ -109,6 +110,7 @@ class CartController extends Controller
                             }
                             $ins['customer_id']     = $request->customer_id;
                             $ins['product_id']      = $product_id;
+                            $ins['brand_id']      = $product_info->brand_id;
                             $ins['guest_token']     = $request->guest_token ?? null;
                             $ins['quantity']        = $quantity ?? 1;
                             $ins['price']           = (float)$product_info->mrp;
@@ -207,6 +209,7 @@ class CartController extends Controller
                     }
                     $ins['customer_id']     = $request->customer_id;
                     $ins['product_id']      = $product_id;
+                    $ins['brand_id']      = $product_info->brand_id;
                     $ins['guest_token']     = $request->guest_token ?? null;
                     $ins['quantity']        = $quantity ?? 1;
                     $ins['price']           = (float)$product_info->mrp;
@@ -264,6 +267,7 @@ class CartController extends Controller
                     }
                     $ins['customer_id']     = $request->customer_id;
                     $ins['product_id']      = $product_id;
+                    $ins['brand_id']      = $product_info->brand_id;
                     $ins['guest_token']     = $request->guest_token ?? null;
                     $ins['quantity']        = $quantity ?? 1;
                     $ins['price']           = (float)$product_info->mrp;
@@ -1176,52 +1180,44 @@ class CartController extends Controller
 
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
-            $shipping_amount = 0;
-            $shipping_name = '';
-            if (isset($address) && (!empty($address))) {
-                $shipping_charges = $this->getShippingChargesFromShiprocket($address, $customer_id);
-            }
+         
+            // if (isset($address) && (!empty($address))) {
+            //     $shipping_charges = $this->getShippingChargesFromShiprocket($address, $customer_id);
+            // }
             if (isset($selected_shipping) && (!empty($selected_shipping))) {
-                $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
+                $query = Cart::where('customer_id', $customer_id)
+                    ->select(
+                        DB::raw('SUM(cart_shipments.shipment_amount) as total_shipment_amount'),
+                        'cart_shipments.shipping_type'
+                    )
+                    ->join('cart_shipments', function ($join) {
+                        $join->on('carts.id', '=', 'cart_shipments.cart_id')
+                            ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
+                    })
+                    ->groupBy('carts.id');
 
+                // Adding conditions to filter carts with more than one unique brand
+                $query->havingRaw('COUNT(DISTINCT carts.brand_id) > 1');
 
-                $flat_charges = 0;
-                if (isset($cartInfoData) && !empty($cartInfoData)) {
-                    foreach ($cartInfoData as $cartInfo) {
+                // Execute the query to get results
+                $results = $query->get();
 
-                        if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
-                            log::info('cart shiprocket response' . $cartInfo->rocketResponse->cart_token);
-                            $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
-                            log::info('cart shiprocket response');
-                            if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
-                                // log::info($response['data']['available_courier_companies']);
-                                $available_courier_companies = $response->data->available_courier_companies;
-                                $recommended_id = $response->data->recommended_courier_company_id;
-                                log::info("checkout recommended id is" . $recommended_id);
-                                foreach ($available_courier_companies as $company) {
-                                    if ($company->courier_company_id == $recommended_id) {
-                                        // $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
-                                        $shipping_amount = $shipping_amount + number_format($company->freight_charge, 2);
-                                        log::info("checkout freight charge is: " . $shipping_amount);
-                                        break;
-                                    }
-                                }
-                            }
-                            $shipping_name = "Standard Shipping";
-                        }
-                    }
-                    if ($shipping_amount == 0) {
-                        $shipping_name = "Flat Shipping";
-                        $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
-                        if (!empty($flat_charges)) {
+                // Initialize variables for processing
+                $shipping_amount = 0;
+                $shippingTypes = [];
 
-                            $shipping_amount = round($flat_charges * 50) ?? 0;
-                        }
-                    }
-                } else {
-                    $shipping_name = "Free Shipping";
-                    $shipping_amount = 0;
+                // Processing each cart result to calculate total shipment amount and collect shipping types
+                foreach ($results as $result) {
+                    $shipping_amount += $result->total_shipment_amount;
+                    $shippingTypes[] = $result->shipping_type;
                 }
+
+                // Determine the final shipping type based on the rules provided
+                $shipping_name = $this->determineFinalShippingType($shippingTypes);
+
+                // Logging the total shipment amount and final shipping type
+                Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
+                Log::info("Final Shipping Type: " . $shipping_name);
 
                 $grand_total                = $grand_total + number_format($shipping_amount, 2);
             }
@@ -1398,12 +1394,12 @@ class CartController extends Controller
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
             }
         }
-        $uniqueIsFree = array_unique($is_free);
-        if (count($uniqueIsFree) === 1 && reset($uniqueIsFree) == 1) {
-            $chargeData = ['shipping_title' => "Free Shipping1", 'is_free' => 1, 'charges' => 0];
+        // $uniqueIsFree = array_unique($is_free);
+        // if (count($uniqueIsFree) === 1 && reset($uniqueIsFree) == 1) {
+        //     $chargeData = ['shipping_title' => "Free Shipping1", 'is_free' => 1, 'charges' => 0];
 
-            return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $chargeData), 200);
-        }
+        //     return response()->json(array('error' => 0, 'status_code' => 200, 'message' => 'Data loaded successfully', 'status' => 'success', 'data' => $chargeData), 200);
+        // }
         if (!empty($flat_charges)) {
 
             $overall_flat_charges = $flat_charges * 50 ?? 0;
@@ -1540,4 +1536,25 @@ class CartController extends Controller
         log::debug('got the value after adding to cart api');
         return $chargeData;
     }
+
+    public function determineFinalShippingType($shippingTypes)
+    {
+        // Determine the final shipping type based on the rules provided
+        if (count(array_unique($shippingTypes)) === 1) {
+            // All carts have the same shipping type
+            return $shippingTypes[0];
+        } else {
+            // Different shipping types exist, apply the specified rules
+            if (in_array('free_shipping', $shippingTypes) && in_array('standard_shipping', $shippingTypes)) {
+                return 'standard_shipping';
+            } elseif (in_array('free_shipping', $shippingTypes) && in_array('flat_shipping', $shippingTypes)) {
+                return 'flat_shipping';
+            } elseif (in_array('flat_shipping', $shippingTypes) && in_array('standard_shipping', $shippingTypes)) {
+                return 'standard_shipping';
+            }
+            // Default fallback (optional based on your needs)
+            return null;
+        }
+    }
+    
 }

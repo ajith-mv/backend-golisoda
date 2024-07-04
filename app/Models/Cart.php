@@ -11,12 +11,28 @@ class Cart extends Model
 
     use HasFactory;
     protected $fillable = [
-        'customer_id', 'guest_token', 'product_id', 'price', 'quantity', 'sub_total', 'cart_order_no', 'coupon_id', 'coupon_amount', 'shipping_fee_id', 'shipping_fee','is_cod','cod_amount','coupon_percentage','coupon_code','coupon_type'
+        'customer_id', 
+        'guest_token', 
+        'product_id', 
+        'price', 
+        'quantity', 
+        'sub_total', 
+        'cart_order_no', 
+        'coupon_id', 
+        'coupon_amount', 
+        'shipping_fee_id', 
+        'shipping_fee', 
+        'is_cod', 
+        'cod_amount', 
+        'coupon_percentage', 
+        'coupon_code', 
+        'coupon_type',
+        'cart_id'
     ];
 
     public function products()
     {
-        return $this->hasOne( Product::class, 'id', 'product_id' );
+        return $this->hasOne(Product::class, 'id', 'product_id');
     }
 
     public function addons()
@@ -24,12 +40,13 @@ class Cart extends Model
         return $this->hasMany(CartProductAddon::class, 'cart_id', 'id');
     }
 
-    public function variationOptions(){
+    public function variationOptions()
+    {
         return $this->hasMany(CartProductVariationOption::class, 'cart_id', 'id');
     }
 
-    public function rocketResponse() {
+    public function rocketResponse()
+    {
         return $this->hasOne(CartShiprocketResponse::class, 'cart_token', 'cart_order_no');
     }
-    
 }

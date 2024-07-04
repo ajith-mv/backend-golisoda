@@ -13,8 +13,10 @@ class CartShipment extends Model
     protected $fillable = [
         'cart_id',
         'brand_id',
-        'shipment_type',
-        'shipment_amount',
+        'shipping_id',
+        'shipping_type',
+        'shipping_amount',
+        'shiprocket_amount'
     ];
 
     /**

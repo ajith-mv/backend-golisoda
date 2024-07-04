@@ -120,8 +120,8 @@ class VendorWiseSaleReportController extends Controller
             if (!empty($start_date) && !empty($end_date)) {
                 $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
-            $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
-            SUM(qty * price) as sale_amount, total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count, gbs_brand_orders.commission_type, 
+            $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,gbs_brands.is_shipping_bared_golisoda,
+            SUM(qty * price) as sale_amount, total_excluding_tax, SUM(shipping_amount) AS shipping_charge, COUNT(gbs_brand_orders.brand_id) as shipment_count, gbs_brand_orders.commission_type, 
             CASE
                 WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
                 WHEN gbs_brand_orders.commission_type = 'fixed' THEN gbs_brand_orders.commission_value
@@ -135,6 +135,7 @@ class VendorWiseSaleReportController extends Controller
                 ->select(
                     'id',
                     'brand_name',
+                    'is_shipping_bared_golisoda',
                     DB::raw('SUM(sale_amount) as sale_amount'),
                     DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('
@@ -147,23 +148,23 @@ class VendorWiseSaleReportController extends Controller
                     // DB::raw('SUM(com_amount) as com_amount'),
                     DB::raw('SUM(shipment_count) as total_shipments'),
                     DB::raw('
-                CASE 
-                    WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) - com_amount))
-                    WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) * com_amount / 100)
-                    ELSE NULL
-                END AS cgst_commission
-            '),
+                    CASE 
+                        WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
+                        WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) + SUM(shipping_charge) * com_amount / 100)
+                        ELSE NULL
+                    END AS cgst_commission
+                '),
+                DB::raw('
+                    CASE 
+                        WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
+                        WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) + SUM(shipping_charge) * com_amount / 100)
+                        ELSE NULL
+                    END AS sgst_commission
+                '),
                     DB::raw('
                 CASE 
-                    WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) - com_amount))
-                    WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) * com_amount / 100)
-                    ELSE NULL
-                END AS sgst_commission
-            '),
-                    DB::raw('
-                CASE 
-                    WHEN commission_type = "fixed" THEN (0.01 * ((SUM(sale_amount) - SUM(total_tax_amount)) - com_amount))
-                    WHEN commission_type = "percentage" THEN (0.01 * ((SUM(sale_amount) - SUM(total_tax_amount))) * com_amount / 100)
+                    WHEN commission_type = "fixed" THEN (0.01 * (SUM(sale_amount) - com_amount))
+                    WHEN commission_type = "percentage" THEN (0.01 * (SUM(sale_amount) * (com_amount / 100))
                     ELSE NULL
                 END AS tds_commission
             ')
@@ -223,8 +224,8 @@ class VendorWiseSaleReportController extends Controller
             if (!empty($start_date) && !empty($end_date)) {
                 $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
-            $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
-            SUM(qty * price) as sale_amount, total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count, gbs_brand_orders.commission_type, 
+            $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,gbs_brands.is_shipping_bared_golisoda,
+            SUM(qty * price) as sale_amount, total_excluding_tax, SUM(shipping_amount) AS shipping_charge, COUNT(gbs_brand_orders.brand_id) as shipment_count, gbs_brand_orders.commission_type, 
             CASE
                 WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
                 WHEN gbs_brand_orders.commission_type = 'fixed' THEN gbs_brand_orders.commission_value
@@ -238,6 +239,7 @@ class VendorWiseSaleReportController extends Controller
                 ->select(
                     'id',
                     'brand_name',
+                    'is_shipping_bared_golisoda',
                     DB::raw('SUM(sale_amount) as sale_amount'),
                     DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('
@@ -250,23 +252,23 @@ class VendorWiseSaleReportController extends Controller
                     // DB::raw('SUM(com_amount) as com_amount'),
                     DB::raw('SUM(shipment_count) as total_shipments'),
                     DB::raw('
-                CASE 
-                    WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) - com_amount))
-                    WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) * com_amount / 100)
-                    ELSE NULL
-                END AS cgst_commission
-            '),
+                    CASE 
+                        WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
+                        WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) + SUM(shipping_charge) * com_amount / 100)
+                        ELSE NULL
+                    END AS cgst_commission
+                '),
+                DB::raw('
+                    CASE 
+                        WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
+                        WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) + SUM(shipping_charge) * com_amount / 100)
+                        ELSE NULL
+                    END AS sgst_commission
+                '),
                     DB::raw('
                 CASE 
-                    WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) - com_amount))
-                    WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) * com_amount / 100)
-                    ELSE NULL
-                END AS sgst_commission
-            '),
-                    DB::raw('
-                CASE 
-                    WHEN commission_type = "fixed" THEN (0.01 * ((SUM(sale_amount) - SUM(total_tax_amount)) - com_amount))
-                    WHEN commission_type = "percentage" THEN (0.01 * ((SUM(sale_amount) - SUM(total_tax_amount))) * com_amount / 100)
+                    WHEN commission_type = "fixed" THEN (0.01 * (SUM(sale_amount) - com_amount))
+                    WHEN commission_type = "percentage" THEN (0.01 * (SUM(sale_amount) * (com_amount / 100))
                     ELSE NULL
                 END AS tds_commission
             ')
@@ -333,8 +335,8 @@ class VendorWiseSaleReportController extends Controller
             if (!empty($start_date) && !empty($end_date)) {
                 $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
-            $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,
-            SUM(qty * price) as sale_amount, total_excluding_tax, COUNT(gbs_brand_orders.brand_id) as shipment_count, gbs_brand_orders.commission_type, 
+            $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name,gbs_brands.is_shipping_bared_golisoda,
+            SUM(qty * price) as sale_amount, total_excluding_tax, SUM(shipping_amount) AS shipping_charge, COUNT(gbs_brand_orders.brand_id) as shipment_count, gbs_brand_orders.commission_type, 
             CASE
                 WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
                 WHEN gbs_brand_orders.commission_type = 'fixed' THEN gbs_brand_orders.commission_value
@@ -348,6 +350,7 @@ class VendorWiseSaleReportController extends Controller
                 ->select(
                     'id',
                     'brand_name',
+                    'is_shipping_bared_golisoda',
                     DB::raw('SUM(sale_amount) as sale_amount'),
                     DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('
@@ -360,23 +363,23 @@ class VendorWiseSaleReportController extends Controller
                     // DB::raw('SUM(com_amount) as com_amount'),
                     DB::raw('SUM(shipment_count) as total_shipments'),
                     DB::raw('
-                CASE 
-                    WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) - com_amount))
-                    WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) * com_amount / 100)
-                    ELSE NULL
-                END AS cgst_commission
-            '),
+                    CASE 
+                        WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
+                        WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) + SUM(shipping_charge) * com_amount / 100)
+                        ELSE NULL
+                    END AS cgst_commission
+                '),
+                DB::raw('
+                    CASE 
+                        WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
+                        WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) + SUM(shipping_charge) * com_amount / 100)
+                        ELSE NULL
+                    END AS sgst_commission
+                '),
                     DB::raw('
                 CASE 
-                    WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) - com_amount))
-                    WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount))) * com_amount / 100)
-                    ELSE NULL
-                END AS sgst_commission
-            '),
-                    DB::raw('
-                CASE 
-                    WHEN commission_type = "fixed" THEN (0.01 * ((SUM(sale_amount) - SUM(total_tax_amount)) - com_amount))
-                    WHEN commission_type = "percentage" THEN (0.01 * ((SUM(sale_amount) - SUM(total_tax_amount))) * com_amount / 100)
+                    WHEN commission_type = "fixed" THEN (0.01 * (SUM(sale_amount) - com_amount))
+                    WHEN commission_type = "percentage" THEN (0.01 * (SUM(sale_amount) * (com_amount / 100))
                     ELSE NULL
                 END AS tds_commission
             ')
