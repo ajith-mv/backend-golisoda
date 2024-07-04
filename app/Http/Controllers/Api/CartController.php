@@ -1184,6 +1184,7 @@ class CartController extends Controller
             // if (isset($address) && (!empty($address))) {
             //     $shipping_charges = $this->getShippingChargesFromShiprocket($address, $customer_id);
             // }
+            $shipping_amount = 0;
             $shipping_name = '';
             if (isset($selected_shipping) && (!empty($selected_shipping))) {
                 $query = Cart::where('customer_id', $customer_id)
