@@ -125,7 +125,7 @@ class VendorWiseSaleReportController extends Controller
                                    gbs_brands.is_shipping_bared_golisoda,
                                    SUM(qty * price) as sale_amount, 
                                    total_excluding_tax, 
-                                   SUM(shipping_amount) AS shipping_charge, 
+                                   SUM(gbs_brand_orders.shipping_amount) AS shipping_charge, 
                                    COUNT(gbs_brand_orders.brand_id) as shipment_count, 
                                    gbs_brand_orders.commission_type, 
                                    CASE
@@ -234,7 +234,7 @@ class VendorWiseSaleReportController extends Controller
             gbs_brands.is_shipping_bared_golisoda,
             SUM(qty * price) as sale_amount, 
             total_excluding_tax, 
-            SUM(shipping_amount) AS shipping_charge, 
+            SUM(gbs_brand_orders.shipping_amount) AS shipping_charge, 
             COUNT(gbs_brand_orders.brand_id) as shipment_count, 
             gbs_brand_orders.commission_type, 
             CASE
@@ -351,7 +351,7 @@ END AS tds_commission
                                    gbs_brands.is_shipping_bared_golisoda,
                                    SUM(qty * price) as sale_amount, 
                                    total_excluding_tax, 
-                                   SUM(shipping_amount) AS shipping_charge, 
+                                   SUM(gbs_brand_orders.shipping_amount) AS shipping_charge, 
                                    COUNT(gbs_brand_orders.brand_id) as shipment_count, 
                                    gbs_brand_orders.commission_type, 
                                    CASE
