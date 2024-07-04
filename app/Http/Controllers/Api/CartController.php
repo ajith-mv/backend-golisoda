@@ -1187,7 +1187,7 @@ class CartController extends Controller
             if (isset($selected_shipping) && (!empty($selected_shipping))) {
                 $query = Cart::where('customer_id', $customer_id)
                     ->select(
-                        DB::raw('SUM(cart_shipments.shipment_amount) as total_shipment_amount'),
+                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
                         'cart_shipments.shipping_type'
                     )
                     ->join('cart_shipments', function ($join) {
