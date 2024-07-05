@@ -1216,7 +1216,7 @@ class CartController extends Controller
                 Log::info($results);
 
                 foreach ($results as $result) {
-                    $max_shipping_amount = floatval($result->total_shipment_amount);
+                    $max_shipping_amount = round($result->total_shipment_amount);
                     $shipping_amount += $max_shipping_amount;
                     $shippingTypes[] = $result->shipping_type;
                 }
