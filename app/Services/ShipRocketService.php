@@ -225,15 +225,19 @@ class ShipRocketService
                                             $shipment['shiprocket_amount'] = $shipping_amount;
                                             $shipment['shipping_amount'] = $shipping_amount;
                                             $shipment['shipping_type'] = 'standard_shipping';
+                                            $shipment['shipping_id'] = 2;
                                         } else {
                                             $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['width'], $data['measurement']['height']);
                                             $shipment['shipping_amount'] = $flat_shipping * 50;
                                             $shipment['shipping_type'] = 'flat_shipping';
+                                            $shipment['shipping_id'] = 3;
                                         }
                                         if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                                             $shipment['shipping_amount'] = 0;
                                             $shipment['shipping_type'] = 'free_shipping';
+                                            $shipment['shipping_id'] = 1;
                                         }
+                                        CartShipment::where('cart_id', $data['citems']->id)->delete();
                                         $shipment['cart_id'] = $data['citems']->id;
                                         $shipment['brand_id'] = $brandId;
                                         CartShipment::create($shipment);
@@ -266,15 +270,19 @@ class ShipRocketService
                                         $shipment['shiprocket_amount'] = $shipping_amount;
                                         $shipment['shipping_amount'] = $shipping_amount;
                                         $shipment['shipping_type'] = 'standard_shipping';
+                                        $shipment['shipping_id'] = 2;
                                     } else {
                                         $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['width'], $data['measurement']['height']);
                                         $shipment['shipping_amount'] = $flat_shipping * 50;
                                         $shipment['shipping_type'] = 'flat_shipping';
+                                        $shipment['shipping_id'] = 3;
                                     }
                                     if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                                         $shipment['shipping_amount'] = 0;
                                         $shipment['shipping_type'] = 'free_shipping';
+                                        $shipment['shipping_id'] = 1;
                                     }
+                                    CartShipment::where('cart_id', $data['citems']->id)->delete();
                                     $shipment['cart_id'] = $data['citems']->id;
                                     $shipment['brand_id'] = $uniqueBrandIds[0];
                                     CartShipment::create($shipment);
