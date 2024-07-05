@@ -1195,11 +1195,11 @@ class CartController extends Controller
                             ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
                     })
                     ->select(
-                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
+                        DB::raw('gbs_cart_shipments.shipping_amount as total_shipment_amount'),
                         'cart_shipments.shipping_type',
                         'carts.brand_id'
                     )
-                    ->groupBy('carts.brand_id', 'cart_shipments.shipping_type')
+                    ->groupBy('carts.brand_id')
                     ->get();
 
                 Log::info($query);
