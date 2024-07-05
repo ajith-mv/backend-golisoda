@@ -74,6 +74,13 @@
         .w-40 {
             width: 40% !important;
         }
+        .w-10 {
+            width: 10% !important;
+        }
+
+        .w-20 {
+            width: 20% !important;
+        }
 
         .p-5 {
             padding: 5px;
@@ -228,12 +235,12 @@
     <table cellspacing="0" padding="0" class="w-100 item-table">
 
         <tr>
-            <th class="w-30">S.No</th>
-            <th class="w-30">Date</th>
-            <th class="w-30">Order Id</th>
-            <th class="w-30">Payment Mode</th>
+            <th class="w-10">S.No</th>
+            <th class="w-10">Date</th>
+            <th class="w-10">Order Id</th>
+            <th class="w-20">Payment Mode</th>
             <th class="w-30">Tracing-Id</th>
-            <th class="w-30">Order Amount</th>
+            <th class="w-20">Order Amount</th>
         </tr>
         @php
             $count = 1;

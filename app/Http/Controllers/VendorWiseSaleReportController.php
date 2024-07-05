@@ -152,7 +152,7 @@ class VendorWiseSaleReportController extends Controller
                 ELSE NULL
             END AS com_amount
         '),
-                    DB::raw('SUM(shipment_count) as total_shipments'),
+                    DB::raw('shipment_count as total_shipments'),
                     DB::raw('
             CASE 
                 WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
