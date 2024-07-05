@@ -1206,7 +1206,7 @@ class CartController extends Controller
                 // Execute the query to get results
                 $results = $query->get();
 
-
+                    log::info($results);
 
                 // Processing each cart result to calculate total shipment amount and collect shipping types
                 foreach ($results as $result) {
