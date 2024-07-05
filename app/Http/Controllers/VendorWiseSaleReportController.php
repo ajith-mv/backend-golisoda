@@ -172,13 +172,16 @@ class VendorWiseSaleReportController extends Controller
                 ->select(
                     'brand_orders.brand_id',
                     DB::raw('SUM(gbs_brand_orders.shipping_amount) as total_shipping_charge'),
-                    DB::raw('COUNT(gbs_brand_orders.brand_id) as total_shipments')
+                    DB::raw('COUNT(DISTINCT gbs_brand_orders.order_id) as total_shipments')
                 )
+                ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
-                ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$start_date])
-                ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$end_date])
-                ->groupBy('brand_orders.brand_id', 'brand_orders.order_id')
+                ->whereDate('brand_orders.created_at', '<=', $start_date)
+                ->whereDate('brand_orders.created_at', '>=', $end_date)
+                ->groupBy('brand_orders.brand_id')
                 ->first();
+
+
 
             $order_info = DB::table('brand_orders')
                 ->join('brands', 'brand_orders.brand_id', '=', 'brands.id')
