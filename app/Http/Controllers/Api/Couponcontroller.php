@@ -864,4 +864,24 @@ class Couponcontroller extends Controller
 
         return $response;
     }
+
+    public function determineFinalShippingType($shippingTypes)
+    {
+        // Determine the final shipping type based on the rules provided
+        if (count(array_unique($shippingTypes)) === 1) {
+            // All carts have the same shipping type
+            return $shippingTypes[0];
+        } else {
+            // Different shipping types exist, apply the specified rules
+            if (in_array('free_shipping', $shippingTypes) && in_array('standard_shipping', $shippingTypes)) {
+                return 'standard_shipping';
+            } elseif (in_array('free_shipping', $shippingTypes) && in_array('flat_shipping', $shippingTypes)) {
+                return 'flat_shipping';
+            } elseif (in_array('flat_shipping', $shippingTypes) && in_array('standard_shipping', $shippingTypes)) {
+                return 'standard_shipping';
+            }
+            // Default fallback (optional based on your needs)
+            return null;
+        }
+    }
 }

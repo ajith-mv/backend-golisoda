@@ -229,11 +229,11 @@
 
         <tr>
             <th class="w-30">S.No</th>
-            <th>Date</th>
-            <th>Order Id</th>
-            <th>Payment Mode</th>
-            <th>Tracing-Id</th>
-            <th>Order Amount</th>
+            <th class="w-30">Date</th>
+            <th class="w-30">Order Id</th>
+            <th class="w-30">Payment Mode</th>
+            <th class="w-30">Tracing-Id</th>
+            <th class="w-30">Order Amount</th>
         </tr>
         @php
             $count = 1;
