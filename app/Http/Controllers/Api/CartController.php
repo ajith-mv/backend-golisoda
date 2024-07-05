@@ -1227,7 +1227,7 @@ class CartController extends Controller
                 // Logging the total shipment amount and final shipping type
                 Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
                 Log::info("Final Shipping Type: " . $shipping_name);
-                if (isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount > 0)) {
+                if (is_numeric($shipping_amount) && isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount > 0)) {
                     $grand_total                = $grand_total + number_format($shipping_amount, 2);
                 }
             }
