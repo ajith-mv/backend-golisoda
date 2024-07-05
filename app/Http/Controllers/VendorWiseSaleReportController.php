@@ -125,8 +125,8 @@ class VendorWiseSaleReportController extends Controller
                                    gbs_brands.is_shipping_bared_golisoda,
                                    SUM(qty * price) as sale_amount, 
                                    total_excluding_tax, 
-                                   gbs_brand_orders.shipping_amount AS shipping_charge, 
-                                   gbs_brand_orders.brand_id as shipment_count, 
+                                   SUM(gbs_brand_orders.shipping_amount) AS shipping_charge, 
+                                   COUNT(gbs_brand_orders.brand_id) as shipment_count, 
                                    gbs_brand_orders.commission_type, 
                                    CASE
                                        WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
@@ -152,21 +152,6 @@ class VendorWiseSaleReportController extends Controller
                 ELSE NULL
             END AS com_amount
         '),
-                    DB::raw('COUNT(shipment_count) as total_shipments'),
-                    DB::raw('
-            CASE 
-                WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
-                WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) * com_amount / 100))
-                ELSE NULL
-            END AS cgst_commission
-        '),
-                    DB::raw('
-            CASE 
-                WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
-                WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) * com_amount / 100))
-                ELSE NULL
-            END AS sgst_commission
-        '),
                     DB::raw('
             CASE 
                 WHEN commission_type = "fixed" THEN (0.01 * (SUM(sale_amount) - com_amount))
@@ -179,9 +164,23 @@ class VendorWiseSaleReportController extends Controller
                 ->first();
 
 
-            // Step 1: Create the subquery with the brand_id filter
 
 
+            $shipment_data = DB::table('brand_orders')
+                ->join('brands', 'brand_orders.brand_id', '=', 'brands.id')
+                ->join('orders', 'brand_orders.order_id', '=', 'orders.id')
+                ->where('brand_orders.brand_id', $brand_id)
+                ->where('orders.status', '!=', 'pending')
+                ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$start_date])
+                ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$end_date])
+                ->select(
+
+                    DB::raw('SUM(gbs_brand_orders.shipping_amount) as total_shipping_charge'),
+                    DB::raw('COUNT(DISTINCT gbs_brand_orders.id) as total_shipments'),
+
+                )
+                ->groupBy('brand_orders.brand_id', 'brand_orders.order_id')
+                ->first();
 
             $order_info = DB::table('brand_orders')
                 ->join('brands', 'brand_orders.brand_id', '=', 'brands.id')
@@ -207,7 +206,7 @@ class VendorWiseSaleReportController extends Controller
             $modal_title = 'View Invoice';
             $globalInfo = GlobalSettings::first();
 
-            $view_order = view('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location', 'start_date', 'end_date'));
+            $view_order = view('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location', 'start_date', 'end_date', 'shipment_data'));
 
             return view('platform.vendor_invoice.view_modal', compact('view_order', 'modal_title'));
         } catch (\Exception $e) {

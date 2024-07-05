@@ -162,7 +162,7 @@
         </tr>
         <tr>
             <td>Total Shipments</td>
-            <td>{{ isset($data->total_shipments) ? $data->total_shipments : '' }}</td>
+            <td>{{ isset($shipment_data->total_shipments) ? $shipment_data->total_shipments : '' }}</td>
         </tr>
         <tr>
             <td>Total Sales (Inclusive Tax)</td>
@@ -178,7 +178,7 @@
         </tr>
         <tr>
             <td> Shipping Charges</td>
-            <td> {{ $data->shipping_charge ?? '' }} </td>
+            <td> {{ $shipment_data->total_shipping_charge ?? '' }} </td>
         </tr>
         @php
             $commission_amount = $data->com_amount ?? 0;
@@ -186,10 +186,10 @@
             if($shipping_bared_golisoda){
                 $shipping_charge = 0;
             }else{
-                $shipping_charge = $data->shipping_charge ?? 0;
+                $shipping_charge = $shipment_data->total_shipping_charge ?? 0;
             }
             $gst_calculation_amount = $commission_amount + $shipping_charge;
-            $cgst_commission = $gst_calculation_amount * 0.09;
+            $cgst_commission = $sgst_commission = $gst_calculation_amount * 0.09;
 
         @endphp
         <tr>
@@ -198,7 +198,7 @@
         </tr>
         <tr>
             <td> SGST on Commission + Shipping (9%) ©</td>
-            <td> {{ $cgst_commission }} </td>
+            <td> {{ $sgst_commission }} </td>
         </tr>
         <tr>
             <td> TDS (1 %)</td>
@@ -209,8 +209,8 @@
             <td><b>{{ 
                 (isset($data->sale_amount) ? $data->sale_amount : 0) 
                 - (isset($data->com_amount) ? $data->com_amount : 0) 
-                - (isset($data->cgst_commission) ? $data->cgst_commission : 0) 
-                - (isset($data->sgst_commission) ? $data->sgst_commission : 0) 
+                - (isset($cgst_commission) ? $data->cgst_commission : 0) 
+                - (isset($sgst_commission) ? $data->sgst_commission : 0) 
                 - (isset($data->tds_commission) ? $data->tds_commission : 0) 
             }}</b></td>
         </tr>
