@@ -49,4 +49,9 @@ class Cart extends Model
     {
         return $this->hasOne(CartShiprocketResponse::class, 'cart_token', 'cart_order_no');
     }
+
+    public function shipments()
+    {
+        return $this->hasMany(CartShipment::class, 'cart_id');
+    }
 }

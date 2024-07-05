@@ -857,6 +857,7 @@ class CartController extends Controller
             $checkCart->addons()->delete();
             $checkCart->variationOptions()->delete();
             $checkCart->rocketResponse()->delete();
+            $checkCart->shipments()->delete();
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;
             $checkCart->delete();
