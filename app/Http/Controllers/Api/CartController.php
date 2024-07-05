@@ -1195,7 +1195,7 @@ class CartController extends Controller
                             ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
                     })
                     ->where('carts.customer_id', $customer_id)
-                    ->select('cart_shipments.brand_id', DB::raw('MAX(cart_shipments.shipping_amount) as max_shipping_amount'))
+                    ->select('cart_shipments.brand_id', DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount'))
                     ->groupBy('cart_shipments.cart_id', 'cart_shipments.brand_id');
 
                 $results = DB::table(DB::raw("({$subquery->toSql()}) as sub"))
