@@ -1225,7 +1225,7 @@ class CartController extends Controller
                 $shipping_name = $this->determineFinalShippingType($shippingTypes);
 
                 // Logging the total shipment amount and final shipping type
-                Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
+                Log::info("Total Amount for carts with more than one unique brand: " . $grand_total);
                 Log::info("Final Shipping Type: " . $shipping_name);
                 if (isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount > 0)) {
                     $grand_total                = $grand_total + number_format($shipping_amount, 2);
