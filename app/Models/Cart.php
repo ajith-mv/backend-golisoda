@@ -27,7 +27,8 @@ class Cart extends Model
         'coupon_percentage', 
         'coupon_code', 
         'coupon_type',
-        'cart_id'
+        'cart_id',
+        'brand_id'
     ];
 
     public function products()
