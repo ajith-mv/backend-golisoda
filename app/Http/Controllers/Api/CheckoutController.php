@@ -203,7 +203,7 @@ class CheckoutController extends Controller
         $order_ins['shipping_city'] = $shipping_address->city ?? $billing_address->city ?? null;
         $order_ins['is_cod'] = $checkout_data['is_cod'] ?? 0;
         $order_ins['cod_amount'] = $checkout_data['cod_amount'] ?? NULL;
-        $order_ins['shipping_type'] = $shipping_type;
+        $order_ins['shipping_type'] = $shipping_name;
 
 
         // if (isset($shipping_method) && $shipping_method != 'PICKUP_FROM_STORE' && isset($shipping_address) && !empty($shipping_address)) {
@@ -603,7 +603,7 @@ class CheckoutController extends Controller
         $order_ins['shipping_post_code'] = $shipping_address->post_code ?? $billing_address->post_code;
         $order_ins['shipping_state'] = $shipping_address->states->state_name ?? $billing_address->states->state_name ?? null;
         $order_ins['shipping_city'] = $shipping_address->city ?? $billing_address->city ?? null;
-        $order_ins['shipping_type'] = $shipping_type;
+        $order_ins['shipping_type'] = $shipping_name;
         // if (isset($shipping_method) && $shipping_method != 'PICKUP_FROM_STORE' && isset($shipping_address) && !empty($shipping_address)) {
 
         //     $shipping_type_info = ShippingCharge::find($shipping_method['charge_id']);
