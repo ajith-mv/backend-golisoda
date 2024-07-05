@@ -118,7 +118,7 @@ class VendorWiseSaleReportController extends Controller
             DB::beginTransaction();
             $where = "WHERE brand_id = '$brand_id' AND gbs_orders.status != 'pending'";
             if (!empty($start_date) && !empty($end_date)) {
-                $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
+                $where = "WHERE DATE(gbs_brand_orders.created_at) >= '$start_date' AND DATE(gbs_brand_orders.created_at) <= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, 
                                    gbs_brands.brand_name as brand_name, 
