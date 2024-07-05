@@ -1189,22 +1189,27 @@ class CartController extends Controller
             $shippingTypes = [];
             $shipping_name = '';
             if (isset($selected_shipping) && (!empty($selected_shipping))) {
-                $query = DB::table('carts')
-                    ->join('cart_shipments', function ($join) {
-                        $join->on('carts.id', '=', 'cart_shipments.cart_id')
-                            ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
+                $subquery = DB::table('cart_shipments')
+                    ->join('carts', function ($join) {
+                        $join->on('cart_shipments.cart_id', '=', 'carts.id')
+                            ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
                     })
                     ->where('carts.customer_id', $customer_id)
-                    ->select(
-                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
-                        'cart_shipments.shipping_type',
-                        'carts.brand_id'
-                    )
-                    ->groupBy('carts.brand_id')
-                    ->get();
-                Log::info($query);
+                    ->select('cart_shipments.brand_id', DB::raw('MAX(cart_shipments.shipping_amount) as max_shipping_amount'))
+                    ->groupBy('cart_shipments.cart_id', 'cart_shipments.brand_id');
 
-                foreach ($query as $result) {
+                $results = DB::table(DB::raw("({$subquery->toSql()}) as sub"))
+                    ->mergeBindings($subquery)
+                    ->select(
+                        DB::raw('SUM(sub.max_shipping_amount) as total_shipment_amount'),
+                        'sub.brand_id'
+                    )
+                    ->groupBy('sub.brand_id')
+                    ->get();
+
+                Log::info($results);
+
+                foreach ($results as $result) {
                     $shipping_amount += $result->total_shipment_amount;
                     $shippingTypes[] = $result->shipping_type;
                 }
