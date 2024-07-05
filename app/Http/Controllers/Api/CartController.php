@@ -1201,7 +1201,7 @@ class CartController extends Controller
                     ->groupBy('carts.id');
 
                 // Adding conditions to filter carts with more than one unique brand
-                // $query->havingRaw('COUNT(DISTINCT gbs_carts.brand_id) > 1');
+                $query->havingRaw('COUNT(DISTINCT gbs_carts.brand_id) >= 1');
 
                 // Execute the query to get results
                 $results = $query->get();
