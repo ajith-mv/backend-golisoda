@@ -121,7 +121,7 @@ class VendorWiseSaleReportController extends Controller
                 $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, 
-                                   gbs_brands.brand_name as brand_name, 
+                                   gbs_brands.brand_name as brand_nam, 
                                    gbs_brands.is_shipping_bared_golisoda,
                                    SUM(qty * price) as sale_amount, 
                                    total_excluding_tax, 
