@@ -77,8 +77,8 @@ class VendorWiseSaleReportController extends Controller
 
                 ->addColumn('action', function ($row) use ($start_date, $end_date) {
                     if (empty($start_date) && empty($end_date)) {
-                        $start_date = date("Y-m-d");
-                        $end_date = date("Y-m-d", strtotime("-1 month"));
+                        $end_date = date("Y-m-d");
+                        $start_date = date("Y-m-d", strtotime("-1 month"));
                     }
                     $view_btn = '<a href="javascript:void(0)" onclick="return viewInvoice(' . $row->id . ', \'' . $start_date . '\', \'' . $end_date . '\')" class="btn btn-icon btn-active-info btn-light-info mx-1 w-30px h-30px" > 
                     <i class="fa fa-eye"></i>
