@@ -115,29 +115,25 @@ class CheckoutController extends Controller
         $checkout_total = str_replace(',', '', $checkout_data['total']);
         $pay_amount  = filter_var($checkout_total, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
 
-        $query = Cart::where('customer_id', $customer_id)
-                    ->select(
-                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
-                        'cart_shipments.shipping_type'
-                    )
+        $shipping_amount = 0;
+        $shippingTypes = [];
+        $shipping_name = '';
+        $query = DB::table('carts')
                     ->join('cart_shipments', function ($join) {
                         $join->on('carts.id', '=', 'cart_shipments.cart_id')
                             ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
                     })
-                    ->groupBy('carts.id');
+                    ->where('carts.customer_id', $customer_id)
+                    ->select(
+                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
+                        'cart_shipments.shipping_type',
+                        'carts.brand_id'
+                    )
+                    ->groupBy('carts.brand_id')
+                    ->get();
+                Log::info($query);
 
-                // Adding conditions to filter carts with more than one unique brand
-                $query->havingRaw('COUNT(DISTINCT gbs_carts.brand_id) > 1');
-
-                // Execute the query to get results
-                $results = $query->get();
-
-                // Initialize variables for processing
-                $shipping_amount = 0;
-                $shippingTypes = [];
-
-                // Processing each cart result to calculate total shipment amount and collect shipping types
-                foreach ($results as $result) {
+                foreach ($query as $result) {
                     $shipping_amount += $result->total_shipment_amount;
                     $shippingTypes[] = $result->shipping_type;
                 }
@@ -511,30 +507,25 @@ class CheckoutController extends Controller
 
         $checkout_total = str_replace(',', '', $checkout_data['total']);
         $pay_amount  = filter_var($checkout_total, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-
-        $query = Cart::where('customer_id', $customer_id)
-                    ->select(
-                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
-                        'cart_shipments.shipping_type'
-                    )
+        $shipping_amount = 0;
+        $shippingTypes = [];
+        $shipping_name = '';
+        $query = DB::table('carts')
                     ->join('cart_shipments', function ($join) {
                         $join->on('carts.id', '=', 'cart_shipments.cart_id')
                             ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
                     })
-                    ->groupBy('carts.id');
+                    ->where('carts.customer_id', $customer_id)
+                    ->select(
+                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
+                        'cart_shipments.shipping_type',
+                        'carts.brand_id'
+                    )
+                    ->groupBy('carts.brand_id')
+                    ->get();
+                Log::info($query);
 
-                // Adding conditions to filter carts with more than one unique brand
-                $query->havingRaw('COUNT(DISTINCT gbs_carts.brand_id) > 1');
-
-                // Execute the query to get results
-                $results = $query->get();
-
-                // Initialize variables for processing
-                $shipping_amount = 0;
-                $shippingTypes = [];
-
-                // Processing each cart result to calculate total shipment amount and collect shipping types
-                foreach ($results as $result) {
+                foreach ($query as $result) {
                     $shipping_amount += $result->total_shipment_amount;
                     $shippingTypes[] = $result->shipping_type;
                 }
