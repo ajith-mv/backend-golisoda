@@ -1195,16 +1195,22 @@ class CartController extends Controller
                             ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
                     })
                     ->where('carts.customer_id', $customer_id)
-                    ->select('cart_shipments.brand_id', DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount'))
-                    ->groupBy('cart_shipments.cart_id', 'cart_shipments.brand_id');
+                    ->select(
+                        'cart_shipments.brand_id',
+                        'cart_shipments.shipping_type',
+                        DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
+                    )
+                    ->groupBy('cart_shipments.cart_id', 'cart_shipments.brand_id', 'cart_shipments.shipping_type');
 
+                // Main query to sum the shipping amounts for each unique brand_id
                 $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
                     ->mergeBindings($subquery)
                     ->select(
                         DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
-                        'sub.brand_id'
+                        'sub.brand_id',
+                        'sub.shipping_type'
                     )
-                    ->groupBy('sub.brand_id')
+                    ->groupBy('sub.brand_id', 'sub.shipping_type')
                     ->get();
 
                 Log::info($results);
