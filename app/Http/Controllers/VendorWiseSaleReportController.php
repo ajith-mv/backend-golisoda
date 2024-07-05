@@ -125,7 +125,7 @@ class VendorWiseSaleReportController extends Controller
                                    gbs_brands.is_shipping_bared_golisoda,
                                    SUM(qty * price) as sale_amount, 
                                    total_excluding_tax, 
-                                   SUM(gbs_brand_orders.shipping_amount) AS shipping_charge, 
+                                   SUM(gbs_brand_orders.shiprocket_amount) AS shipping_charge, 
                                    COUNT(gbs_brand_orders.brand_id) as shipment_count, 
                                    gbs_brand_orders.commission_type, 
                                    CASE
@@ -231,23 +231,23 @@ class VendorWiseSaleReportController extends Controller
                 $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, 
-            gbs_brands.brand_name as brand_name, 
-            gbs_brands.is_shipping_bared_golisoda,
-            SUM(qty * price) as sale_amount, 
-            total_excluding_tax, 
-            SUM(gbs_brand_orders.shipping_amount) AS shipping_charge, 
-            COUNT(gbs_brand_orders.brand_id) as shipment_count, 
-            gbs_brand_orders.commission_type, 
-            CASE
-                WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
-                WHEN gbs_brand_orders.commission_type = 'fixed' THEN gbs_brand_orders.commission_value
-                ELSE 0
-            END AS com_amount,
-            SUM(tax_amount) as total_tax_amount
-     FROM gbs_brand_orders
-     JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
-     JOIN gbs_brands ON gbs_brands.id = gbs_brand_orders.brand_id $where
-     GROUP BY gbs_brand_orders.brand_id, gbs_brand_orders.commission_type) as a"))
+                                   gbs_brands.brand_name as brand_name, 
+                                   gbs_brands.is_shipping_bared_golisoda,
+                                   SUM(qty * price) as sale_amount, 
+                                   total_excluding_tax, 
+                                   SUM(gbs_brand_orders.shiprocket_amount) AS shipping_charge, 
+                                   COUNT(gbs_brand_orders.brand_id) as shipment_count, 
+                                   gbs_brand_orders.commission_type, 
+                                   CASE
+                                       WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
+                                       WHEN gbs_brand_orders.commission_type = 'fixed' THEN gbs_brand_orders.commission_value
+                                       ELSE 0
+                                   END AS com_amount,
+                                   SUM(tax_amount) as total_tax_amount
+                            FROM gbs_brand_orders
+                            JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
+                            JOIN gbs_brands ON gbs_brands.id = gbs_brand_orders.brand_id $where
+                            GROUP BY gbs_brand_orders.brand_id, gbs_brand_orders.commission_type) as a"))
                 ->select(
                     'id',
                     'brand_name',
@@ -256,41 +256,40 @@ class VendorWiseSaleReportController extends Controller
                     DB::raw('SUM(sale_amount) as sale_amount'),
                     DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('
-CASE 
-WHEN commission_type = "fixed" THEN (SUM(sale_amount) - SUM(total_tax_amount)) - com_amount
-WHEN commission_type = "percentage" THEN (SUM(sale_amount) - SUM(total_tax_amount)) * com_amount / 100
-ELSE NULL
-END AS com_amount
-'),
-                    DB::raw('SUM(shipment_count) as total_shipments'),
+            CASE 
+                WHEN commission_type = "fixed" THEN (SUM(sale_amount) - SUM(total_tax_amount)) - com_amount
+                WHEN commission_type = "percentage" THEN (SUM(sale_amount) - SUM(total_tax_amount)) * com_amount / 100
+                ELSE NULL
+            END AS com_amount
+        '),
                     DB::raw('
-CASE 
-WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
-WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) * com_amount / 100))
-ELSE NULL
-END AS cgst_commission
-'),
-                    DB::raw('
-CASE 
-WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
-WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) * com_amount / 100))
-ELSE NULL
-END AS sgst_commission
-'),
-                    DB::raw('
-CASE 
-WHEN commission_type = "fixed" THEN (0.01 * (SUM(sale_amount) - com_amount))
-WHEN commission_type = "percentage" THEN (0.01 * (SUM(sale_amount) * (com_amount / 100)))
-ELSE NULL
-END AS tds_commission
-')
+            CASE 
+                WHEN commission_type = "fixed" THEN (0.01 * (SUM(sale_amount) - com_amount))
+                WHEN commission_type = "percentage" THEN (0.01 * (SUM(sale_amount) * (com_amount / 100)))
+                ELSE NULL
+            END AS tds_commission
+        ')
                 )
                 ->groupBy('id')
                 ->first();
 
 
 
-            // Step 1: Create the subquery with the brand_id filter
+
+            $shipment_data = DB::table('brand_orders')
+                ->join('orders', 'orders.id', '=', 'brand_orders.order_id')
+                ->join('brands', 'brands.id', '=', 'brand_orders.brand_id')
+                ->select(
+                    'brand_orders.brand_id',
+                    DB::raw('SUM(gbs_brand_orders.shipping_amount) as total_shipping_charge'),
+                    DB::raw('COUNT(DISTINCT gbs_brand_orders.order_id) as total_shipments')
+                )
+                ->where('brand_orders.brand_id', $brand_id)
+                ->where('orders.status', '!=', 'pending')
+                ->whereDate('brand_orders.created_at', '<=', $start_date)
+                ->whereDate('brand_orders.created_at', '>=', $end_date)
+                ->groupBy('brand_orders.brand_id')
+                ->first();
 
 
 
@@ -310,6 +309,7 @@ END AS tds_commission
                 )
                 ->groupBy('brand_orders.brand_id', 'brand_orders.order_id')
                 ->get();
+
             $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])->first();
 
             DB::commit();
@@ -318,7 +318,7 @@ END AS tds_commission
 
             // $view_order = view('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location'));
             // if ($request->has('download')) {
-            $pdf = PDF::loadView('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location', 'start_date', 'end_date'));
+            $pdf = PDF::loadView('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location', 'start_date', 'end_date', 'shipment_data'));
 
             Storage::put('public/vendor_invoice/' . $brand_id . date('d-m-Y_H_i') . '.pdf', $pdf->output());
             // dd('works here');
@@ -353,7 +353,7 @@ END AS tds_commission
                                    gbs_brands.is_shipping_bared_golisoda,
                                    SUM(qty * price) as sale_amount, 
                                    total_excluding_tax, 
-                                   SUM(gbs_brand_orders.shipping_amount) AS shipping_charge, 
+                                   SUM(gbs_brand_orders.shiprocket_amount) AS shipping_charge, 
                                    COUNT(gbs_brand_orders.brand_id) as shipment_count, 
                                    gbs_brand_orders.commission_type, 
                                    CASE
@@ -380,21 +380,6 @@ END AS tds_commission
                 ELSE NULL
             END AS com_amount
         '),
-                    DB::raw('SUM(shipment_count) as total_shipments'),
-                    DB::raw('
-            CASE 
-                WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
-                WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) * com_amount / 100))
-                ELSE NULL
-            END AS cgst_commission
-        '),
-                    DB::raw('
-            CASE 
-                WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
-                WHEN commission_type = "percentage" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) * com_amount / 100))
-                ELSE NULL
-            END AS sgst_commission
-        '),
                     DB::raw('
             CASE 
                 WHEN commission_type = "fixed" THEN (0.01 * (SUM(sale_amount) - com_amount))
@@ -408,7 +393,21 @@ END AS tds_commission
 
 
 
-            // Step 1: Create the subquery with the brand_id filter
+
+            $shipment_data = DB::table('brand_orders')
+                ->join('orders', 'orders.id', '=', 'brand_orders.order_id')
+                ->join('brands', 'brands.id', '=', 'brand_orders.brand_id')
+                ->select(
+                    'brand_orders.brand_id',
+                    DB::raw('SUM(gbs_brand_orders.shipping_amount) as total_shipping_charge'),
+                    DB::raw('COUNT(DISTINCT gbs_brand_orders.order_id) as total_shipments')
+                )
+                ->where('brand_orders.brand_id', $brand_id)
+                ->where('orders.status', '!=', 'pending')
+                ->whereDate('brand_orders.created_at', '<=', $start_date)
+                ->whereDate('brand_orders.created_at', '>=', $end_date)
+                ->groupBy('brand_orders.brand_id')
+                ->first();
 
 
 
@@ -428,13 +427,14 @@ END AS tds_commission
                 )
                 ->groupBy('brand_orders.brand_id', 'brand_orders.order_id')
                 ->get();
+
             $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])->first();
 
             DB::commit();
             $modal_title = 'View Invoice';
             $globalInfo = GlobalSettings::first();
 
-            $pdf = PDF::loadView('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location', 'start_date', 'end_date'));
+            $pdf = PDF::loadView('platform.vendor_invoice.view_invoice', compact('order_info', 'data', 'globalInfo', 'brand_location', 'start_date', 'end_date', 'shipment_data'));
 
             Storage::put('public/vendor_invoice/' . $brand_id . date('d-m-Y_H_i') . '.pdf', $pdf->output());
             $email_slug = 'vendor-tax-invoice';

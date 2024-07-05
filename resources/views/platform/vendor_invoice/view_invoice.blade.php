@@ -128,14 +128,14 @@
 
                         <td class="w-35">
                             <div><b> To: </b></div>
-                            <div><b>{{ $brand_location->branch_name }}</b></div>
-                            <div>{{ $brand_location->address_line1 }}</div>
-                            <div>{{ $brand_location->address_line2 }}</div>
-                            <div>{{ $brand_location->city }} ,{{ $brand_location->state }}</div>
-                            <div>{{ $brand_location->pincode }}</div>
+                            <div><b>{{ isset($brand_location) ? $brand_location->branch_name : '' }}</b></div>
+                            <div>{{ isset($brand_location) ? $brand_location->address_line1 : '' }}</div>
+                            <div>{{ isset($brand_location) ? $brand_location->address_line2 : '' }}</div>
+                            <div>{{ isset($brand_location) ? $brand_location->city : '' }} ,{{ isset($brand_location) ? $brand_location->state : '' }}</div>
+                            <div>{{ isset($brand_location) ? $brand_location->pincode : '' }}</div>
 
-                            <div>{{ $brand_location->mobile_no }}</div>
-                            <div>{{ $brand_location->email_id }}</div>
+                            <div>{{ isset($brand_location) ? $brand_location->mobile_no : '' }}</div>
+                            <div>{{ isset($brand_location) ? $brand_location->email_id : '' }}</div>
                             <div> PAN:</div>
                             <div> GSTIN:</div>
                         </td>
