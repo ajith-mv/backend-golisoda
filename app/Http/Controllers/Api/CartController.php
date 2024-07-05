@@ -1189,19 +1189,19 @@ class CartController extends Controller
             $shippingTypes = [];
             $shipping_name = '';
             if (isset($selected_shipping) && (!empty($selected_shipping))) {
-                $query = Cart::where('customer_id', $customer_id)
+                $query = DB::table('carts')
                     ->join('cart_shipments', function ($join) {
                         $join->on('carts.id', '=', 'cart_shipments.cart_id')
                             ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
                     })
+                    ->where('carts.customer_id', $customer_id)
                     ->select(
-                        DB::raw('gbs_cart_shipments.shipping_amount as total_shipment_amount'),
+                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
                         'cart_shipments.shipping_type',
                         'carts.brand_id'
                     )
                     ->groupBy('carts.brand_id')
                     ->get();
-
                 Log::info($query);
 
                 foreach ($query as $result) {
