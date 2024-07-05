@@ -209,8 +209,8 @@
             <td><b>{{ 
                 (isset($data->sale_amount) ? $data->sale_amount : 0) 
                 - (isset($data->com_amount) ? $data->com_amount : 0) 
-                - (isset($cgst_commission) ? $data->cgst_commission : 0) 
-                - (isset($sgst_commission) ? $data->sgst_commission : 0) 
+                - (isset($cgst_commission) ? $cgst_commission : 0) 
+                - (isset($sgst_commission) ? $sgst_commission : 0) 
                 - (isset($data->tds_commission) ? $data->tds_commission : 0) 
             }}</b></td>
         </tr>
