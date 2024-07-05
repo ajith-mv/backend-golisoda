@@ -1216,7 +1216,7 @@ class CartController extends Controller
                 Log::info($results);
 
                 foreach ($results as $result) {
-                    $max_shipping_amount = round($result->total_shipment_amount);
+                    $max_shipping_amount = floatval($result->total_shipment_amount);
                     $shipping_amount += $max_shipping_amount;
                     $shippingTypes[] = $result->shipping_type;
                 }
@@ -1225,15 +1225,15 @@ class CartController extends Controller
                 $shipping_name = $this->determineFinalShippingType($shippingTypes);
 
                 // Logging the total shipment amount and final shipping type
-                Log::info("Total Shipment Amount for carts with more than one unique brand: " . $grand_total);
+                Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
                 Log::info("Final Shipping Type: " . $shipping_name);
-                if (is_numeric($shipping_amount) && isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount > 0)) {
+                if (isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount > 0)) {
                     $grand_total                = $grand_total + number_format($shipping_amount, 2);
                 }
             }
 
             // if (isset($coupon_data) && !empty($coupon_data)) {
-            //     $grand_total = $grand_total - $coupon_data['discount_amount'] ?? 0;
+            //     $grand_total = (float)$grand_total - $coupon_data['discount_amount'] ?? 0;
             // }
 
             if (count(array_unique($brand_array)) > 1) {
