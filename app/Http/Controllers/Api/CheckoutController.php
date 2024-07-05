@@ -325,7 +325,13 @@ class CheckoutController extends Controller
         $his['action'] = 'Order Placed';
         $his['description'] = 'Order has been Placed successfully';
         OrderHistory::create($his);
-        Cart::where('customer_id', $customer_id)->delete();
+        $delete_cart = Cart::where('customer_id', $customer_id)->get();
+        foreach($delete_cart as $delete_data){
+            $delete_data->variationOptions()->delete();
+            $delete_data->rocketResponse()->delete();
+            $delete_data->shipments()->delete();
+            $delete_data->delete();
+        }
         if ($order_info) {
             $order_status    = OrderStatus::where('status', 'published')->where('order', 2)->first();
 
@@ -805,7 +811,13 @@ class CheckoutController extends Controller
 
             if ($success) {
 
-                Cart::where('customer_id', $customer_id)->delete();
+                $delete_cart = Cart::where('customer_id', $customer_id)->get();
+                foreach($delete_cart as $delete_data){
+                    $delete_data->variationOptions()->delete();
+                    $delete_data->rocketResponse()->delete();
+                    $delete_data->shipments()->delete();
+                    $delete_data->delete();
+                }
                 /** 
                  *  1. do quantity update in product
                  *  2. update order status and payment response
