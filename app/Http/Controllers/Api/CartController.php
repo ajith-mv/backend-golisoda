@@ -1198,10 +1198,10 @@ class CartController extends Controller
                     ->select('cart_shipments.brand_id', DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount'))
                     ->groupBy('cart_shipments.cart_id', 'cart_shipments.brand_id');
 
-                $results = DB::table(DB::raw("({$subquery->toSql()}) as sub"))
+                $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
                     ->mergeBindings($subquery)
                     ->select(
-                        DB::raw('SUM(sub.max_shipping_amount) as total_shipment_amount'),
+                        DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
                         'sub.brand_id'
                     )
                     ->groupBy('sub.brand_id')
