@@ -1200,7 +1200,7 @@ class CartController extends Controller
                         'cart_shipments.shipping_type',
                         DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
                     )
-                    ->groupBy('cart_shipments.cart_id', 'cart_shipments.brand_id', 'cart_shipments.shipping_type');
+                    ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
 
                 // Main query to sum the shipping amounts for each unique brand_id
                 $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
