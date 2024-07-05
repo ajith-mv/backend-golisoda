@@ -331,7 +331,7 @@ class ShipRocketService
         // $response = json_decode($response);
         $amount = null;
         if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
-            // log::info($response['data']['available_courier_companies']);
+            log::info(env('SHIPROCKET_CALCULATION'). 'shiprocket calculation');
             if (env('SHIPROCKET_CALCULATION') == 'recommended') {
                 $recommended_id = $response['data']['recommended_courier_company_id'];
                 log::info("recommended id is" . $recommended_id);
