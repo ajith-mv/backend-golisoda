@@ -728,48 +728,53 @@ class Couponcontroller extends Controller
             //     $grand_total                = $grand_total + ($shippingfee_info->charges ?? 0);
             // }
 
-            $cartInfoData = Cart::where('customer_id', $customer_id)->whereNull('shipping_fee_id')->get();
-
             $shipping_amount = 0;
-            $flat_charges = 0;
-            if (isset($cartInfoData) && !empty($cartInfoData)) {
-                foreach ($cartInfoData as $cartInfo) {
+            $shippingTypes = [];
+            $shipping_name = '';
+            if (isset($selected_shipping) && (!empty($selected_shipping))) {
+                $subquery = DB::table('cart_shipments')
+                    ->join('carts', function ($join) {
+                        $join->on('cart_shipments.cart_id', '=', 'carts.id')
+                            ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
+                    })
+                    ->where('carts.customer_id', $customer_id)
+                    ->select(
+                        'cart_shipments.brand_id',
+                        'cart_shipments.shipping_type',
+                        DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
+                    )
+                    ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
 
-                    if (isset($cartInfo->rocketResponse->shipping_charge_response_data) && !empty($cartInfo->rocketResponse->shipping_charge_response_data)) {
-                        $response = json_decode($cartInfo->rocketResponse->shipping_charge_response_data);
-                        log::info('coupon shiprocket response');
-                        if (isset($response->data->available_courier_companies) && !empty($response->data->available_courier_companies)) {
-                            // log::info($response['data']['available_courier_companies']);
-                            $available_courier_companies = $response->data->available_courier_companies;
-                            $recommended_id = $response->data->recommended_courier_company_id;
-                            log::info("coupon recommended id is" . $recommended_id);
-                            foreach ($available_courier_companies as $company) {
-                            if ($company->courier_company_id == $recommended_id) {
-                                // $recommended_shipping_data = $available_courier_companies[$recommended_id - 1];
-                                $shipping_amount = $shipping_amount + number_format($company->freight_charge, 2);
-                                log::info("coupon freight charge is: " . $shipping_amount);
-                                break;
-                            }
-                            }
-    
-                        }
-                        $shipping_name = "Standard Shipping";
-                    }
-                }
-                if ($shipping_amount == 0) {
-                    $shipping_name = "Flat Shipping";
-                    $flat_charges = $flat_charges + getVolumeMetricCalculation($cartInfo->products->productMeasurement->length ?? 0, $cartInfo->products->productMeasurement->width ?? 0, $cartInfo->products->productMeasurement->hight ?? 0);
-                    if (!empty($flat_charges)) {
+                // Main query to sum the shipping amounts for each unique brand_id
+                $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
+                    ->mergeBindings($subquery)
+                    ->select(
+                        DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
+                        'sub.brand_id',
+                        'sub.shipping_type'
+                    )
+                    ->groupBy('sub.brand_id', 'sub.shipping_type')
+                    ->get();
 
-                        $shipping_amount = round($flat_charges * 50) ?? 0;
-                    }
+                Log::info($results);
+
+                foreach ($results as $result) {
+                    $max_shipping_amount = floatval($result->total_shipment_amount);
+                    $shipping_amount += $max_shipping_amount;
+                    $shippingTypes[] = $result->shipping_type;
                 }
-            } else {
-                $shipping_name = "Free Shipping";
-                $shipping_amount = 0;
+
+                // Determine the final shipping type based on the rules provided
+                $shipping_name = $this->determineFinalShippingType($shippingTypes);
+
+                // Logging the total shipment amount and final shipping type
+                Log::info("Total Amount for carts with more than one unique brand: " . $grand_total);
+                Log::info("Final Shipping Type: " . $shipping_name);
+                if (isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount > 0)) {
+                    $grand_total                = (float)$grand_total + (float)$shipping_amount;
+                }
             }
 
-            $grand_total                = $grand_total + number_format($shipping_amount, 2);
 
             if (isset($coupon_amount) && !empty($coupon_amount)) {
                 $grand_total = (float)$grand_total - (float)$coupon_amount ?? 0;
@@ -810,7 +815,7 @@ class Couponcontroller extends Controller
                 'product_tax_exclusive_total_without_format' => round($product_tax_exclusive_total),
                 'tax_total' => number_format($tax_total, 2),
                 'tax_percentage' => number_format(round($tax_percentage), 2),
-                'shipping_name' => $shipping_name,
+                'shipping_name' => ucwords(str_replace('_', '', $shipping_name)),
                 'shipping_charge' => number_format($shipping_amount, 2),
                 'coupon_amount' => $coupon_amount ?? 0,
                 'addon_amount' => $total_addon_amount,
