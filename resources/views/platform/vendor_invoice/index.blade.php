@@ -297,7 +297,7 @@
                     <label for="">Total in words </label>
                 </div>
                 <div>
-                    <b>{{ ucwords(getIndianCurrency(number_format((float)$total, 2))) }} Only</b>
+                    <b>{{ ucwords(getIndianCurrency($total)) }} Only</b>
                 </div>
                 <div>
 
