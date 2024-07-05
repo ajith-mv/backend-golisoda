@@ -177,7 +177,7 @@ class VendorWiseSaleReportController extends Controller
                 ->where('orders.status', '!=', 'pending')
                 ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$start_date])
                 ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$end_date])
-                ->groupBy('brand_orders.brand_id')
+                ->groupBy('brand_orders.brand_id', 'brand_orders.order_id')
                 ->first();
 
             $order_info = DB::table('brand_orders')
