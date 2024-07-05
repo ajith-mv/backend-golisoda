@@ -1228,7 +1228,7 @@ class CartController extends Controller
                 Log::info("Total Amount for carts with more than one unique brand: " . $grand_total);
                 Log::info("Final Shipping Type: " . $shipping_name);
                 if (isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount > 0)) {
-                    $grand_total                = intval($grand_total) + number_format($shipping_amount, 2);
+                    $grand_total                = (float)($grand_total);
                 }
             }
 
