@@ -1190,26 +1190,21 @@ class CartController extends Controller
             $shipping_name = '';
             if (isset($selected_shipping) && (!empty($selected_shipping))) {
                 $query = Cart::where('customer_id', $customer_id)
-                    ->select(
-                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
-                        'cart_shipments.shipping_type'
-                    )
                     ->join('cart_shipments', function ($join) {
                         $join->on('carts.id', '=', 'cart_shipments.cart_id')
                             ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
                     })
-                    ->groupBy('carts.id');
+                    ->select(
+                        DB::raw('SUM(cart_shipments.shipping_amount) as total_shipment_amount'),
+                        'cart_shipments.shipping_type',
+                        'carts.brand_id'
+                    )
+                    ->groupBy('carts.brand_id', 'cart_shipments.shipping_type')
+                    ->get();
 
-                // Adding conditions to filter carts with more than one unique brand
-                $query->havingRaw('COUNT(DISTINCT gbs_carts.brand_id) >= 1');
+                Log::info($query);
 
-                // Execute the query to get results
-                $results = $query->get();
-
-                    log::info($results);
-
-                // Processing each cart result to calculate total shipment amount and collect shipping types
-                foreach ($results as $result) {
+                foreach ($query as $result) {
                     $shipping_amount += $result->total_shipment_amount;
                     $shippingTypes[] = $result->shipping_type;
                 }
