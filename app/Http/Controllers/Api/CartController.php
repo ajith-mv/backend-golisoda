@@ -1181,11 +1181,12 @@ class CartController extends Controller
 
             $tmp['carts'] = $cartTemp;
             $tmp['cart_count'] = count($cartTemp);
-         
+
             // if (isset($address) && (!empty($address))) {
             //     $shipping_charges = $this->getShippingChargesFromShiprocket($address, $customer_id);
             // }
             $shipping_amount = 0;
+            $shippingTypes = [];
             $shipping_name = '';
             if (isset($selected_shipping) && (!empty($selected_shipping))) {
                 $query = Cart::where('customer_id', $customer_id)
@@ -1205,9 +1206,7 @@ class CartController extends Controller
                 // Execute the query to get results
                 $results = $query->get();
 
-                // Initialize variables for processing
-                $shipping_amount = 0;
-                $shippingTypes = [];
+
 
                 // Processing each cart result to calculate total shipment amount and collect shipping types
                 foreach ($results as $result) {
@@ -1559,5 +1558,4 @@ class CartController extends Controller
             return null;
         }
     }
-    
 }
