@@ -125,8 +125,8 @@ class VendorWiseSaleReportController extends Controller
                                    gbs_brands.is_shipping_bared_golisoda,
                                    SUM(qty * price) as sale_amount, 
                                    total_excluding_tax, 
-                                   SUM(gbs_brand_orders.shipping_amount) AS shipping_charge, 
-                                   COUNT(gbs_brand_orders.brand_id) as shipment_count, 
+                                   gbs_brand_orders.shipping_amount AS shipping_charge, 
+                                   gbs_brand_orders.brand_id as shipment_count, 
                                    gbs_brand_orders.commission_type, 
                                    CASE
                                        WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
@@ -152,7 +152,7 @@ class VendorWiseSaleReportController extends Controller
                 ELSE NULL
             END AS com_amount
         '),
-                    DB::raw('shipment_count as total_shipments'),
+                    DB::raw('COUNT(shipment_count) as total_shipments'),
                     DB::raw('
             CASE 
                 WHEN commission_type = "fixed" THEN (0.09 * ((SUM(sale_amount) - SUM(total_tax_amount)) + SUM(shipping_charge) - com_amount))
