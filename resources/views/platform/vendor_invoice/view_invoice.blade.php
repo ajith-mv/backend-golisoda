@@ -171,16 +171,27 @@
         </tr>
         <tr>
             <td> Shipping Charges</td>
-            {{-- <td> {{ $data->total_shipments ?? '' }} </td> --}}
-            <td> 0 </td>
+            <td> {{ $data->shipping_charge ?? '' }} </td>
         </tr>
+        @php
+            $commission_amount = $data->com_amount ?? 0;
+            $shipping_bared_golisoda = $data->is_shipping_bared_golisoda;
+            if($shipping_bared_golisoda){
+                $shipping_charge = 0;
+            }else{
+                $shipping_charge = $data->shipping_charge ?? 0;
+            }
+            $gst_calculation_amount = $commission_amount + $shipping_charge;
+            $cgst_commission = $gst_calculation_amount * 0.09;
+
+        @endphp
         <tr>
             <td> CGST on Commission + Shipping (9%) ©</td>
-            <td> {{ isset($data->cgst_commission) ? $data->cgst_commission : '' }} </td>
+            <td> {{ $cgst_commission }} </td>
         </tr>
         <tr>
             <td> SGST on Commission + Shipping (9%) ©</td>
-            <td> {{ isset($data->sgst_commission) ? $data->sgst_commission : '' }} </td>
+            <td> {{ $cgst_commission }} </td>
         </tr>
         <tr>
             <td> TDS (1 %)</td>

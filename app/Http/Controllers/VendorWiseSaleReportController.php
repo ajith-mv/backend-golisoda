@@ -142,6 +142,7 @@ class VendorWiseSaleReportController extends Controller
                     'id',
                     'brand_name',
                     'is_shipping_bared_golisoda',
+                    DB::raw('SUM(shipping_charge) as shipping_charge'),
                     DB::raw('SUM(sale_amount) as sale_amount'),
                     DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('
@@ -251,6 +252,7 @@ class VendorWiseSaleReportController extends Controller
                     'id',
                     'brand_name',
                     'is_shipping_bared_golisoda',
+                    DB::raw('SUM(shipping_charge) as shipping_charge'),
                     DB::raw('SUM(sale_amount) as sale_amount'),
                     DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('
@@ -368,6 +370,7 @@ END AS tds_commission
                     'id',
                     'brand_name',
                     'is_shipping_bared_golisoda',
+                    DB::raw('SUM(shipping_charge) as shipping_charge'),
                     DB::raw('SUM(sale_amount) as sale_amount'),
                     DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
                     DB::raw('
