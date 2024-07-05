@@ -254,7 +254,7 @@
                         <td>{{ number_format($item->sub_total, 2) }}</td>
                     </tr>
                     @php
-                        $total = $total + number_format($item->sub_total, 2);
+                        $total = $total + (float)$item->sub_total;
                         $i++;
                     @endphp
                 @endif
@@ -296,7 +296,7 @@
                     <label for="">Total in words </label>
                 </div>
                 <div>
-                    <b>{{ ucwords(getIndianCurrency($total)) }} Only</b>
+                    <b>{{ ucwords(getIndianCurrency(number_format($total,2))) }} Only</b>
                 </div>
                 <div>
 
