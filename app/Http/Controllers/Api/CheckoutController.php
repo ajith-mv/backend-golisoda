@@ -118,22 +118,34 @@ class CheckoutController extends Controller
         $shipping_amount = 0;
         $shippingTypes = [];
         $shipping_name = '';
-        $query = DB::table('carts')
-                    ->join('cart_shipments', function ($join) {
-                        $join->on('carts.id', '=', 'cart_shipments.cart_id')
-                            ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
+        $subquery = DB::table('cart_shipments')
+                    ->join('carts', function ($join) {
+                        $join->on('cart_shipments.cart_id', '=', 'carts.id')
+                            ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
                     })
                     ->where('carts.customer_id', $customer_id)
                     ->select(
-                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
+                        'cart_shipments.brand_id',
                         'cart_shipments.shipping_type',
-                        'carts.brand_id'
+                        DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
                     )
-                    ->groupBy('carts.brand_id')
-                    ->get();
-                Log::info($query);
+                    ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
 
-                foreach ($query as $result) {
+                // Main query to sum the shipping amounts for each unique brand_id
+                $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
+                    ->mergeBindings($subquery)
+                    ->select(
+                        DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
+                        'sub.brand_id',
+                        'sub.shipping_type'
+                    )
+                    ->groupBy('sub.brand_id', 'sub.shipping_type')
+                    ->get();
+
+                Log::info($results);
+
+                foreach ($results as $result) {
+                    $max_shipping_amount = floatval($result->total_shipment_amount);
                     $shipping_amount += $result->total_shipment_amount;
                     $shippingTypes[] = $result->shipping_type;
                 }
@@ -510,22 +522,34 @@ class CheckoutController extends Controller
         $shipping_amount = 0;
         $shippingTypes = [];
         $shipping_name = '';
-        $query = DB::table('carts')
-                    ->join('cart_shipments', function ($join) {
-                        $join->on('carts.id', '=', 'cart_shipments.cart_id')
-                            ->whereColumn('carts.brand_id', '=', 'cart_shipments.brand_id');
+        $subquery = DB::table('cart_shipments')
+                    ->join('carts', function ($join) {
+                        $join->on('cart_shipments.cart_id', '=', 'carts.id')
+                            ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
                     })
                     ->where('carts.customer_id', $customer_id)
                     ->select(
-                        DB::raw('SUM(gbs_cart_shipments.shipping_amount) as total_shipment_amount'),
+                        'cart_shipments.brand_id',
                         'cart_shipments.shipping_type',
-                        'carts.brand_id'
+                        DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
                     )
-                    ->groupBy('carts.brand_id')
-                    ->get();
-                Log::info($query);
+                    ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
 
-                foreach ($query as $result) {
+                // Main query to sum the shipping amounts for each unique brand_id
+                $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
+                    ->mergeBindings($subquery)
+                    ->select(
+                        DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
+                        'sub.brand_id',
+                        'sub.shipping_type'
+                    )
+                    ->groupBy('sub.brand_id', 'sub.shipping_type')
+                    ->get();
+
+                Log::info($results);
+
+                foreach ($results as $result) {
+                    $max_shipping_amount = floatval($result->total_shipment_amount);
                     $shipping_amount += $result->total_shipment_amount;
                     $shippingTypes[] = $result->shipping_type;
                 }
