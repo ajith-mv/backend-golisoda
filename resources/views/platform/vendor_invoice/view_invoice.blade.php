@@ -173,7 +173,7 @@
             <td> {{ isset($data->sale_amount_excluding_tax) ? $data->sale_amount_excluding_tax : '' }} </td>
         </tr>
         <tr>
-            <td> Commission(B) @ {{isset($data->com_percentage && ($data->com_percentage != '0.00')) ? round($data->com_percentage) :  '' }} </td>
+            <td> Commission(B) @ {{isset($data->com_percentage) && ($data->com_percentage != '0.00')) ? round($data->com_percentage) :  '' }} </td>
             <td> {{ isset($data->com_amount) ? number_format($data->com_amount, 2) :  '' }} </td>
         </tr>
         <tr>
