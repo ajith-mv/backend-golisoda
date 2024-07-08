@@ -176,9 +176,9 @@ class VendorWiseSaleReportController extends Controller
                 )
                 ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
-                ->whereDate('brand_orders.created_at', '<=', $start_date)
-                ->whereDate('brand_orders.created_at', '>=', $end_date)
-                ->groupBy('brand_order.brand_id')
+                ->whereDate('brand_orders.created_at', '>=', $start_date)
+                ->whereDate('brand_orders.created_at', '<=', $end_date)
+                ->groupBy('brand_orders.brand_id')
                 ->first();
 
 
@@ -188,8 +188,8 @@ class VendorWiseSaleReportController extends Controller
                 ->join('orders', 'brand_orders.order_id', '=', 'orders.id')
                 ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
-                ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$start_date])
-                ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$end_date])
+                ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$start_date])
+                ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$end_date])
                 ->select(
                     'brands.brand_name',
                     'brand_orders.tracking_id',
@@ -404,8 +404,8 @@ class VendorWiseSaleReportController extends Controller
                 )
                 ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
-                ->whereDate('brand_orders.created_at', '<=', $start_date)
-                ->whereDate('brand_orders.created_at', '>=', $end_date)
+                ->whereDate('brand_orders.created_at', '>=', $start_date)
+                ->whereDate('brand_orders.created_at', '<=', $end_date)
                 ->groupBy('brand_orders.brand_id')
                 ->first();
 
@@ -416,8 +416,8 @@ class VendorWiseSaleReportController extends Controller
                 ->join('orders', 'brand_orders.order_id', '=', 'orders.id')
                 ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
-                ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$start_date])
-                ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$end_date])
+                ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$start_date])
+                ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$end_date])
                 ->select(
                     'brands.brand_name',
                     'brand_orders.tracking_id',
