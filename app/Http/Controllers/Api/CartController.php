@@ -1369,6 +1369,9 @@ class CartController extends Controller
 
         $from_type = $request->from_type;
         $address = $request->address;
+        if(!isset($address) && (empty($address))){
+            return response()->json(array('error' => 1, 'status_code' => 400, 'message' => 'Address not set', 'status' => 'failure', 'data' => []), 400);
+        }
         $shippingAddress = CustomerAddress::find($address);
         log::debug($shippingAddress);
         log::debug('address id is' . $address);
