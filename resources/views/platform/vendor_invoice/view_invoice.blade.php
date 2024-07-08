@@ -176,10 +176,7 @@
             <td> Commission(B) {{(isset($data->com_percentage) && ($data->com_percentage != '0.00')) ? '@ '.round($data->com_percentage). '%' :  '' }} </td>
             <td> {{ isset($data->com_amount) ? number_format($data->com_amount, 2) :  '' }} </td>
         </tr>
-        <tr>
-            <td> Shipping Charges</td>
-            <td> {{ $shipment_data->total_shipping_charge ?? '' }} </td>
-        </tr>
+        
         @php
             $commission_amount = $data->com_amount ?? 0;
             $shipping_bared_golisoda = $data->is_shipping_bared_golisoda;
@@ -192,6 +189,10 @@
             $cgst_commission = $sgst_commission = $gst_calculation_amount * 0.09;
 
         @endphp
+        <tr>
+            <td> Shipping Charges</td>
+            <td> {{ $shipping_charge }} </td>
+        </tr>
         <tr>
             <td> CGST on Commission + Shipping (9%) ©</td>
             <td> {{ $cgst_commission }} </td>
