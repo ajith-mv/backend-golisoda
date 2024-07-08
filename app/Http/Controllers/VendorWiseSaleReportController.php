@@ -133,6 +133,10 @@ class VendorWiseSaleReportController extends Controller
                                        WHEN gbs_brand_orders.commission_type = 'fixed' THEN gbs_brand_orders.commission_value
                                        ELSE 0
                                    END AS com_amount,
+                                   CASE
+                                       WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
+                                       ELSE 0
+                                   END AS com_percentage,
                                    SUM(tax_amount) as total_tax_amount
                             FROM gbs_brand_orders
                             JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
@@ -243,6 +247,10 @@ class VendorWiseSaleReportController extends Controller
                                        WHEN gbs_brand_orders.commission_type = 'fixed' THEN gbs_brand_orders.commission_value
                                        ELSE 0
                                    END AS com_amount,
+                                    CASE
+                                       WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
+                                       ELSE 0
+                                   END AS com_percentage,
                                    SUM(tax_amount) as total_tax_amount
                             FROM gbs_brand_orders
                             JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
@@ -360,7 +368,10 @@ class VendorWiseSaleReportController extends Controller
                                        WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
                                        WHEN gbs_brand_orders.commission_type = 'fixed' THEN gbs_brand_orders.commission_value
                                        ELSE 0
-                                   END AS com_amount,
+                                   END AS com_amount, CASE
+                                       WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
+                                       ELSE 0
+                                   END AS com_percentage,
                                    SUM(tax_amount) as total_tax_amount
                             FROM gbs_brand_orders
                             JOIN gbs_orders ON gbs_orders.id = gbs_brand_orders.order_id 
