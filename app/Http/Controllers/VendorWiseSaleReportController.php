@@ -39,9 +39,9 @@ class VendorWiseSaleReportController extends Controller
             }
 
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, gbs_brands.brand_name as brand_name, gbs_brand_orders.commission_value as com_percentage, gbs_brands.commission_type as commission_type,
-            sum(gbs_brands.sub_total) as sale_amount,
+            sum(gbs_brand_orders.sub_total) as sale_amount,
             CASE
-        WHEN gbs_brand_orders.commission_type = 'percentage' THEN ROUND(SUM(gbs_brands.sub_total * gbs_brand_orders.commission_value / 100), 2)
+        WHEN gbs_brand_orders.commission_type = 'percentage' THEN ROUND(SUM(gbs_brand_orders.sub_total * gbs_brand_orders.commission_value / 100), 2)
         WHEN gbs_brand_orders.commission_type = 'fixed' THEN ROUND(SUM(qty * gbs_brand_orders.commission_value), 2)
         ELSE 0
     END AS com_amount
@@ -123,7 +123,7 @@ class VendorWiseSaleReportController extends Controller
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, 
                                    gbs_brands.brand_name as brand_name, 
                                    gbs_brands.is_shipping_bared_golisoda,
-                                   SUM(gbs_brands.sub_total) as sale_amount, 
+                                   SUM(gbs_brand_orders.sub_total) as sale_amount, 
                                    total_excluding_tax, 
                                    SUM(gbs_brand_orders.shiprocket_amount) AS shipping_charge, 
                                    COUNT(gbs_brand_orders.brand_id) as shipment_count, 
@@ -233,7 +233,7 @@ class VendorWiseSaleReportController extends Controller
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, 
                                    gbs_brands.brand_name as brand_name, 
                                    gbs_brands.is_shipping_bared_golisoda,
-                                   SUM(gbs_brands.sub_total) as sale_amount, 
+                                   SUM(gbs_brand_orders.sub_total) as sale_amount, 
                                    total_excluding_tax, 
                                    SUM(gbs_brand_orders.shiprocket_amount) AS shipping_charge, 
                                    COUNT(gbs_brand_orders.brand_id) as shipment_count, 
@@ -351,7 +351,7 @@ class VendorWiseSaleReportController extends Controller
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, 
                                    gbs_brands.brand_name as brand_name, 
                                    gbs_brands.is_shipping_bared_golisoda,
-                                   SUM(gbs_brands.sub_total) as sale_amount, 
+                                   SUM(gbs_brand_orders.sub_total) as sale_amount, 
                                    total_excluding_tax, 
                                    SUM(gbs_brand_orders.shiprocket_amount) AS shipping_charge, 
                                    COUNT(gbs_brand_orders.brand_id) as shipment_count, 
