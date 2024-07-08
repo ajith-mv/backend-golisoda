@@ -144,11 +144,11 @@ class VendorWiseSaleReportController extends Controller
                     'is_shipping_bared_golisoda',
                     DB::raw('SUM(shipping_charge) as shipping_charge'),
                     DB::raw('SUM(sale_amount) as sale_amount'),
-                    DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
+                    DB::raw('(SUM(sale_amount) - SUM(total_excluding_tax)) as sale_amount_excluding_tax'),
                     DB::raw('
             CASE 
-                WHEN commission_type = "fixed" THEN (SUM(sale_amount) - SUM(total_tax_amount)) - com_amount
-                WHEN commission_type = "percentage" THEN (SUM(sale_amount) - SUM(total_tax_amount)) * com_amount / 100
+                WHEN commission_type = "fixed" THEN (SUM(sale_amount) - SUM(total_excluding_tax)) - com_amount
+                WHEN commission_type = "percentage" THEN (SUM(sale_amount) - SUM(total_excluding_tax)) * com_amount / 100
                 ELSE NULL
             END AS com_amount
         '),
@@ -254,11 +254,11 @@ class VendorWiseSaleReportController extends Controller
                     'is_shipping_bared_golisoda',
                     DB::raw('SUM(shipping_charge) as shipping_charge'),
                     DB::raw('SUM(sale_amount) as sale_amount'),
-                    DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
+                    DB::raw('(SUM(sale_amount) - SUM(total_excluding_tax)) as sale_amount_excluding_tax'),
                     DB::raw('
             CASE 
-                WHEN commission_type = "fixed" THEN (SUM(sale_amount) - SUM(total_tax_amount)) - com_amount
-                WHEN commission_type = "percentage" THEN (SUM(sale_amount) - SUM(total_tax_amount)) * com_amount / 100
+                WHEN commission_type = "fixed" THEN (SUM(sale_amount) - SUM(total_excluding_tax)) - com_amount
+                WHEN commission_type = "percentage" THEN (SUM(sale_amount) - SUM(total_excluding_tax)) * com_amount / 100
                 ELSE NULL
             END AS com_amount
         '),
@@ -372,11 +372,11 @@ class VendorWiseSaleReportController extends Controller
                     'is_shipping_bared_golisoda',
                     DB::raw('SUM(shipping_charge) as shipping_charge'),
                     DB::raw('SUM(sale_amount) as sale_amount'),
-                    DB::raw('(SUM(sale_amount) - SUM(total_tax_amount)) as sale_amount_excluding_tax'),
+                    DB::raw('(SUM(sale_amount) - SUM(total_excluding_tax)) as sale_amount_excluding_tax'),
                     DB::raw('
             CASE 
-                WHEN commission_type = "fixed" THEN (SUM(sale_amount) - SUM(total_tax_amount)) - com_amount
-                WHEN commission_type = "percentage" THEN (SUM(sale_amount) - SUM(total_tax_amount)) * com_amount / 100
+                WHEN commission_type = "fixed" THEN (SUM(sale_amount) - SUM(total_excluding_tax)) - com_amount
+                WHEN commission_type = "percentage" THEN (SUM(sale_amount) - SUM(total_excluding_tax)) * com_amount / 100
                 ELSE NULL
             END AS com_amount
         '),
