@@ -174,7 +174,7 @@
         </tr>
         <tr>
             <td> Commission(B) @ {{isset($data->com_percentage) ? $data->com_percentage :  '' }} </td>
-            <td> {{ isset($data->com_amount) ? $data->com_amount :  '' }} </td>
+            <td> {{ isset($data->com_amount) ? number_format($data->com_amount, 2) :  '' }} </td>
         </tr>
         <tr>
             <td> Shipping Charges</td>
@@ -202,7 +202,7 @@
         </tr>
         <tr>
             <td> TDS (1 %)</td>
-            <td> {{ isset($data->tds_commission) ? $data->tds_commission : '' }} </td>
+            <td> {{ isset($data->tds_commission) ? number_format($data->tds_commission, 2) : '' }} </td>
         </tr>
         <tr>
             <td><b>Net Payable Amount</b></td>
