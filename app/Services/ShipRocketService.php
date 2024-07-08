@@ -293,8 +293,45 @@ class ShipRocketService
                     }
                 }
             }
-            log::info('got the shipping amount as' . number_format($shipping_amount, 2));
-            return ['shipping_title' => ucwords(str_replace('_', ' ', $shipping_text)), 'is_free' => $is_free, 'charges' =>  number_format($shipping_amount, 2)];
+            $shipping_amount_db = 0;
+            $shippingTypes = [];
+            $shipping_name = '';
+            $subquery = DB::table('cart_shipments')
+                ->join('carts', function ($join) {
+                    $join->on('cart_shipments.cart_id', '=', 'carts.id')
+                        ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
+                })
+                ->where('carts.customer_id', $customer_id)
+                ->select(
+                    'cart_shipments.brand_id',
+                    'cart_shipments.shipping_type',
+                    DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
+                )
+                ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
+
+            // Main query to sum the shipping amounts for each unique brand_id
+            $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
+                ->mergeBindings($subquery)
+                ->select(
+                    DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
+                    'sub.brand_id',
+                    'sub.shipping_type'
+                )
+                ->groupBy('sub.brand_id', 'sub.shipping_type')
+                ->get();
+
+            Log::info($results);
+
+            foreach ($results as $result) {
+                $max_shipping_amount = floatval($result->total_shipment_amount);
+                $shipping_amount_db += $max_shipping_amount;
+                $shippingTypes[] = $result->shipping_type;
+            }
+
+            // Determine the final shipping type based on the rules provided
+            $shipping_name = $this->determineFinalShippingType($shippingTypes);
+            log::info('got the shipping amount as' . number_format($shipping_amount_db, 2));
+            return ['shipping_title' => ucwords(str_replace('_', ' ', $shipping_name)), 'is_free' => $is_free, 'charges' =>  number_format($shipping_amount_db, 2)];
         }
     }
 
@@ -454,5 +491,25 @@ class ShipRocketService
         }
         log::info('vendor pickup location' . $vendor_pickup_location);
         return $vendor_pickup_location;
+    }
+
+    public function determineFinalShippingType($shippingTypes)
+    {
+        // Determine the final shipping type based on the rules provided
+        if (count(array_unique($shippingTypes)) === 1) {
+            // All carts have the same shipping type
+            return $shippingTypes[0];
+        } else {
+            // Different shipping types exist, apply the specified rules
+            if (in_array('free_shipping', $shippingTypes) && in_array('standard_shipping', $shippingTypes)) {
+                return 'standard_shipping';
+            } elseif (in_array('free_shipping', $shippingTypes) && in_array('flat_shipping', $shippingTypes)) {
+                return 'flat_shipping';
+            } elseif (in_array('flat_shipping', $shippingTypes) && in_array('standard_shipping', $shippingTypes)) {
+                return 'standard_shipping';
+            }
+            // Default fallback (optional based on your needs)
+            return null;
+        }
     }
 }
