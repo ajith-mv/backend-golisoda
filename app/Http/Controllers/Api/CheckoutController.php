@@ -257,8 +257,8 @@ class CheckoutController extends Controller
                 $ins['commission_type'] = $brand_data->commission_type;
                 $ins['commission_value'] = $brand_data->commission_value;
                 $cart_shipment = CartShipment::where('cart_id', $item['cart_id'])->first();
-                $ins['shipping_amount'] = isset($cart_shipment) ? $cart_shipment->shipping_amount : NULL;
-                $ins['shiprocket_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : NULL;
+                $ins['shipping_amount'] = isset($cart_shipment) ? $cart_shipment->shipping_amount : 0;
+                $ins['shiprocket_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : 0;
                 $ins['shipping_id'] = isset($cart_shipment) ? $cart_shipment->shipping_id : '';
                 $ins['shipping_type'] = isset($cart_shipment) ? $cart_shipment->shiprocket_type : '';
                 $brand_order = BrandOrder::create($ins);
@@ -660,8 +660,8 @@ class CheckoutController extends Controller
                 $ins['commission_type'] = $brand_data->commission_type;
                 $ins['commission_value'] = $brand_data->commission_value;
                 $cart_shipment = CartShipment::where('cart_id', $item['cart_id'])->first();
-                $ins['shipping_amount'] = isset($cart_shipment) ? $cart_shipment->shipping_amount : NULL;
-                $ins['shiprocket_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : NULL;
+                $ins['shipping_amount'] = isset($cart_shipment) ? $cart_shipment->shipping_amount : 0;
+                $ins['shiprocket_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : 0;
                 $ins['shipping_id'] = isset($cart_shipment) ? $cart_shipment->shipping_id : '';
                 $ins['shipping_type'] = isset($cart_shipment) ? $cart_shipment->shiprocket_type : '';
                 $brand_order = BrandOrder::create($ins);
