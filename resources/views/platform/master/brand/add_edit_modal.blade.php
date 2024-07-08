@@ -217,7 +217,7 @@
     }
 </style>
 <script src="{{ asset('assets/js/jquery.validate.min.js') }}"></script>
-
+<script src="{{ asset('assets/plugins/custom/formrepeater/formrepeater.bundle.js') }}"></script>
 <script>
     $('.mobile_num').keypress(
         function(event) {
