@@ -178,7 +178,7 @@ class VendorWiseSaleReportController extends Controller
                 ->where('orders.status', '!=', 'pending')
                 ->whereDate('brand_orders.created_at', '<=', $start_date)
                 ->whereDate('brand_orders.created_at', '>=', $end_date)
-                ->groupBy('brand_orders.brand_id')
+                ->groupBy('brand_order.brand_id')
                 ->first();
 
 
