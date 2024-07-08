@@ -180,7 +180,8 @@
         @php
             $commission_amount = $data->com_amount ?? 0;
             $shipping_bared_golisoda = $data->is_shipping_bared_golisoda;
-            if($shipping_bared_golisoda){
+            $is_free_shipping = $data->is_free_shipping;
+            if($shipping_bared_golisoda && $is_free_shipping){
                 $shipping_charge = 0;
             }else{
                 $shipping_charge = $shipment_data->total_shipping_charge ?? 0;
