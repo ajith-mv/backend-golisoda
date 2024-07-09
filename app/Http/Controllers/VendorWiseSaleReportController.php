@@ -211,7 +211,7 @@ class VendorWiseSaleReportController extends Controller
 
             $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])
                 ->join('brands', 'brand_vendor_locations.brand_id', '=', 'brands.id')
-                ->select('brand_vendor_locations.*', 'brands.brand_name')
+                ->select('brand_vendor_locations.*', 'brands.brand_name', 'brands.gst_no', 'brands.gstin_no')
                 ->first();
 
             DB::commit();
@@ -333,7 +333,8 @@ class VendorWiseSaleReportController extends Controller
 
             $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])
                 ->join('brands', 'brand_vendor_locations.brand_id', '=', 'brands.id')
-                ->select('brand_vendor_locations.*', 'brands.brand_name')
+                ->select('brand_vendor_locations.*', 'brands.brand_name', 'brands.gst_no', 'brands.gstin_no')
+
                 ->first();
 
             DB::commit();
@@ -462,7 +463,7 @@ class VendorWiseSaleReportController extends Controller
 
             $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])
                 ->join('brands', 'brand_vendor_locations.brand_id', '=', 'brands.id')
-                ->select('brand_vendor_locations.*', 'brands.brand_name')
+                ->select('brand_vendor_locations.*', 'brands.brand_name', 'brands.gst_no', 'brands.gstin_no')
                 ->first();
 
             DB::commit();

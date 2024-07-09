@@ -137,8 +137,8 @@
 
                             <div>{{ isset($brand_location) ? $brand_location->mobile_no : '' }}</div>
                             <div>{{ isset($brand_location) ? $brand_location->email_id : '' }}</div>
-                            <div> PAN:</div>
-                            <div> GSTIN:</div>
+                            <div> PAN:{{ isset($brand_location) ? $brand_location->gst_no : '' }}</div>
+                            <div> GSTIN:{{ isset($brand_location) ? $brand_location->gstin_no : '' }}</div>
                         </td>
 
 
