@@ -343,7 +343,7 @@ class ShipRocketService
             "pickup_postcode" => $pickup_post_code,
             "delivery_postcode" => $delivery_post_code,
 
-            "order_id" => $order_id,
+            // "order_id" => $order_id,
             "cod" =>  false,
             "weight" => $measure_ment['weight'],
             "length" => $measure_ment['length'],
