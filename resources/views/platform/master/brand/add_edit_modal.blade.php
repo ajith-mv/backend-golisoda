@@ -455,27 +455,25 @@
                 });
             });
         });
-    });
+        const isFreeShippingCheckbox = $('#is_free_shipping');
+        const isShippingBaredGolisodaCheckbox = $('#is_shipping_bared_golisoda');
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const isFreeShippingCheckbox = document.getElementById('is_free_shipping');
-        const isShippingBaredGolisodaCheckbox = document.getElementById('is_shipping_bared_golisoda');
-
-        isShippingBaredGolisodaCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                isFreeShippingCheckbox.checked = true;
-                isFreeShippingCheckbox.disabled =
-                true; // Disable the checkbox to prevent user from unchecking it
+        isShippingBaredGolisodaCheckbox.change(function() {
+            if ($(this).is(':checked')) {
+                isFreeShippingCheckbox.prop('checked', true);
+                isFreeShippingCheckbox.prop('disabled',
+                true); // Disable the checkbox to prevent user from unchecking it
             } else {
-                isFreeShippingCheckbox.disabled =
-                false; // Enable the checkbox if is_shipping_bared_golisoda is unchecked
+                isFreeShippingCheckbox.prop('disabled',
+                false); // Enable the checkbox if is_shipping_bared_golisoda is unchecked
             }
         });
 
         // Ensure initial state is handled in case of page reload
-        if (isShippingBaredGolisodaCheckbox.checked) {
-            isFreeShippingCheckbox.checked = true;
-            isFreeShippingCheckbox.disabled = true;
+        if (isShippingBaredGolisodaCheckbox.is(':checked')) {
+            isFreeShippingCheckbox.prop('checked', true);
+            isFreeShippingCheckbox.prop('disabled', true);
         }
     });
+
 </script>
