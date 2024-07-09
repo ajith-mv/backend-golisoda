@@ -128,6 +128,8 @@
 
                         <td class="w-35">
                             <div><b> To: </b></div>
+                            <div><b>{{ isset($brand_location) ? $brand_location->brand_name : '' }}</b></div>
+
                             <div><b>{{ isset($brand_location) ? $brand_location->branch_name : '' }}</b></div>
                             <div>{{ isset($brand_location) ? $brand_location->address_line1 : '' }}</div>
                             <div>{{ isset($brand_location) ? $brand_location->address_line2 : '' }}</div>

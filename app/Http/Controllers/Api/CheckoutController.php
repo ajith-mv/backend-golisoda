@@ -120,43 +120,43 @@ class CheckoutController extends Controller
         $shippingTypes = [];
         $shipping_name = '';
         $subquery = DB::table('cart_shipments')
-                    ->join('carts', function ($join) {
-                        $join->on('cart_shipments.cart_id', '=', 'carts.id')
-                            ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
-                    })
-                    ->where('carts.customer_id', $customer_id)
-                    ->select(
-                        'cart_shipments.brand_id',
-                        'cart_shipments.shipping_type',
-                        DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
-                    )
-                    ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
+            ->join('carts', function ($join) {
+                $join->on('cart_shipments.cart_id', '=', 'carts.id')
+                    ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
+            })
+            ->where('carts.customer_id', $customer_id)
+            ->select(
+                'cart_shipments.brand_id',
+                'cart_shipments.shipping_type',
+                DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
+            )
+            ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
 
-                // Main query to sum the shipping amounts for each unique brand_id
-                $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
-                    ->mergeBindings($subquery)
-                    ->select(
-                        DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
-                        'sub.brand_id',
-                        'sub.shipping_type'
-                    )
-                    ->groupBy('sub.brand_id', 'sub.shipping_type')
-                    ->get();
+        // Main query to sum the shipping amounts for each unique brand_id
+        $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
+            ->mergeBindings($subquery)
+            ->select(
+                DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
+                'sub.brand_id',
+                'sub.shipping_type'
+            )
+            ->groupBy('sub.brand_id', 'sub.shipping_type')
+            ->get();
 
-                Log::info($results);
+        Log::info($results);
 
-                foreach ($results as $result) {
-                    $max_shipping_amount = floatval($result->total_shipment_amount);
-                    $shipping_amount += $result->total_shipment_amount;
-                    $shippingTypes[] = $result->shipping_type;
-                }
+        foreach ($results as $result) {
+            $max_shipping_amount = floatval($result->total_shipment_amount);
+            $shipping_amount += $result->total_shipment_amount;
+            $shippingTypes[] = $result->shipping_type;
+        }
 
-                // Determine the final shipping type based on the rules provided
-                $shipping_name = $this->determineFinalShippingType($shippingTypes);
+        // Determine the final shipping type based on the rules provided
+        $shipping_name = $this->determineFinalShippingType($shippingTypes);
 
-                // Logging the total shipment amount and final shipping type
-                Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
-                Log::info("Final Shipping Type: " . $shipping_name);
+        // Logging the total shipment amount and final shipping type
+        Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
+        Log::info("Final Shipping Type: " . $shipping_name);
 
 
 
@@ -326,7 +326,7 @@ class CheckoutController extends Controller
         $his['description'] = 'Order has been Placed successfully';
         OrderHistory::create($his);
         $delete_cart = Cart::where('customer_id', $customer_id)->get();
-        foreach($delete_cart as $delete_data){
+        foreach ($delete_cart as $delete_data) {
             $delete_data->variationOptions()->delete();
             $delete_data->rocketResponse()->delete();
             $delete_data->shipments()->delete();
@@ -530,43 +530,43 @@ class CheckoutController extends Controller
         $shippingTypes = [];
         $shipping_name = '';
         $subquery = DB::table('cart_shipments')
-                    ->join('carts', function ($join) {
-                        $join->on('cart_shipments.cart_id', '=', 'carts.id')
-                            ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
-                    })
-                    ->where('carts.customer_id', $customer_id)
-                    ->select(
-                        'cart_shipments.brand_id',
-                        'cart_shipments.shipping_type',
-                        DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
-                    )
-                    ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
+            ->join('carts', function ($join) {
+                $join->on('cart_shipments.cart_id', '=', 'carts.id')
+                    ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
+            })
+            ->where('carts.customer_id', $customer_id)
+            ->select(
+                'cart_shipments.brand_id',
+                'cart_shipments.shipping_type',
+                DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
+            )
+            ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
 
-                // Main query to sum the shipping amounts for each unique brand_id
-                $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
-                    ->mergeBindings($subquery)
-                    ->select(
-                        DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
-                        'sub.brand_id',
-                        'sub.shipping_type'
-                    )
-                    ->groupBy('sub.brand_id', 'sub.shipping_type')
-                    ->get();
+        // Main query to sum the shipping amounts for each unique brand_id
+        $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
+            ->mergeBindings($subquery)
+            ->select(
+                DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
+                'sub.brand_id',
+                'sub.shipping_type'
+            )
+            ->groupBy('sub.brand_id', 'sub.shipping_type')
+            ->get();
 
-                Log::info($results);
+        Log::info($results);
 
-                foreach ($results as $result) {
-                    $max_shipping_amount = floatval($result->total_shipment_amount);
-                    $shipping_amount += $result->total_shipment_amount;
-                    $shippingTypes[] = $result->shipping_type;
-                }
+        foreach ($results as $result) {
+            $max_shipping_amount = floatval($result->total_shipment_amount);
+            $shipping_amount += $result->total_shipment_amount;
+            $shippingTypes[] = $result->shipping_type;
+        }
 
-                // Determine the final shipping type based on the rules provided
-                $shipping_name = $this->determineFinalShippingType($shippingTypes);
+        // Determine the final shipping type based on the rules provided
+        $shipping_name = $this->determineFinalShippingType($shippingTypes);
 
-                // Logging the total shipment amount and final shipping type
-                Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
-                Log::info("Final Shipping Type: " . $shipping_name);
+        // Logging the total shipment amount and final shipping type
+        Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
+        Log::info("Final Shipping Type: " . $shipping_name);
 
         $order_ins['customer_id'] = $customer_id;
         $order_ins['customer_id'] = $customer_id;
@@ -812,7 +812,7 @@ class CheckoutController extends Controller
             if ($success) {
 
                 $delete_cart = Cart::where('customer_id', $customer_id)->get();
-                foreach($delete_cart as $delete_data){
+                foreach ($delete_cart as $delete_data) {
                     $delete_data->variationOptions()->delete();
                     $delete_data->rocketResponse()->delete();
                     $delete_data->shipments()->delete();
@@ -1052,7 +1052,10 @@ class CheckoutController extends Controller
                 if ($brandOrderData) {
                     $order_info = $brandOrderData[0]->order;
                     $variations = $this->getVariations($order_info);
-                    $brand_address = BrandVendorLocation::where([['brand_id', $singleBrandId], ['is_default', 1]])->first();
+                    $brand_address = BrandVendorLocation::where([['brand_id', $singleBrandId], ['is_default', 1]])
+                        ->join('brands', 'brand_vendor_locations.brand_id', '=', 'brands.id')
+                        ->select('brand_vendor_locations.*', 'brands.brand_name')
+                        ->first();
                     if (isset($brand_address) && (!empty($brand_address))) {
                         $pdf = PDF::loadView('platform.vendor_invoice.index', compact('brand_address', 'order_info', 'globalInfo', 'variations', 'singleBrandId'));
                         Storage::put('public/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf', $pdf->output());
@@ -1061,7 +1064,7 @@ class CheckoutController extends Controller
                         $globalInfo = GlobalSettings::first();
                         $filePath = 'storage/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf';
                         $extract = array(
-                            'name' => $brand_address->branch_name,
+                            'name' => $brand_address->brand_name,
                             'regards' => $globalInfo->site_name,
                             'company_website' => '',
                             'company_mobile_no' => $globalInfo->site_mobile_no,
@@ -1136,7 +1139,7 @@ class CheckoutController extends Controller
         return $variations;
     }
 
-    
+
     public function determineFinalShippingType($shippingTypes)
     {
         // Determine the final shipping type based on the rules provided
@@ -1156,5 +1159,4 @@ class CheckoutController extends Controller
             return null;
         }
     }
-    
 }

@@ -49,9 +49,9 @@
     <script src="{{ asset('assets/js/datatable.min.js') }}"></script>
 
     <script>
-        // $(document).ready(function() {
-        //     $('.date_range').val('');
-        // });
+        $(document).ready(function() {
+            $('#filter_search_data').select2();
+         });
         var dtTable = $('#product-table').DataTable({
 
             processing: true,

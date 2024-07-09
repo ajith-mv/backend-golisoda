@@ -89,7 +89,8 @@
                                 <img src="{{ asset('assets/global_setting/logo/1707472536_logo.png') }}" alt=""
                                     height="75"></span> </td>
                         <td class="w-70">
-                            <h2> Sold By <br /> {{ $brand_address->branch_name }} </h2>
+                            <h2> Sold By <br /> {{ $brand_address->brand_name }} </h2>
+                            <div>{{ $brand_address->branch_name }}</div>
                             <div>
                                 {{ $brand_address->address_line1 . ', ' . $brand_address->address_line2 . ', ' . $brand_address->city }}
                             </div>

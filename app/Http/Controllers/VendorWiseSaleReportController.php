@@ -209,7 +209,10 @@ class VendorWiseSaleReportController extends Controller
                 ->groupBy('brand_orders.brand_id', 'brand_orders.order_id')
                 ->get();
 
-            $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])->first();
+            $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])
+                ->join('brands', 'brand_vendor_locations.brand_id', '=', 'brands.id')
+                ->select('brand_vendor_locations.*', 'brands.brand_name')
+                ->first();
 
             DB::commit();
 
@@ -328,7 +331,10 @@ class VendorWiseSaleReportController extends Controller
                 ->groupBy('brand_orders.brand_id', 'brand_orders.order_id')
                 ->get();
 
-            $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])->first();
+            $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])
+                ->join('brands', 'brand_vendor_locations.brand_id', '=', 'brands.id')
+                ->select('brand_vendor_locations.*', 'brands.brand_name')
+                ->first();
 
             DB::commit();
             $modal_title = 'View Invoice';
@@ -454,7 +460,10 @@ class VendorWiseSaleReportController extends Controller
                 ->groupBy('brand_orders.brand_id', 'brand_orders.order_id')
                 ->get();
 
-            $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])->first();
+            $brand_location = BrandVendorLocation::where([['brand_id', $brand_id], ['is_default', 1]])
+                ->join('brands', 'brand_vendor_locations.brand_id', '=', 'brands.id')
+                ->select('brand_vendor_locations.*', 'brands.brand_name')
+                ->first();
 
             DB::commit();
             $modal_title = 'View Invoice';
