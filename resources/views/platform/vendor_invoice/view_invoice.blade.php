@@ -208,13 +208,13 @@
         </tr>
         <tr>
             <td><b>Net Payable Amount</b></td>
-            <td><b>{{ 
-                (isset($data->sale_amount) ? $data->sale_amount : 0) 
-                - (isset($data->com_amount) ? $data->com_amount : 0) 
-                - (isset($cgst_commission) ? $cgst_commission : 0) 
-                - (isset($sgst_commission) ? $sgst_commission : 0) 
-                - (isset($data->tds_commission) ? $data->tds_commission : 0) 
-            }}</b></td>
+           @php
+               $sale_amount = isset($data->sale_amount) ? $data->sale_amount : 0;
+               $com_amount = isset($data->com_amount) ? $data->com_amount : 0;
+               $tds_commission = isset($data->tds_commission) ? $data->tds_commission : 0;
+               $net_total = ($sale_amount) - ($com_amount) - ($cgst_commission) - ($sgst_commission) - ($tds_commission);
+           @endphp
+            <td><b>{{ round($net_total) }}</b></td>
         </tr>
         
     </table>
@@ -233,7 +233,7 @@
         </tr>
     </table>
     <br/>
-    <h1 style="text-align:center"> Invoice Summary </h1>
+    <h1 style="text-align:center"> Order Summary </h1>
     <table cellspacing="0" padding="0" class="w-100 item-table">
 
         <tr>
@@ -252,7 +252,7 @@
                 <td>{{ $count }}</td>
                 <td>{{ date('d/m/Y', strtotime($order->created_at)) }}</td>
                 <td>{{ $order->order_no}}</td>
-                <td>{{ isset($item->payments) ? $item->payments->payment_type : '' }}</td>
+                <td>{{ $order->payment_type }}</td>
                 <td>{{ $order->tracking_id}}</td>
                 <td>{{ $order->vendor_order_amount}}</td>
             </tr>

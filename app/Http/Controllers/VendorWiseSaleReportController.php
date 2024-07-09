@@ -193,11 +193,13 @@ class VendorWiseSaleReportController extends Controller
             $order_info = DB::table('brand_orders')
                 ->join('brands', 'brand_orders.brand_id', '=', 'brands.id')
                 ->join('orders', 'brand_orders.order_id', '=', 'orders.id')
+                ->join('payments', 'payments.order_id', '=', 'orders.id')
                 ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
                 ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$start_date])
                 ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$end_date])
                 ->select(
+                    'payments.payment_type',
                     'brands.brand_name',
                     'brand_orders.tracking_id',
                     DB::raw('SUM(gbs_brand_orders.sub_total) as vendor_order_amount'),
@@ -310,11 +312,13 @@ class VendorWiseSaleReportController extends Controller
             $order_info = DB::table('brand_orders')
                 ->join('brands', 'brand_orders.brand_id', '=', 'brands.id')
                 ->join('orders', 'brand_orders.order_id', '=', 'orders.id')
+                ->join('payments', 'payments.order_id', '=', 'orders.id')
                 ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
-                ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$start_date])
-                ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$end_date])
+                ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$start_date])
+                ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$end_date])
                 ->select(
+                    'payments.payment_type',
                     'brands.brand_name',
                     'brand_orders.tracking_id',
                     DB::raw('SUM(gbs_brand_orders.sub_total) as vendor_order_amount'),
@@ -434,11 +438,13 @@ class VendorWiseSaleReportController extends Controller
             $order_info = DB::table('brand_orders')
                 ->join('brands', 'brand_orders.brand_id', '=', 'brands.id')
                 ->join('orders', 'brand_orders.order_id', '=', 'orders.id')
+                ->join('payments', 'payments.order_id', '=', 'orders.id')
                 ->where('brand_orders.brand_id', $brand_id)
                 ->where('orders.status', '!=', 'pending')
                 ->whereRaw('DATE(gbs_brand_orders.created_at) >= ?', [$start_date])
                 ->whereRaw('DATE(gbs_brand_orders.created_at) <= ?', [$end_date])
                 ->select(
+                    'payments.payment_type',
                     'brands.brand_name',
                     'brand_orders.tracking_id',
                     DB::raw('SUM(gbs_brand_orders.sub_total) as vendor_order_amount'),

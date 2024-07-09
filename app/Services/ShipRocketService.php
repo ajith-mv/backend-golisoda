@@ -462,7 +462,7 @@ class ShipRocketService
             "shipping_address" => $cartShipAddress->address_line1,
             "shipping_address_2" => $cartShipAddress->address_line2,
             "shipping_city" => $cartShipAddress->city,
-            "shipping_pincode" => $cartShipAddress->post_code,
+            // "shipping_pincode" => $cartShipAddress->post_code,
             "shipping_country" => "India",
             "shipping_state" => $cartShipAddress->state ?? 'Tamil nadu',
             "shipping_email" => $cartShipAddress->email ?? $customer->email,
