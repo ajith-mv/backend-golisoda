@@ -129,14 +129,10 @@
                             <div><b> To: </b></div>
                             <div><b>{{ isset($brand_location) ? $brand_location->brand_name : '' }}</b></div>
 
-                            <div><b>{{ isset($brand_location) ? $brand_location->branch_name : '' }}</b></div>
-                            <div>{{ isset($brand_location) ? $brand_location->address_line1 : '' }}</div>
-                            <div>{{ isset($brand_location) ? $brand_location->address_line2 : '' }}</div>
-                            <div>{{ isset($brand_location) ? $brand_location->city : '' }} ,{{ isset($brand_location) ? $brand_location->state : '' }}</div>
-                            <div>{{ isset($brand_location) ? $brand_location->pincode : '' }}</div>
-
-                            <div>{{ isset($brand_location) ? $brand_location->mobile_no : '' }}</div>
-                            <div>{{ isset($brand_location) ? $brand_location->email_id : '' }}</div>
+                            <div>{{ isset($brand_location) ? $brand_location->address_line1 : '' }}, {{ isset($brand_location) ? $brand_location->address_line2 : '' }}</div>
+                            <div>{{ isset($brand_location) ? $brand_location->city : '' }} ,{{ isset($brand_location) ? $brand_location->state : '' }} - {{ isset($brand_location) ? $brand_location->pincode : '' }}</div>
+                            <div> Phone: {{ isset($brand_location) ? $brand_location->mobile_no : '' }}</div>
+                            <div> Email: {{ isset($brand_location) ? $brand_location->email_id : '' }}</div>
                             <div> PAN:{{ isset($brand_location) ? $brand_location->pan_no : '' }}</div>
                             <div> GSTIN:{{ isset($brand_location) ? $brand_location->gstin_no : '' }}</div>
                         </td>
