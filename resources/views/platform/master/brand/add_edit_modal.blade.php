@@ -38,8 +38,8 @@
                             <div class="col-md-6">
                                 <label class="required fw-bold fs-6 mb-2">Brand Name</label>
                                 <input type="text" name="brand_name"
-                                    class="form-control form-control-solid mb-3 mb-lg-0 required" placeholder="Brand Name"
-                                    value="{{ $info->brand_name ?? '' }}" />
+                                    class="form-control form-control-solid mb-3 mb-lg-0 required"
+                                    placeholder="Brand Name" value="{{ $info->brand_name ?? '' }}" />
                             </div>
                             <div class="col-md-6">
                                 <label class="fw-bold fs-6 mb-2">Minimum Shipping amount</label>
@@ -47,7 +47,7 @@
                                     class="form-control form-control-solid mb-3 mb-lg-0"
                                     value="{{ $info->minimum_shipping_amount ?? '' }}">
                             </div>
-                            
+
                         </div>
                         <div class="row mb-7">
                             <div class="col-md-6">
@@ -116,13 +116,17 @@
                                 <label class="required fw-bold fs-6 mb-2">Commission type</label>
 
                                 <div class="form-check form-check-custom form-check-solid">
-                                    <input name="commission_type" class="form-check-input" {{ (isset($info->commission_type) && !empty($info->commission_type)) ? $info->commission_type == 'fixed' ? 'checked' : '' : '' }} type="radio" value="fixed" id="fixed"/>
+                                    <input name="commission_type" class="form-check-input"
+                                        {{ isset($info->commission_type) && !empty($info->commission_type) ? ($info->commission_type == 'fixed' ? 'checked' : '') : '' }}
+                                        type="radio" value="fixed" id="fixed" />
                                     <label class="form-check-label" for="flexRadioDefault">
                                         Fixed
                                     </label>
                                 </div>
                                 <div class="form-check form-check-custom form-check-solid">
-                                    <input name="commission_type" class="form-check-input" type="radio" {{ (isset($info->commission_type) && !empty($info->commission_type)) ? $info->commission_type == 'percentage' ? 'checked' : '' : '' }} value="percentage" id="percentage"/>
+                                    <input name="commission_type" class="form-check-input" type="radio"
+                                        {{ isset($info->commission_type) && !empty($info->commission_type) ? ($info->commission_type == 'percentage' ? 'checked' : '') : '' }}
+                                        value="percentage" id="percentage" />
                                     <label class="form-check-label" for="flexRadioDefault">
                                         Percentage
                                     </label>
@@ -131,11 +135,11 @@
                             <div class="col-md-6">
                                 <label class="required fw-bold fs-6 mb-2">Commission value</label>
                                 <input type="text" name="commission_value"
-                                    class="form-control required form-control-solid mb-3 mb-lg-0" placeholder="Commission Value"
-                                    value="{{ $info->commission_value ?? '' }}" />
+                                    class="form-control required form-control-solid mb-3 mb-lg-0"
+                                    placeholder="Commission Value" value="{{ $info->commission_value ?? '' }}" />
                             </div>
-                            
-                           
+
+
                         </div>
                         <div class="row mb-7">
                             <div class="col-md-6">
@@ -172,21 +176,26 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold fs-6 mb-2"> Is Free shipping </label>
+                                <label class="fw-bold fs-6 mb-2">Is Free shipping</label>
                                 <div
                                     class="form-check form-switch form-check-custom form-check-solid fw-bold fs-6 mb-2">
-                                    <input class="form-check-input" type="checkbox" name="is_free_shipping"
-                                        value="1" @if (isset($info->is_free_shipping) && $info->is_free_shipping == 1) checked @endif />
+                                    <input id="is_free_shipping" class="form-check-input" type="checkbox"
+                                        name="is_free_shipping" value="1"
+                                        @if (isset($info->is_free_shipping) && $info->is_free_shipping == 1) checked @endif />
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold fs-6 mb-2"> Shipping charge bared by Golisoda </label>
+                                <label class="fw-bold fs-6 mb-2">Shipping charge bared by Golisoda</label>
                                 <div
                                     class="form-check form-switch form-check-custom form-check-solid fw-bold fs-6 mb-2">
-                                    <input class="form-check-input" type="checkbox" name="is_shipping_bared_golisoda"
-                                        value="1" @if (isset($info->is_shipping_bared_golisoda) && $info->is_shipping_bared_golisoda == 1) checked @endif />
+                                    <input id="is_shipping_bared_golisoda" class="form-check-input" type="checkbox"
+                                        name="is_shipping_bared_golisoda" value="1"
+                                        @if (isset($info->is_shipping_bared_golisoda) && $info->is_shipping_bared_golisoda == 1) checked @endif />
                                 </div>
                             </div>
+
+
+
                         </div>
 
 
@@ -446,5 +455,27 @@
                 });
             });
         });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const isFreeShippingCheckbox = document.getElementById('is_free_shipping');
+        const isShippingBaredGolisodaCheckbox = document.getElementById('is_shipping_bared_golisoda');
+
+        isShippingBaredGolisodaCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                isFreeShippingCheckbox.checked = true;
+                isFreeShippingCheckbox.disabled =
+                true; // Disable the checkbox to prevent user from unchecking it
+            } else {
+                isFreeShippingCheckbox.disabled =
+                false; // Enable the checkbox if is_shipping_bared_golisoda is unchecked
+            }
+        });
+
+        // Ensure initial state is handled in case of page reload
+        if (isShippingBaredGolisodaCheckbox.checked) {
+            isFreeShippingCheckbox.checked = true;
+            isFreeShippingCheckbox.disabled = true;
+        }
     });
 </script>
