@@ -120,7 +120,9 @@ class BrandController extends Controller
             $ins['notes']               = $request->notes;
             $ins['order_by']            = $request->order_by ?? 0;
             $ins['is_free_shipping']    = $request->is_free_shipping ?? 0;
-            $ins['is_shipping_bared_golisoda']    = $request->is_shipping_bared_golisoda ?? 0;
+            $ins['is_shipping_bared_golisoda']    = $request->is_shipping_bared_golisoda;
+            $ins['pan_no']    = $request->pan_no;
+            $ins['gstin_no']    = $request->gstin_no;
 
             $ins['minimum_shipping_amount']    = $request->minimum_shipping_amount;
             $ins['commission_type']    = $request->commission_type;

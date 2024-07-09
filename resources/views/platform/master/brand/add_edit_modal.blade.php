@@ -51,6 +51,20 @@
                         </div>
                         <div class="row mb-7">
                             <div class="col-md-6">
+                                <label class="fw-bold fs-6 mb-2">PAN Number</label>
+                                <input type="text" name="pan_no"
+                                    class="form-control form-control-solid mb-3 mb-lg-0"
+                                    placeholder="PAN Number" value="{{ $info->pan_no ?? '' }}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="fw-bold fs-6 mb-2">GSTIN Number</label>
+                                <input type="text" name="gstin_no"
+                                    class="form-control form-control-solid mb-3 mb-lg-0"
+                                    placeholder="GSTIN Number" value="{{ $info->gstin_no ?? '' }}" />
+                            </div>
+                        </div>
+                        <div class="row mb-7">
+                            <div class="col-md-6">
 
                                 <div class="mb-7">
                                     <label class="d-block fw-bold fs-6 mb-5">Logo</label>
