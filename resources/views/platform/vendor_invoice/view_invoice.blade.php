@@ -115,7 +115,7 @@
                     <tr>
                         <td class="w-35">
                             <div><b> From: </b></div>
-                            <h2> {{ $globalInfo->site_name }} </h2>
+                            <h4> {{ $globalInfo->site_name }} </h4>
                             <div> {{ $globalInfo->address }} </div>
                             <div> Phone: {{ $globalInfo->site_mobile_no }} </div>
 
@@ -127,7 +127,7 @@
 
                         <td class="w-35">
                             <div><b> To: </b></div>
-                            <div><b>{{ isset($brand_location) ? $brand_location->brand_name : '' }}</b></div>
+                            <h4><b>{{ isset($brand_location) ? $brand_location->brand_name : '' }}</b></h4>
 
                             <div>{{ isset($brand_location) ? $brand_location->address_line1 : '' }}, {{ isset($brand_location) ? $brand_location->address_line2 : '' }}</div>
                             <div>{{ isset($brand_location) ? $brand_location->city : '' }} ,{{ isset($brand_location) ? $brand_location->state : '' }} - {{ isset($brand_location) ? $brand_location->pincode : '' }}</div>
