@@ -414,6 +414,12 @@ class CustomerController extends Controller
         return CustomerAddressesResource::collection($address_details);
     }
 
+    public function getAddressListById($address_id)
+    {
+        $address_details = CustomerAddress::with(['countries', 'states', 'PostCode'])->where('id', $address_id)->orderBy('created_at', 'desc')->get();
+        return CustomerAddressesResource::collection($address_details);
+    }
+
     public function addUpdateCustomerAddress(Request $request)
     {
 
@@ -441,12 +447,14 @@ class CustomerController extends Controller
         $ins['city']            = $request->city;
 
         CustomerAddress::updateOrCreate(['id' => $request->id], $ins);
+        $changed_address = isset($request->id) ? $this->getAddressListById($request->id) : [];
 
         $response = array(
             'error'     => 0,
             'message'   => $request->id ? 'Address Updated successfully' : 'Address Added successfully',
             'status'    => 'success',
-            'addresses' => $this->addressList($request->customer_id)
+            'addresses' => $this->addressList($request->customer_id),
+            'changed_address' => $changed_address
         );
         return $response;
     }

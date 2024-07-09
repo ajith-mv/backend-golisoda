@@ -240,14 +240,14 @@ class VendorWiseSaleReportController extends Controller
             DB::beginTransaction();
             $where = "WHERE brand_id = '$brand_id' AND gbs_orders.status != 'pending'";
             if (!empty($start_date) && !empty($end_date)) {
-                $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
+                $where = "WHERE DATE(gbs_brand_orders.created_at) >= '$start_date' AND DATE(gbs_brand_orders.created_at) <= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, 
                                    gbs_brands.brand_name as brand_name, 
                                    gbs_brands.is_shipping_bared_golisoda,
                                    gbs_brands.is_free_shipping,
                                    SUM(gbs_brand_orders.sub_total) as sale_amount, 
-                                    SUM(total_excluding_tax) as total_excluding_tax, 
+                                   SUM(total_excluding_tax) as total_excluding_tax, 
                                    SUM(gbs_brand_orders.shiprocket_amount) AS shipping_charge, 
                                    COUNT(gbs_brand_orders.brand_id) as shipment_count, 
                                    gbs_brand_orders.commission_type, 
@@ -256,7 +256,7 @@ class VendorWiseSaleReportController extends Controller
                                        WHEN gbs_brand_orders.commission_type = 'fixed' THEN gbs_brand_orders.commission_value
                                        ELSE 0
                                    END AS com_amount,
-                                    CASE
+                                   CASE
                                        WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
                                        ELSE 0
                                    END AS com_percentage,
@@ -371,14 +371,14 @@ class VendorWiseSaleReportController extends Controller
             DB::beginTransaction();
             $where = "WHERE brand_id = '$brand_id' AND gbs_orders.status != 'pending'";
             if (!empty($start_date) && !empty($end_date)) {
-                $where = "WHERE DATE(gbs_brand_orders.created_at) <= '$start_date' AND DATE(gbs_brand_orders.created_at) >= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
+                $where = "WHERE DATE(gbs_brand_orders.created_at) >= '$start_date' AND DATE(gbs_brand_orders.created_at) <= '$end_date' AND brand_id = '$brand_id'  AND gbs_orders.status != 'pending'";
             }
             $data = DB::table(DB::raw("(SELECT gbs_brands.id as id, 
                                    gbs_brands.brand_name as brand_name, 
                                    gbs_brands.is_shipping_bared_golisoda,
                                    gbs_brands.is_free_shipping,
                                    SUM(gbs_brand_orders.sub_total) as sale_amount, 
-                                    SUM(total_excluding_tax) as total_excluding_tax, 
+                                   SUM(total_excluding_tax) as total_excluding_tax, 
                                    SUM(gbs_brand_orders.shiprocket_amount) AS shipping_charge, 
                                    COUNT(gbs_brand_orders.brand_id) as shipment_count, 
                                    gbs_brand_orders.commission_type, 
@@ -386,7 +386,8 @@ class VendorWiseSaleReportController extends Controller
                                        WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
                                        WHEN gbs_brand_orders.commission_type = 'fixed' THEN gbs_brand_orders.commission_value
                                        ELSE 0
-                                   END AS com_amount, CASE
+                                   END AS com_amount,
+                                   CASE
                                        WHEN gbs_brand_orders.commission_type = 'percentage' THEN gbs_brand_orders.commission_value
                                        ELSE 0
                                    END AS com_percentage,
@@ -398,8 +399,8 @@ class VendorWiseSaleReportController extends Controller
                 ->select(
                     'id',
                     'brand_name',
-                    'is_shipping_bared_golisoda',
                     'com_percentage',
+                    'is_shipping_bared_golisoda',
                     'is_free_shipping',
                     DB::raw('SUM(shipping_charge) as shipping_charge'),
                     DB::raw('SUM(sale_amount) as sale_amount'),
@@ -421,8 +422,6 @@ class VendorWiseSaleReportController extends Controller
                 )
                 ->groupBy('id')
                 ->first();
-
-
 
 
             $shipment_data = DB::table('brand_orders')
