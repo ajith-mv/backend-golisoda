@@ -96,7 +96,6 @@
                                 <img src="{{ asset('assets/global_setting/logo/1707472536_logo.png') }}" alt=""
                                     height="75"></span> </td>
                         <td class="w-30">
-                            <div> Invoice No: </div>
                             <div> Invoice Date: {{ date('d-m-Y')}}</div>
                             <div> Date Range: {{ isset($end_date) ? $end_date : ''}} to {{ isset($start_date) ? $start_date : ''}}</div>
 
