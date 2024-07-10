@@ -155,6 +155,7 @@ class Couponcontroller extends Controller
                                     }
                                 }
                                 if ($has_product == 0 && $has_product_error > 0) {
+                                    $is_coupon = 0;
                                     $response['status'] = 'error';
                                     $response['message'] = 'Cart order does not meet coupon minimum order amount';
                                 }
@@ -266,6 +267,7 @@ class Couponcontroller extends Controller
                                     $response['cart_info'] = $this->getCartListAll($customer_id, null, null, null, $shipping_fee_id, $response['coupon_amount']);
                                 }
                             } else {
+                                $is_coupon = 0;
                                 $response['status'] = 'error';
                                 $response['message'] = 'Cart order does not meet coupon minimum order amount';
                             }
@@ -372,6 +374,7 @@ class Couponcontroller extends Controller
                                     $response['cart_info'] = $this->getCartListAll($customer_id, null, null, null, $shipping_fee_id, $response['coupon_amount']);
                                 }
                             } else {
+                                $is_coupon = 0;
                                 $response['status'] = 'error';
                                 $response['message'] = 'Cart order does not meet coupon minimum order amount';
                             }
@@ -471,6 +474,7 @@ class Couponcontroller extends Controller
                                     DB::table('carts')->where('id', $checkCartData->id)->update($update_data);
                                     $response['cart_info'] = $this->getCartListAll($customer_id, null, null, null, $shipping_fee_id, $response['coupon_amount']);
                                 } else {
+                                    $is_coupon = 0;
                                     $response['status'] = 'error';
                                     $response['message'] = 'Cart order does not meet coupon minimum order amount';
                                 }
