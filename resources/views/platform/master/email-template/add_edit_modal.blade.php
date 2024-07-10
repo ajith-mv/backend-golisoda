@@ -147,7 +147,6 @@
         margin: 0;
     }
 </style>
-<script src="{{ asset('assets/plugins/custom/formrepeater/formrepeater.bundle.js') }}"></script>
 <script>
     // $("#message").html("1111");
     var eleme = '#message';
