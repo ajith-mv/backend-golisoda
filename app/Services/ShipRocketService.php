@@ -127,6 +127,8 @@ class ShipRocketService
                     foreach ($checkCart as $citems) {
 
                         if ($citems->products) {
+                            CartShipment::where('cart_id', $citems->id)->delete();
+
                             $pro = $citems->products;
                             $product_id = $pro->id;
                             $variation_option_id = [];
