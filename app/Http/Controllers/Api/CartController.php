@@ -1248,7 +1248,7 @@ class CartController extends Controller
             $is_cod = 0;
             $cod_amount = 0;
             $coupon_data = Cart::where('customer_id', $customer_id)->whereNotNull('coupon_id')->first();
-            if (isset($coupon_data) && isset($coupon_data->coupon_id) && isset($coupon_data->coupon_amount)) {
+            if (isset($coupon_data) && isset($coupon_data->coupon_id) && isset($coupon_data->coupon_amount) && ($coupon_data->coupon_amount > 0)) {
                 $new_coupon_amount = $this->applyCoupon($coupon_data->coupon_code, $customer_id, $selected_shipping);
                 if (filter_var($new_coupon_amount, FILTER_VALIDATE_INT) !== false || filter_var($new_coupon_amount, FILTER_VALIDATE_FLOAT) !== false) {
                     $grand_total = (float)$grand_total - (float)$new_coupon_amount;
