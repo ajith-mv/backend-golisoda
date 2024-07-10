@@ -107,7 +107,6 @@ class ShipRocketService
      */
     public function getShippingRocketOrderDimensions($customer_id, $cart_token, $cart_address_id)
     {
-        log::info('function called successfully');
         if (isset($customer_id) && !empty($customer_id)) {
             $shipping_amount = 0;
             $shipping_text = "standard_shipping";
@@ -116,6 +115,10 @@ class ShipRocketService
             $customer = Customer::find($customer_id);
             $cartShipAddress = CartAddress::find($cart_address_id);
             $brandIds = [];
+
+            $shipping_amount_db = 0;
+            $shippingTypes = [];
+            $shipping_name = '';
             if ($cartShipAddress) {
 
                 $product_id = [];
@@ -293,45 +296,45 @@ class ShipRocketService
                             }
                         }
                     }
+                    $subquery = DB::table('cart_shipments')
+                        ->join('carts', function ($join) {
+                            $join->on('cart_shipments.cart_id', '=', 'carts.id')
+                                ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
+                        })
+                        ->where('carts.customer_id', $customer_id)
+                        ->select(
+                            'cart_shipments.brand_id',
+                            'cart_shipments.shipping_type',
+                            DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
+                        )
+                        ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
+
+                    // Main query to sum the shipping amounts for each unique brand_id
+                    $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
+                        ->mergeBindings($subquery)
+                        ->select(
+                            DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
+                            'sub.brand_id',
+                            'sub.shipping_type'
+                        )
+                        ->groupBy('sub.brand_id', 'sub.shipping_type')
+                        ->get();
+
+                    Log::info($results);
+
+                    foreach ($results as $result) {
+                        $max_shipping_amount = floatval($result->total_shipment_amount);
+                        $shipping_amount_db += $max_shipping_amount;
+                        $shippingTypes[] = $result->shipping_type;
+                    }
+
+                    // Determine the final shipping type based on the rules provided
+                    $shipping_name = $this->determineFinalShippingType($shippingTypes);
                 }
             }
-            $shipping_amount_db = 0;
-            $shippingTypes = [];
-            $shipping_name = '';
-            $subquery = DB::table('cart_shipments')
-                ->join('carts', function ($join) {
-                    $join->on('cart_shipments.cart_id', '=', 'carts.id')
-                        ->whereColumn('cart_shipments.brand_id', '=', 'carts.brand_id');
-                })
-                ->where('carts.customer_id', $customer_id)
-                ->select(
-                    'cart_shipments.brand_id',
-                    'cart_shipments.shipping_type',
-                    DB::raw('MAX(gbs_cart_shipments.shipping_amount) as max_shipping_amount')
-                )
-                ->groupBy('cart_shipments.brand_id', 'cart_shipments.shipping_type');
 
-            // Main query to sum the shipping amounts for each unique brand_id
-            $results = DB::table(DB::raw("({$subquery->toSql()}) as gbs_sub"))
-                ->mergeBindings($subquery)
-                ->select(
-                    DB::raw('SUM(gbs_sub.max_shipping_amount) as total_shipment_amount'),
-                    'sub.brand_id',
-                    'sub.shipping_type'
-                )
-                ->groupBy('sub.brand_id', 'sub.shipping_type')
-                ->get();
 
-            Log::info($results);
 
-            foreach ($results as $result) {
-                $max_shipping_amount = floatval($result->total_shipment_amount);
-                $shipping_amount_db += $max_shipping_amount;
-                $shippingTypes[] = $result->shipping_type;
-            }
-
-            // Determine the final shipping type based on the rules provided
-            $shipping_name = $this->determineFinalShippingType($shippingTypes);
             log::info('got the shipping amount as' . number_format($shipping_amount_db, 2));
             return ['shipping_title' => ucwords(str_replace('_', ' ', $shipping_name)), 'is_free' => $is_free, 'charges' =>  number_format($shipping_amount_db, 2)];
         }
@@ -370,7 +373,7 @@ class ShipRocketService
         // $response = json_decode($response);
         $amount = null;
         if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
-            log::info(env('SHIPROCKET_CALCULATION'). 'shiprocket calculation');
+            log::info(env('SHIPROCKET_CALCULATION') . 'shiprocket calculation');
             if (env('SHIPROCKET_CALCULATION') == 'recommended') {
                 $recommended_id = $response['data']['recommended_courier_company_id'];
                 log::info("recommended id is" . $recommended_id);
