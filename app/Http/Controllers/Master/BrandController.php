@@ -230,6 +230,7 @@ class BrandController extends Controller
     {
         $id         = $request->id;
         $info       = Brands::find($id);
+        $info->vendorLocation()->delete();
         $info->delete();
         return response()->json(['message' => "Successfully deleted brand!", 'status' => 1]);
     }
