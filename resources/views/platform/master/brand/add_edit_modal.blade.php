@@ -16,6 +16,11 @@
         </button>
     </div>
 </div>
+<style>
+input[type="checkbox"][readonly] {
+    pointer-events: none;
+  }
+</style
 <!--end::Header-->
 <!--begin::Body-->
 <form id="add_brand_form" class="form" action="#" enctype="multipart/form-data">
@@ -476,10 +481,10 @@
         isShippingBaredGolisodaCheckbox.change(function() {
             if ($(this).is(':checked')) {
                 isFreeShippingCheckbox.prop('checked', true);
-                isFreeShippingCheckbox.prop('disabled',
+                isFreeShippingCheckbox.prop('readonly',
                 true); // Disable the checkbox to prevent user from unchecking it
             } else {
-                isFreeShippingCheckbox.prop('disabled',
+                isFreeShippingCheckbox.prop('readonly',
                 false); // Enable the checkbox if is_shipping_bared_golisoda is unchecked
             }
         });
@@ -487,7 +492,7 @@
         // Ensure initial state is handled in case of page reload
         if (isShippingBaredGolisodaCheckbox.is(':checked')) {
             isFreeShippingCheckbox.prop('checked', true);
-            isFreeShippingCheckbox.prop('disabled', true);
+            isFreeShippingCheckbox.prop('readonly', true);
         }
     });
 
