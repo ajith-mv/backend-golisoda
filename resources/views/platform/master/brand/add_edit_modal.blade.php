@@ -336,6 +336,7 @@
                     var from = $('#from').val();
                     var formData = new FormData(document.getElementById(
                         "add_brand_form"));
+                    $("#is_free_shipping :disabled").removeAttr('disabled');
                     submitButton.setAttribute('data-kt-indicator', 'on');
                     // Disable button to avoid multiple click
                     submitButton.disabled = true;
