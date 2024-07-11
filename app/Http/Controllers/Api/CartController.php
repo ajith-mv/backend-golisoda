@@ -805,7 +805,7 @@ class CartController extends Controller
 
             $error = 0;
             $message = 'Cart updated successful';
-            $data = $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null, null);
+            $data = $this->getCartListAll($checkCart->customer_id, $checkCart->guest_token, null, null, $selected_shipping, null, null);
         } else {
 
             $error = 1;
