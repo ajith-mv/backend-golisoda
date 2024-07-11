@@ -805,7 +805,7 @@ class CartController extends Controller
 
             $error = 0;
             $message = 'Cart updated successful';
-            $data = $this->getCartListAll($checkCart->customer_id, $checkCart->guest_token, $selected_shipping);
+            $data = $this->getCartListAll($customer_id, $guest_token, null, null, $selected_shipping, null, null);
         } else {
 
             $error = 1;
@@ -1276,7 +1276,7 @@ class CartController extends Controller
                 } else {
                     $coupon_amount = $coupon_data->coupon_amount;
                 }
-                if($coupon_amount < 1){
+                if ($coupon_amount < 1) {
                     $is_coupon = 0;
                 }
             }
@@ -1372,7 +1372,7 @@ class CartController extends Controller
 
         $from_type = $request->from_type;
         $address = $request->address;
-        if(!isset($address) && (empty($address))){
+        if (!isset($address) && (empty($address))) {
             return response()->json(array('error' => 1, 'status_code' => 400, 'message' => 'Address not set', 'status' => 'failure', 'data' => []), 200);
         }
         $shippingAddress = CustomerAddress::find($address);
@@ -1447,8 +1447,7 @@ class CartController extends Controller
         if (isset($data)) {
             $chargeData = $data;
             // Log::debug("got the response from api for cart id " . $shipping_charge);
-        } 
-        else {
+        } else {
             $chargeData = ['shipping_title' => "Flat Rate", 'is_free' => 0, 'charges' => round($overall_flat_charges)];
             Log::debug("did not get the response from api for cart id, calculated shipping charge based on volumetric calculation - " . $cart_info->id);
             Log::debug("overall flat charge" . $overall_flat_charges);
