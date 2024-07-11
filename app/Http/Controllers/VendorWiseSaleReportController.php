@@ -158,13 +158,6 @@ class VendorWiseSaleReportController extends Controller
                 WHEN commission_type = "percentage" THEN (SUM(total_excluding_tax)) * com_amount / 100
                 ELSE NULL
             END AS com_amount
-        '),
-                    DB::raw('
-            CASE 
-                WHEN commission_type = "fixed" THEN (0.01 * (SUM(sale_amount) - com_amount))
-                WHEN commission_type = "percentage" THEN (0.01 * (SUM(sale_amount) * (com_amount / 100)))
-                ELSE NULL
-            END AS tds_commission
         ')
                 )
                 ->groupBy('id')

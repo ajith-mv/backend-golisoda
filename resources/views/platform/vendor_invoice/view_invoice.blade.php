@@ -175,6 +175,9 @@
         </tr>
         
         @php
+               $sale_amount = isset($data->sale_amount) ? $data->sale_amount : 0;
+               $tds_commission = $sale_amount * 0.01;
+
             $commission_amount = $data->com_amount ?? 0;
             $shipping_bared_golisoda = $data->is_shipping_bared_golisoda;
             $is_free_shipping = $data->is_free_shipping;
@@ -201,15 +204,13 @@
         </tr>
         <tr>
             <td> TDS (1 %)</td>
-            <td> {{ isset($data->tds_commission) ? number_format($data->tds_commission, 2) : '' }} </td>
+            <td> {{ $tds_commission }} </td>
         </tr>
         <tr>
             <td><b>Net Payable Amount</b></td>
            @php
-               $sale_amount = isset($data->sale_amount) ? $data->sale_amount : 0;
                $com_amount = isset($data->com_amount) ? $data->com_amount : 0;
-               $tds_commission = isset($data->tds_commission) ? $data->tds_commission : 0;
-               $net_total = ($sale_amount) - ($com_amount) - ($cgst_commission) - ($sgst_commission) - ($tds_commission);
+               $net_total = ($sale_amount) - ($com_amount) - ($cgst_commission) - ($sgst_commission) - ($shipping_charge) - ($tds_commission);
            @endphp
             <td><b>{{ round($net_total) }}</b></td>
         </tr>

@@ -352,7 +352,7 @@
                         <tr>
                             <td style="text-align: right;">
                                 <div>Shipping Fee </div>
-                                <small>( {{ ucwords(str_replace('_', '', $order_info->shipping_type)) }})</small>
+                                <small>( {{ ucwords(str_replace('_', ' ', $order_info->shipping_type)) }})</small>
                             </td>
                             <td class="w-100" style="text-align: right;"><span
                                     style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
