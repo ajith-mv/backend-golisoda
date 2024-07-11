@@ -259,6 +259,7 @@ class ProductController extends Controller
             'product_name' => 'required_if:product_page_type,==,general',
             'base_price' => 'required_if:product_page_type,==,general',
             'mrp' => 'required_if:product_page_type,==,general',
+            'qty' => 'required',
             // 'strike_price' => 'required_if:product_page_type,==,general',
             'sku' => 'required_if:product_page_type,==,general|unique:products,sku,' . $id . ',id,deleted_at,NULL',
             'sale_price' => 'required_if:discount_option,==,percentage',
