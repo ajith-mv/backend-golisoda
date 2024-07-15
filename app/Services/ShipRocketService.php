@@ -204,8 +204,8 @@ class ShipRocketService
                         $uniqueBrandIds = array_unique($brandIds);
 
                         if (count($uniqueBrandIds) > 1) {
-                            log::info('different brand ids are in cart');
-                            log::info($uniqueBrandIds);
+                            // log::info('different brand ids are in cart');
+                            // log::info($uniqueBrandIds);
                             $cart_total = 0;
                             foreach ($uniqueBrandIds as $brandId) {
                                 $brand_data = Brands::find($brandId);
@@ -219,6 +219,7 @@ class ShipRocketService
                                 }
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
                                 foreach ($createOrderData[$brandId] as $data) {
+                                    log::info($brandId);
                                     log::info($data['cartItemsarr'][$brandId]);
                                     $orderItems = $data['cartItemsarr'];
                                     $cart_total += $data['cartTotal'];
@@ -322,7 +323,7 @@ class ShipRocketService
                         ->groupBy('sub.brand_id')
                         ->get();
 
-                    Log::info($results);
+                    // Log::info($results);
 
                     foreach ($results as $result) {
                         $max_shipping_amount = floatval($result->total_shipment_amount);
@@ -375,14 +376,14 @@ class ShipRocketService
         // $response = json_decode($response);
         $amount = null;
         if (isset($response['data']['available_courier_companies']) && !empty($response['data']['available_courier_companies'])) {
-            log::info(env('SHIPROCKET_CALCULATION') . 'shiprocket calculation');
+            // log::info(env('SHIPROCKET_CALCULATION') . 'shiprocket calculation');
             if (env('SHIPROCKET_CALCULATION') == 'recommended') {
                 $recommended_id = $response['data']['recommended_courier_company_id'];
-                log::info("recommended id is" . $recommended_id);
+                // log::info("recommended id is" . $recommended_id);
                 foreach ($response['data']['available_courier_companies'] as $company) {
                     if ($company['courier_company_id'] == $recommended_id) {
                         $amount = $company['freight_charge'];
-                        log::info("freight charge is calculated using recommended value: " . $amount);
+                        // log::info("freight charge is calculated using recommended value: " . $amount);
                     }
                 }
             } else {
@@ -392,7 +393,7 @@ class ShipRocketService
                         // Update maximum rating and corresponding freight charge
                         $maxRating = $company['rating'];
                         $amount = $company['freight_charge'];
-                        log::info("freight charge is calculated using rating: " . $amount);
+                        // log::info("freight charge is calculated using rating: " . $amount);
                     }
                 }
             }
