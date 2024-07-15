@@ -126,6 +126,9 @@ class ShipRocketService
                 $cartTotal = 0;
                 $total_weight = 0;
                 $delivery_post_code = $cartShipAddress->post_code;
+                $createOrderData = [];
+                $brandIds = [];
+
                 if (isset($checkCart) && !empty($checkCart)) {
                     foreach ($checkCart as $citems) {
 
@@ -171,7 +174,7 @@ class ShipRocketService
                                 'selling_price' => $citems->sub_total
                             ];
 
-                            $cartItemsarr[$citems->brand_id][] = $tmp;
+                            // $cartItemsarr[$citems->brand_id][] = $tmp;
                             $cartTotal = $citems->sub_total;
 
                             $measure = DB::table('product_measurements')
@@ -192,7 +195,7 @@ class ShipRocketService
                                 'citems' => $citems,
                                 'cartShipAddress' => $cartShipAddress,
                                 'customer' => $customer,
-                                'cartItemsarr' => $cartItemsarr,
+                                'cartItemsarr' => $tmp,
                                 'measure' => $measure,
                                 'cartTotal' => $cartTotal,
                                 'total_weight' => $total_weight
@@ -220,7 +223,7 @@ class ShipRocketService
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
                                 foreach ($createOrderData[$brandId] as $data) {
                                     log::info($brandId);
-                                    log::info($data['cartItemsarr'][$brandId]);
+                                    log::info($data['cartItemsarr']);
                                     $orderItems = $data['cartItemsarr'];
                                     $cart_total += $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
