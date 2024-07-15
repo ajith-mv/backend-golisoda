@@ -199,7 +199,7 @@ class ShipRocketService
                             ];
                         }
                     }
-                    log::info($createOrderData);
+                    // log::info($createOrderData);
                     if ($brandIds && (!empty($brandIds))) {
                         $uniqueBrandIds = array_unique($brandIds);
 
