@@ -254,7 +254,7 @@ class ShipRocketService
                                         $shipment['brand_id'] = $brandId;
                                         CartShipment::create($shipment);
                                     }
-                                    break;
+                                    // break;
                                 }
                             }
                         } else {
