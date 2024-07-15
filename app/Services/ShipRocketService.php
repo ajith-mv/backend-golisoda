@@ -111,7 +111,7 @@ class ShipRocketService
             $shipping_amount = 0;
             $shipping_text = "standard_shipping";
             $is_free = 0;
-            $checkCart = Cart::where('customer_id', $customer_id)->get();
+            $checkCart = Cart::where('customer_id', $customer_id)->orderBy('brand_id', 'asc')->get();
             $customer = Customer::find($customer_id);
             $cartShipAddress = CartAddress::find($cart_address_id);
             $brandIds = [];
@@ -187,16 +187,38 @@ class ShipRocketService
                             ];
 
                             $brandIds[] = $citems->brand_id;
-                            $createOrderData[$citems->brand_id][] = [
-                                'measurement' => $measure_ment,
-                                'citems' => $citems,
-                                'cartShipAddress' => $cartShipAddress,
-                                'customer' => $customer,
-                                'cartItemsarr' => $tmp,
-                                'measure' => $measure,
-                                'cartTotal' => $cartTotal,
-                                'total_weight' => $total_weight
+                            // Initialize createOrderData for each brand_id
+                            if (!isset($createOrderData[$citems->brand_id])) {
+                                $createOrderData[$citems->brand_id] = [
+                                    'measurement' => [],
+                                    'citems' => [],
+                                    'cartShipAddress' => $cartShipAddress,
+                                    'customer' => $customer,
+                                    'cartItemsarr' => [],
+                                    'measure' => null,
+                                    'cartTotal' => 0,
+                                    'total_weight' => 0
+                                ];
+                            }
+
+                            $createOrderData[$citems->brand_id]['cartItemsarr'][] = $tmp;
+                            $createOrderData[$citems->brand_id]['citems'][] = $citems;
+                            $createOrderData[$citems->brand_id]['cartTotal'] += $citems->sub_total;
+                            $createOrderData[$citems->brand_id]['total_weight'] += $total_weight;
+
+                            $measure = DB::table('product_measurements')
+                                ->selectRaw("width, height, length, weight")
+                                ->where('product_id', $product_id)->first();
+
+                            $measure_ment = [
+                                "sub_total" => $createOrderData[$citems->brand_id]['cartTotal'],
+                                "length" => isset($measure->length) ? $measure->length : 1,
+                                "breadth" => isset($measure->width) ? $measure->width : 1,
+                                "height" => isset($measure->height) ? $measure->height : 1,
+                                "weight" => $createOrderData[$citems->brand_id]['total_weight']
                             ];
+
+                            $createOrderData[$citems->brand_id]['measurement'] = $measure_ment;
                         }
                     }
                     $request_params = [];
@@ -211,7 +233,7 @@ class ShipRocketService
                             $count = 1;
                             foreach ($uniqueBrandIds as $brandId) {
                                 $brand_data = Brands::find($brandId);
-                                log::info('count called'. $count);
+                                log::info('count called' . $count);
                                 // log::info($createOrderData[$brandId]);
                                 // if (isset($brand_data) && ($brand_data->is_free_shipping != 1)) {
                                 if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
@@ -222,7 +244,7 @@ class ShipRocketService
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
                                 $i = 0;
                                 foreach ($createOrderData[$brandId] as $data) {
-                                    log::info('count inner loop '. $i );
+                                    log::info('count inner loop ' . $i);
                                     log::info($data);
                                     // log::info($data['cartItemsarr'][$brandId]);
                                     $orderItems = $data['cartItemsarr'];
