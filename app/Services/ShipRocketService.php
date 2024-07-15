@@ -171,7 +171,7 @@ class ShipRocketService
                                 'selling_price' => $citems->sub_total
                             ];
 
-                            $cartItemsarr[] = $tmp;
+                            $cartItemsarr[$citems->brand_id][] = $tmp;
                             $cartTotal = $citems->sub_total;
 
                             $measure = DB::table('product_measurements')
