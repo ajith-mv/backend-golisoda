@@ -186,8 +186,8 @@ class ShipRocketService
                                 "weight" => $total_weight
                             ];
 
-                            $brandIds[] = $pro->brand_id;
-                            $createOrderData[$pro->brand_id][] = [
+                            $brandIds[] = $citems->brand_id;
+                            $createOrderData[$citems->brand_id][] = [
                                 'measurement' => $measure_ment,
                                 'citems' => $citems,
                                 'cartShipAddress' => $cartShipAddress,
