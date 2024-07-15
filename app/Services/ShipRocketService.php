@@ -171,7 +171,7 @@ class ShipRocketService
                                 'selling_price' => $citems->sub_total
                             ];
 
-                            $cartItemsarr[$citems->brand_id][] = $tmp;
+                            // $cartItemsarr[$citems->brand_id][] = $tmp;
                             $cartTotal = $citems->sub_total;
 
                             $measure = DB::table('product_measurements')
@@ -192,7 +192,7 @@ class ShipRocketService
                                 'citems' => $citems,
                                 'cartShipAddress' => $cartShipAddress,
                                 'customer' => $customer,
-                                'cartItemsarr' => $cartItemsarr,
+                                'cartItemsarr' => $tmp,
                                 'measure' => $measure,
                                 'cartTotal' => $cartTotal,
                                 'total_weight' => $total_weight
@@ -208,9 +208,10 @@ class ShipRocketService
                             // log::info('different brand ids are in cart');
                             // log::info($uniqueBrandIds);
                             $cart_total = 0;
+                            $count = 1;
                             foreach ($uniqueBrandIds as $brandId) {
                                 $brand_data = Brands::find($brandId);
-
+                                log::info('count called'. $count);
                                 // log::info($createOrderData[$brandId]);
                                 // if (isset($brand_data) && ($brand_data->is_free_shipping != 1)) {
                                 if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
@@ -219,14 +220,18 @@ class ShipRocketService
                                     $is_free = 1;
                                 }
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
+                                $i = 0;
                                 foreach ($createOrderData[$brandId] as $data) {
+                                    log::info('count inner loop '. $i );
                                     log::info($data);
                                     // log::info($data['cartItemsarr'][$brandId]);
                                     $orderItems = $data['cartItemsarr'];
                                     $cart_total += $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
                                     $request_params[] = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
+                                    $i++;
                                 }
+                                $count++;
                             }
                             // foreach ($request_params as $params) {
                             //     $createResponse = $this->createOrder($params);
