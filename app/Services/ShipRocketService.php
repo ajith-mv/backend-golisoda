@@ -213,25 +213,37 @@ class ShipRocketService
                             foreach ($uniqueBrandIds as $brandId) {
                                 $brand_data = Brands::find($brandId);
 
-                                // log::info($createOrderData[$brandId]);
-                                // if (isset($brand_data) && ($brand_data->is_free_shipping != 1)) {
                                 if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
                                     $shipping_amount = 0;
                                     $shipping_text = "free_shipping";
                                     $is_free = 1;
                                 }
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
-                                foreach ($createOrderData[$brandId] as $data) {
-                                    log::info($brandId);
-                                    log::info($data['cartItemsarr'][$brandId]);
+
+                                if (isset($createOrderData[$brandId])) {
+                                    $data = $createOrderData[$brandId];
                                     $orderItems = $data['cartItemsarr'];
-                                    $cart_total += $data['cartTotal'];
+                                    $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
-                                    $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
+
+                                    $params = $this->getRequestForCreateOrderApi(
+                                        $data['citems'],
+                                        $data['cartShipAddress'],
+                                        $data['customer'],
+                                        $orderItems,
+                                        $cart_total,
+                                        $data['cartTotal'],
+                                        $data['total_weight']
+                                    );
+
                                     $createResponse = $this->createOrder($params);
                                     if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                                        // $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
-                                        $shiprocket_shipping_charges = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
+                                        $shiprocket_shipping_charges = $this->getShippingCharges(
+                                            $createResponse['order_id'],
+                                            $measure_ment,
+                                            $pickup_post_code,
+                                            $delivery_post_code
+                                        );
                                         $shipping_amount = $shipping_amount + $shiprocket_shipping_charges;
                                         if (isset($shiprocket_shipping_charges) && !empty($shiprocket_shipping_charges) && ($shiprocket_shipping_charges != 0)) {
                                             $shipment['shiprocket_amount'] = $shiprocket_shipping_charges;
@@ -239,7 +251,11 @@ class ShipRocketService
                                             $shipment['shipping_type'] = 'standard_shipping';
                                             $shipment['shipping_id'] = 2;
                                         } else {
-                                            $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['breadth'], $data['measurement']['height']);
+                                            $flat_shipping = getVolumeMetricCalculation(
+                                                $data['measurement']['length'],
+                                                $data['measurement']['breadth'],
+                                                $data['measurement']['height']
+                                            );
                                             $shipment['shipping_amount'] = $flat_shipping * 50;
                                             $shipment['shipping_type'] = 'flat_shipping';
                                             $shipment['shipping_id'] = 3;
@@ -254,7 +270,6 @@ class ShipRocketService
                                         $shipment['brand_id'] = $brandId;
                                         CartShipment::create($shipment);
                                     }
-                                    // break;
                                 }
                             }
                         } else {
