@@ -219,7 +219,7 @@ class ShipRocketService
                                 }
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
                                 foreach ($createOrderData[$brandId] as $data) {
-                                    log::info($data['cartItemsarr']);
+                                    log::info($data['cartItemsarr'][$brandId]);
                                     $orderItems = $data['cartItemsarr'];
                                     $cart_total += $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
