@@ -206,7 +206,7 @@ class ShipRocketService
 
                         if (count($uniqueBrandIds) > 1) {
                             // log::info('different brand ids are in cart');
-                            // log::info($uniqueBrandIds);
+                            log::info($uniqueBrandIds);
                             $cart_total = 0;
                             $count = 1;
                             foreach ($uniqueBrandIds as $brandId) {
