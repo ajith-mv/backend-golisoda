@@ -244,6 +244,7 @@ class ShipRocketService
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
                                 if (isset($createOrderData[$brandId])) {
                                     $data = $createOrderData[$brandId];
+                                    log::info($data);
                                     $orderItems = $data['cartItemsarr'];
                                     $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
