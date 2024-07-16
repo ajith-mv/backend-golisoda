@@ -517,6 +517,8 @@ class ShipRocketService
      */
     public function getRequestForCreateOrderApi($citems, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight)
     {
+        log::info($citems);
+        die();
         return array(
             "order_id" => $citems['cart_order_no'][0],
             "order_date" => date('Y-m-d h:i'),
