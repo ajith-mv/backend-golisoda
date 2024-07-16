@@ -259,7 +259,8 @@ class ShipRocketService
                                         $orderItems,
                                         $cart_total,
                                         $data['cartTotal'],
-                                        $data['total_weight']
+                                        $data['total_weight'],
+                                        $cart_token
                                     );
 
                                     // $createResponse = $this->createOrder($params);
@@ -512,10 +513,10 @@ class ShipRocketService
      *
      * @return array
      */
-    public function getRequestForCreateOrderApi($citems, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight)
+    public function getRequestForCreateOrderApi($citems, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight, $cart_token)
     {
         return array(
-            "order_id" => $citems[0]['cart_order_no'],
+            "order_id" => $cart_token,
             "order_date" => date('Y-m-d h:i'),
             // "pickup_location" =>  "Golisoda",
             "channel_id" =>  "",
