@@ -39,7 +39,7 @@ class ShipRocketService
         try {
             $token =  $this->getToken();
             $response =  Shiprocket::order($token)->create($params);
-            log::info('status code for create order' . $response['status_code']);
+            // log::info('status code for create order' . $response['status_code']);
             // $response = json_decode($response);
             if ($response['status_code'] == 1) {
 
