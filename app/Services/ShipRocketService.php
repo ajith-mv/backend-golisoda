@@ -200,9 +200,11 @@ class ShipRocketService
                                     'total_weight' => 0
                                 ];
                             }
-
+                            $createOrderData[$citems->brand_id]['citems'][] = [
+                                'cart_order_no' => $citems->cart_order_no,
+                                'id' => $citems->id
+                            ];
                             $createOrderData[$citems->brand_id]['cartItemsarr'][] = $tmp;
-                            $createOrderData[$citems->brand_id]['citems'][] = $citems;
                             $createOrderData[$citems->brand_id]['cartTotal'] += $citems->sub_total;
                             $createOrderData[$citems->brand_id]['total_weight'] += $total_weight;
 
@@ -228,7 +230,7 @@ class ShipRocketService
 
                         if (count($uniqueBrandIds) > 1) {
                             // log::info('different brand ids are in cart');
-                            log::info($uniqueBrandIds);
+                            // log::info($uniqueBrandIds);
                             $cart_total = 0;
                             $count = 1;
                             foreach ($uniqueBrandIds as $brandId) {
@@ -244,8 +246,7 @@ class ShipRocketService
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
                                 if (isset($createOrderData[$brandId])) {
                                     $data = $createOrderData[$brandId];
-                                    log::info($data['citems']);
-                                    die();
+                                  
                                     $orderItems = $data['cartItemsarr'];
                                     $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
@@ -352,10 +353,17 @@ class ShipRocketService
                                         $shipment['shipping_type'] = 'free_shipping';
                                         $shipment['shipping_id'] = 1;
                                     }
-                                    CartShipment::where('cart_id', $data['citems']->id)->delete();
-                                    $shipment['cart_id'] = $data['citems']->id;
-                                    $shipment['brand_id'] = $uniqueBrandIds[0];
-                                    CartShipment::create($shipment);
+                                    foreach ($data['citems'] as $citem) {
+                                        CartShipment::where('cart_id', $citem['id'])->delete();
+                                        $shipment['cart_id'] = $citem['id'];
+                                        $shipment['brand_id'] = $uniqueBrandIds[0];
+                                        // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
+                                        CartShipment::create($shipment);
+                                    }
+                                    // CartShipment::where('cart_id', $data['citems']->id)->delete();
+                                    // $shipment['cart_id'] = $data['citems']->id;
+                                    // $shipment['brand_id'] = ;
+                                    // CartShipment::create($shipment);
                                 }
                             }
                         }
@@ -510,7 +518,7 @@ class ShipRocketService
     public function getRequestForCreateOrderApi($citems, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight)
     {
         return array(
-            "order_id" => $citems['cart_order_no'],
+            "order_id" => $citems['cart_order_no'][0],
             "order_date" => date('Y-m-d h:i'),
             "pickup_location" =>  "Golisoda",
             "channel_id" =>  "",
