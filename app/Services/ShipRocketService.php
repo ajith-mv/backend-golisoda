@@ -508,7 +508,7 @@ class ShipRocketService
     public function getRequestForCreateOrderApi($citems, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight)
     {
         return array(
-            "order_id" => $citems->cart_order_no,
+            "order_id" => $citems['cart_order_no'],
             "order_date" => date('Y-m-d h:i'),
             "pickup_location" =>  "Golisoda",
             "channel_id" =>  "",
@@ -541,9 +541,9 @@ class ShipRocketService
             "transaction_charges" => 0,
             "total_discount" => 0,
             "sub_total" => $cartTotal,
-            "length" => isset($measure->length) ? $measure->length : 1,
-            "breadth" => isset($measure->width) ? $measure->width : 1,
-            "height" => isset($measure->height) ? $measure->height : 1,
+            "length" => isset($measure['length']) ? $measure['length'] : 1,
+            "breadth" => isset($measure['width']) ? $measure['width'] : 1,
+            "height" => isset($measure['height']) ? $measure['height'] : 1,
             "weight" => $total_weight
         );
     }
