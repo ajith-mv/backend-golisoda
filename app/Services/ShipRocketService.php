@@ -310,9 +310,18 @@ class ShipRocketService
                             if (isset($createOrderData[$uniqueBrandIds[0]])) {
                                 foreach ($createOrderData[$uniqueBrandIds[0]] as $data) {
                                     $orderItems = $data['cartItemsarr'];
-                                    $cart_total += $data['cartTotal'];
+                                    $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
-                                    $params = $this->getRequestForCreateOrderApi($data['citems'], $data['cartShipAddress'], $data['customer'], $orderItems, $cart_total, $data['cartTotal'], $data['total_weight']);
+
+                                    $params = $this->getRequestForCreateOrderApi(
+                                        $data['citems'],
+                                        $data['cartShipAddress'],
+                                        $data['customer'],
+                                        $orderItems,
+                                        $cart_total,
+                                        $data['cartTotal'],
+                                        $data['total_weight']
+                                    );
                                 }
                                 $createResponse = $this->createOrder($params);
                                 if (isset($createResponse) && !empty($createResponse['order_id'])) {
@@ -340,10 +349,7 @@ class ShipRocketService
                                         // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
                                         CartShipment::create($shipment);
                                     }
-                                    // CartShipment::where('cart_id', $data['citems']->id)->delete();
-                                    // $shipment['cart_id'] = $data['citems']->id;
-                                    // $shipment['brand_id'] = ;
-                                    // CartShipment::create($shipment);
+                                 
                                 }
                             }
                         }
