@@ -506,7 +506,7 @@ class ShipRocketService
         return array(
             "order_id" => $citems[0]['cart_order_no'],
             "order_date" => date('Y-m-d h:i'),
-            "pickup_location" =>  "Golisoda",
+            // "pickup_location" =>  "Golisoda",
             "channel_id" =>  "",
             "comment" =>  "",
             "billing_customer_name" => $cartShipAddress->name,
