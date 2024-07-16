@@ -200,10 +200,9 @@ class ShipRocketService
                                     'total_weight' => 0
                                 ];
                             }
-                            $citems_data = ['cart_order_no' => $citems->cart_order_no, 'id' => $citems->id];
 
                             $createOrderData[$citems->brand_id]['cartItemsarr'][] = $tmp;
-                            $createOrderData[$citems->brand_id]['citems'][] = $citems_data;
+                            $createOrderData[$citems->brand_id]['citems'][] = $citems;
                             $createOrderData[$citems->brand_id]['cartTotal'] += $citems->sub_total;
                             $createOrderData[$citems->brand_id]['total_weight'] += $total_weight;
 
@@ -246,6 +245,7 @@ class ShipRocketService
                                 if (isset($createOrderData[$brandId])) {
                                     $data = $createOrderData[$brandId];
                                     log::info($data);
+                                    die();
                                     $orderItems = $data['cartItemsarr'];
                                     $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
