@@ -1393,7 +1393,7 @@ class CartController extends Controller
             foreach ($all_cart as $item) {
                 $pro = $item->products;
                 $brandId = $pro->brand_id;
-                CartShiprocketResponse::where('cart_token', $item->cart_order_no)->delete();
+                // CartShiprocketResponse::where('cart_token', $item->cart_order_no)->delete();
                 $brand_data = Brands::find($brandId);
                 if (isset($brand_data)) {
                     $is_free[] = $brand_data->is_free_shipping;
@@ -1442,7 +1442,7 @@ class CartController extends Controller
             $ins_cart['city'] = $shippingAddress->city;
 
             $cart_address = CartAddress::create($ins_cart);
-            $data = $service->getShippingRocketOrderDimensions($customer_id, $cart_info->guest_token ?? null, $cart_address->id);
+            $data = $service->getShippingRocketOrderDimensions($customer_id, $cart_info->cart_order_no ?? null, $cart_address->id);
         }
         if (isset($data)) {
             $chargeData = $data;
