@@ -281,41 +281,21 @@ class ShipRocketService
                                             $shipment['shipping_type'] = 'free_shipping';
                                             $shipment['shipping_id'] = 1;
                                         }
-                                        CartShipment::where('cart_id', $data['citems']->id)->delete();
-                                        $shipment['cart_id'] = $data['citems']->id;
-                                        $shipment['brand_id'] = $brandId;
-                                        CartShipment::create($shipment);
+                                        foreach ($data['citems'] as $citem) {
+                                            CartShipment::where('cart_id', $citem['id'])->delete();
+                                            $shipment['cart_id'] = $citem['id'];
+                                            $shipment['brand_id'] = $brandId;
+                                            // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
+                                            CartShipment::create($shipment);
+                                        }
+                                        // CartShipment::where('cart_id', $data['citems']->id)->delete();
+                                        // $shipment['cart_id'] = $data['citems']->id;
+                                        // $shipment['brand_id'] = $brandId;
+                                        // CartShipment::create($shipment);
                                     }
                                 }
                             }
-                            // foreach ($request_params as $params) {
-                            //     $createResponse = $this->createOrder($params);
-                            //     if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                            //         // $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
-                            //         $shiprocket_shipping_charges = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
-                            //         $shipping_amount = $shipping_amount + $shiprocket_shipping_charges;
-                            //         if (isset($shiprocket_shipping_charges) && !empty($shiprocket_shipping_charges) && ($shiprocket_shipping_charges != 0)) {
-                            //             $shipment['shiprocket_amount'] = $shiprocket_shipping_charges;
-                            //             $shipment['shipping_amount'] = $shiprocket_shipping_charges;
-                            //             $shipment['shipping_type'] = 'standard_shipping';
-                            //             $shipment['shipping_id'] = 2;
-                            //         } else {
-                            //             $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['breadth'], $data['measurement']['height']);
-                            //             $shipment['shipping_amount'] = $flat_shipping * 50;
-                            //             $shipment['shipping_type'] = 'flat_shipping';
-                            //             $shipment['shipping_id'] = 3;
-                            //         }
-                            //         if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
-                            //             $shipment['shipping_amount'] = 0;
-                            //             $shipment['shipping_type'] = 'free_shipping';
-                            //             $shipment['shipping_id'] = 1;
-                            //         }
-                            //         CartShipment::where('cart_id', $data['citems']->id)->delete();
-                            //         $shipment['cart_id'] = $data['citems']->id;
-                            //         $shipment['brand_id'] = $brandId;
-                            //         CartShipment::create($shipment);
-                            //     }
-                            // }
+                           
                         } else {
                             log::info('same brand ids are in cart');
 
@@ -517,10 +497,8 @@ class ShipRocketService
      */
     public function getRequestForCreateOrderApi($citems, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight)
     {
-        log::info($citems);
-        die();
         return array(
-            "order_id" => $citems['cart_order_no'][0],
+            "order_id" => $citems[0]['cart_order_no'],
             "order_date" => date('Y-m-d h:i'),
             "pickup_location" =>  "Golisoda",
             "channel_id" =>  "",
