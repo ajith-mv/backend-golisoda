@@ -34,7 +34,7 @@ class ShipRocketService
         return $this->getToken();
     }
 
-    public function createOrder($params)
+    public function createOrder($params, $brand_id)
     {
         try {
             $token =  $this->getToken();
@@ -50,6 +50,7 @@ class ShipRocketService
                 $ins_params['rocket_order_request_data'] = json_encode($params);
                 $ins_params['rocket_order_response_data'] = $response;
                 $ins_params['order_id'] = $response['order_id'];
+                $ins_params['brand_id'] = $brand_id;
 
                 CartShiprocketResponse::create($ins_params);
             } else {
@@ -67,33 +68,33 @@ class ShipRocketService
 
     }
 
-    public function updateOrder($params)
-    {
-        $token = $this->getToken();
-        $curl = curl_init();
+    // public function updateOrder($params)
+    // {
+    //     $token = $this->getToken();
+    //     $curl = curl_init();
 
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/update/adhoc',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode($params),
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $token
-            ),
-        ));
+    //     curl_setopt_array($curl, array(
+    //         CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/update/adhoc',
+    //         CURLOPT_RETURNTRANSFER => true,
+    //         CURLOPT_ENCODING => '',
+    //         CURLOPT_MAXREDIRS => 10,
+    //         CURLOPT_TIMEOUT => 0,
+    //         CURLOPT_FOLLOWLOCATION => true,
+    //         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    //         CURLOPT_CUSTOMREQUEST => 'POST',
+    //         CURLOPT_POSTFIELDS => json_encode($params),
+    //         CURLOPT_HTTPHEADER => array(
+    //             'Content-Type: application/json',
+    //             'Authorization: Bearer ' . $token
+    //         ),
+    //     ));
 
-        $response = curl_exec($curl);
+    //     $response = curl_exec($curl);
 
-        curl_close($curl);
+    //     curl_close($curl);
 
-        return $response;
-    }
+    //     return $response;
+    // }
 
     /**
      * Method getShippingRocketOrderDimensions
@@ -246,7 +247,7 @@ class ShipRocketService
                                 $pickup_post_code = $this->getVendorPostCode($brandId);
                                 if (isset($createOrderData[$brandId])) {
                                     $data = $createOrderData[$brandId];
-                                  
+
                                     $orderItems = $data['cartItemsarr'];
                                     $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
@@ -260,7 +261,17 @@ class ShipRocketService
                                         $data['cartTotal'],
                                         $data['total_weight']
                                     );
+
                                     $createResponse = $this->createOrder($params);
+                                    // Check if order exists in Shiprocket and update it
+                                    $existingOrder = CartShiprocketResponse::where('cart_token', $cart_token)->where('brand_id', $brandId)->first();
+                                    if ($existingOrder) {
+                                        log::info('Updating existing order in Shiprocket');
+                                        $createResponse = $this->updateOrder($existingOrder->order_id, $params);
+                                    } else {
+                                        log::info('Creating new order in Shiprocket');
+                                        $createResponse = $this->createOrder($params, $brandId);
+                                    }
                                     if (isset($createResponse) && !empty($createResponse['order_id'])) {
                                         // $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
                                         $shiprocket_shipping_charges = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
@@ -295,63 +306,63 @@ class ShipRocketService
                                     }
                                 }
                             }
-                           
-                        // } else {
-                        //     log::info('same brand ids are in cart');
 
-                        //     $cart_total = 0;
-                        //     $brand_data = Brands::find($uniqueBrandIds[0]);
-                        //     if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
-                        //         $shipping_amount = 0;
-                        //         $shipping_text = "free_shipping";
-                        //         $is_free = 1;
-                        //     }
-                        //     $pickup_post_code = $this->getVendorPostCode($uniqueBrandIds[0]);
-                        //     if (isset($createOrderData[$uniqueBrandIds[0]])) {
-                        //         foreach ($createOrderData[$uniqueBrandIds[0]] as $data) {
-                        //             $orderItems = $data['cartItemsarr'];
-                        //             $cart_total = $data['cartTotal'];
-                        //             $measure_ment = $data['measurement'];
+                            // } else {
+                            //     log::info('same brand ids are in cart');
 
-                        //             $params = $this->getRequestForCreateOrderApi(
-                        //                 $data['citems'],
-                        //                 $data['cartShipAddress'],
-                        //                 $data['customer'],
-                        //                 $orderItems,
-                        //                 $cart_total,
-                        //                 $data['cartTotal'],
-                        //                 $data['total_weight']
-                        //             );
-                        //         }
-                        //         $createResponse = $this->createOrder($params);
-                        //         if (isset($createResponse) && !empty($createResponse['order_id'])) {
-                        //             $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
-                        //             if (isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount != 0)) {
-                        //                 $shipment['shiprocket_amount'] = $shipping_amount;
-                        //                 $shipment['shipping_amount'] = $shipping_amount;
-                        //                 $shipment['shipping_type'] = 'standard_shipping';
-                        //                 $shipment['shipping_id'] = 2;
-                        //             } else {
-                        //                 $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['breadth'], $data['measurement']['height']);
-                        //                 $shipment['shipping_amount'] = $flat_shipping * 50;
-                        //                 $shipment['shipping_type'] = 'flat_shipping';
-                        //                 $shipment['shipping_id'] = 3;
-                        //             }
-                        //             if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
-                        //                 $shipment['shipping_amount'] = 0;
-                        //                 $shipment['shipping_type'] = 'free_shipping';
-                        //                 $shipment['shipping_id'] = 1;
-                        //             }
-                        //             foreach ($data['citems'] as $citem) {
-                        //                 CartShipment::where('cart_id', $citem['id'])->delete();
-                        //                 $shipment['cart_id'] = $citem['id'];
-                        //                 $shipment['brand_id'] = $uniqueBrandIds[0];
-                        //                 // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
-                        //                 CartShipment::create($shipment);
-                        //             }
-                                 
-                        //         }
-                        //     }
+                            //     $cart_total = 0;
+                            //     $brand_data = Brands::find($uniqueBrandIds[0]);
+                            //     if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                            //         $shipping_amount = 0;
+                            //         $shipping_text = "free_shipping";
+                            //         $is_free = 1;
+                            //     }
+                            //     $pickup_post_code = $this->getVendorPostCode($uniqueBrandIds[0]);
+                            //     if (isset($createOrderData[$uniqueBrandIds[0]])) {
+                            //         foreach ($createOrderData[$uniqueBrandIds[0]] as $data) {
+                            //             $orderItems = $data['cartItemsarr'];
+                            //             $cart_total = $data['cartTotal'];
+                            //             $measure_ment = $data['measurement'];
+
+                            //             $params = $this->getRequestForCreateOrderApi(
+                            //                 $data['citems'],
+                            //                 $data['cartShipAddress'],
+                            //                 $data['customer'],
+                            //                 $orderItems,
+                            //                 $cart_total,
+                            //                 $data['cartTotal'],
+                            //                 $data['total_weight']
+                            //             );
+                            //         }
+                            //         $createResponse = $this->createOrder($params);
+                            //         if (isset($createResponse) && !empty($createResponse['order_id'])) {
+                            //             $shipping_amount = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
+                            //             if (isset($shipping_amount) && !empty($shipping_amount) && ($shipping_amount != 0)) {
+                            //                 $shipment['shiprocket_amount'] = $shipping_amount;
+                            //                 $shipment['shipping_amount'] = $shipping_amount;
+                            //                 $shipment['shipping_type'] = 'standard_shipping';
+                            //                 $shipment['shipping_id'] = 2;
+                            //             } else {
+                            //                 $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['breadth'], $data['measurement']['height']);
+                            //                 $shipment['shipping_amount'] = $flat_shipping * 50;
+                            //                 $shipment['shipping_type'] = 'flat_shipping';
+                            //                 $shipment['shipping_id'] = 3;
+                            //             }
+                            //             if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                            //                 $shipment['shipping_amount'] = 0;
+                            //                 $shipment['shipping_type'] = 'free_shipping';
+                            //                 $shipment['shipping_id'] = 1;
+                            //             }
+                            //             foreach ($data['citems'] as $citem) {
+                            //                 CartShipment::where('cart_id', $citem['id'])->delete();
+                            //                 $shipment['cart_id'] = $citem['id'];
+                            //                 $shipment['brand_id'] = $uniqueBrandIds[0];
+                            //                 // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
+                            //                 CartShipment::create($shipment);
+                            //             }
+
+                            //         }
+                            //     }
                         }
                     }
                     $subquery = DB::table('cart_shipments')
@@ -572,6 +583,29 @@ class ShipRocketService
                 return 'standard_shipping';
             }
             // Default fallback (optional based on your needs)
+            return null;
+        }
+    }
+
+    public function updateOrder($orderId, $params)
+    {
+        try {
+            $token =  $this->getToken();
+            $response =  Shiprocket::order($token)->update($orderId, $params);
+            log::info('status code for update order' . $response['status_code']);
+            if ($response['status_code'] == 1) {
+                $ins_params['rocket_order_request_data'] = json_encode($params);
+                $ins_params['rocket_order_response_data'] = $response;
+                $ins_params['request_type'] = 'update_order';
+
+                CartShiprocketResponse::where('order_id', $orderId)->update($ins_params);
+            } else {
+                log::debug($response);
+            }
+
+            return $response;
+        } catch (Exception  $e) {
+            log::debug($e);
             return null;
         }
     }

@@ -17,7 +17,8 @@ class CartShiprocketResponse extends Model
         'rocket_order_request_data',
         'rocket_order_response_data',
         'shipping_charge_request_data',
-        'shipping_charge_response_data'
+        'shipping_charge_response_data',
+        'brand_id'
     ];
 
     public function billingAddress()
