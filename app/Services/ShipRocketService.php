@@ -352,7 +352,7 @@ class ShipRocketService
                                  
                         //         }
                         //     }
-                        // }
+                        }
                     }
                     $subquery = DB::table('cart_shipments')
                         ->join('carts', function ($join) {
