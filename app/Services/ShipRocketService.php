@@ -108,6 +108,7 @@ class ShipRocketService
      */
     public function getShippingRocketOrderDimensions($customer_id, $cart_token, $cart_address_id)
     {
+        $order_id_goli = '';
         log::info($cart_token);
         if (isset($customer_id) && !empty($customer_id)) {
             $shipping_amount = 0;
@@ -253,8 +254,9 @@ class ShipRocketService
                                     $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
                                     $brand_name = $brand_data->brand_name;
+                                    $order_id_goli = $customer_id.'_'.$brandId;
                                     $params = $this->getRequestForCreateOrderApi(
-                                        $data['citems'],
+                                        $order_id_goli,
                                         $data['cartShipAddress'],
                                         $data['customer'],
                                         $orderItems,
@@ -460,10 +462,10 @@ class ShipRocketService
      *
      * @return array
      */
-    public function getRequestForCreateOrderApi($citems, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight, $cart_token, $brand_name)
+    public function getRequestForCreateOrderApi($order_id_goli, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight, $cart_token, $brand_name)
     {
         return array(
-            "order_id" => $cart_token,
+            "order_id" => $order_id_goli,
             "order_date" => date('Y-m-d h:i'),
             "pickup_location" =>  $brand_name,
             "channel_id" =>  "",
