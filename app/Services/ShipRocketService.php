@@ -615,14 +615,16 @@ class ShipRocketService
 
             curl_close($curl);
             $response_data = json_decode($response);
-
+log::info('got the response data');
             if($response_data){
+                log::info('inside response data');
                 $ins_params['order_update_request_data'] = json_encode($request);
                 $ins_params['order_update_response_data'] = $response;
                 $ins_params['request_type'] = 'update_order';
 
                 CartShiprocketResponse::where('order_id', $order_id)->update($ins_params);
             }
+            log::info('not worked');
             return $response_data;
         } catch (Exception $e) {
             log::debug($e);
