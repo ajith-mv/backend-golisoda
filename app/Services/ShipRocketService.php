@@ -323,6 +323,13 @@ class ShipRocketService
                                         $shipment['shipping_amount'] = $flat_shipping * 50;
                                         $shipment['shipping_type'] = 'flat_shipping';
                                         $shipment['shipping_id'] = 3;
+                                        $shipment['shiprocket_amount'] = $flat_shipping * 50;
+
+                                        if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
+                                            $shipment['shipping_amount'] = 0;
+                                            $shipment['shipping_type'] = 'free_shipping';
+                                            $shipment['shipping_id'] = 1;
+                                        }
                                         foreach ($data['citems'] as $citem) {
                                             CartShipment::where('cart_id', $citem['id'])->delete();
                                             $shipment['cart_id'] = $citem['id'];
@@ -330,6 +337,7 @@ class ShipRocketService
                                             // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
                                             CartShipment::create($shipment);
                                         }
+
                                     }
                                 }
                             }
