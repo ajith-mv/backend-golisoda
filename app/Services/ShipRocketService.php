@@ -76,7 +76,7 @@ class ShipRocketService
 
     }
 
-    public function updateOrder($params, $order_id)
+    public function updateOrder($params)
     {
         try {
             $token = $this->getToken();
@@ -103,13 +103,6 @@ class ShipRocketService
             curl_close($curl);
             // log::debug($response);
             $response = json_decode($response);
-            if($response){
-                $ins_params['order_update_request_data'] = json_encode($params);
-                $ins_params['order_update_response_data'] = $response;
-                $ins_params['request_type'] = 'update_order';
-
-                CartShiprocketResponse::where('order_id', $orderId)->update($ins_params);
-            }
             
             return $response;
         } catch (Exception  $e) {
@@ -285,12 +278,12 @@ class ShipRocketService
                                     $existingOrder = CartShiprocketResponse::where('cart_token', $order_id_goli)->where('brand_id', $brandId)->first();
                                     if ($existingOrder) {
                                         log::info('Updating existing order in Shiprocket');
-                                        $createResponse = $this->updateOrder($params, $existingOrder->order_id);
+                                        $createResponse = $this->updateOrder($params);
                                         $shiprocket_order_id = $createResponse->order_id;
                                         $address_request = $this->getRequestForAddressUpdation($shiprocket_order_id, $data['cartShipAddress'], $customer);
                                         log::debug('Address request');
                                         log::debug($address_request);
-                                        $address_update = $this->updateDeliveryAddress($address_request);
+                                        $address_update = $this->updateDeliveryAddress($address_request, $shiprocket_order_id);
                                         // log::debug("Address response");
                                         // dd($address_update);
                                         // log::info($address_update);
@@ -595,7 +588,7 @@ class ShipRocketService
             "billing_alternate_phone" => $shippingAddress->mobile_no);
     }
 
-    public function updateDeliveryAddress($request)
+    public function updateDeliveryAddress($request, $order_id)
     {
         try {
             $token = $this->getToken();
@@ -621,7 +614,15 @@ class ShipRocketService
             $response = curl_exec($curl);
 
             curl_close($curl);
-            return json_decode($response);
+            $response_data = json_decode($response);
+            if($response){
+                $ins_params['order_update_request_data'] = json_encode($request);
+                $ins_params['order_update_response_data'] = $response;
+                $ins_params['request_type'] = 'update_order';
+
+                CartShiprocketResponse::where('order_id', $order_id)->update($ins_params);
+            }
+            return $response_data;
         } catch (Exception $e) {
             log::debug($e);
             log::debug($request);
