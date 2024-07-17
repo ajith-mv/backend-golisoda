@@ -93,7 +93,6 @@ class ShipRocketService
         $response = curl_exec($curl);
 
         curl_close($curl);
-        dd($response);
         return $response;
     }
 
@@ -275,7 +274,7 @@ class ShipRocketService
                                     $existingOrder = CartShiprocketResponse::where('cart_token', $order_id_goli)->where('brand_id', $brandId)->first();
                                     if ($existingOrder) {
                                         log::info('Updating existing order in Shiprocket');
-                                        $createResponse = $this->updateOrder($existingOrder->order_id, $params);
+                                        $createResponse = $this->updateOrder($params);
                                     } else {
                                         log::info('Creating new order in Shiprocket');
                                         $createResponse = $this->createOrder($params, $brandId);
