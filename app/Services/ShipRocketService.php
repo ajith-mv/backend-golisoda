@@ -576,15 +576,14 @@ class ShipRocketService
             "order_id" => $order_id,
             "shipping_customer_name" => $shippingAddress->name,
             "shipping_address" => $shippingAddress->address_line1,
-            "shipping_address_2" => $shippingAddress->address_line2,
+            "shipping_address_2" => isset($shippingAddress->address_line2) ?? '',
             "shipping_city" => $shippingAddress->city,
             "shipping_pincode" => $shippingAddress->post_code,
             "shipping_country" => "India",
             "shipping_state" => $shippingAddress->state ?? 'Tamil nadu',
             "shipping_email" => $shippingAddress->email ?? $customer->email,
             "shipping_phone" => $shippingAddress->mobile_no,
-            "billing_alternate_phone" => $shippingAddress->mobile_no
-        );
+            "billing_alternate_phone" => $shippingAddress->mobile_no);
     }
 
     public function updateDeliveryAddress($request)
