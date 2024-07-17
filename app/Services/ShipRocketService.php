@@ -104,7 +104,7 @@ class ShipRocketService
             curl_close($curl);
             // log::debug($response);
             $response = json_decode($response);
-            
+
             return $response;
         } catch (Exception  $e) {
             log::debug($e);
@@ -403,7 +403,7 @@ class ShipRocketService
             "pickup_postcode" => $pickup_post_code,
             "delivery_postcode" => $delivery_post_code,
 
-            // "order_id" => $order_id,
+            "order_id" => $order_id,
             "cod" =>  false,
             "weight" => $measure_ment['weight'],
             "length" => $measure_ment['length'],
@@ -586,7 +586,8 @@ class ShipRocketService
             "shipping_state" => $shippingAddress->state ?? 'Tamil nadu',
             "shipping_email" => $shippingAddress->email ?? $customer->email,
             "shipping_phone" => $shippingAddress->mobile_no,
-            "billing_alternate_phone" => $shippingAddress->mobile_no);
+            "billing_alternate_phone" => $shippingAddress->mobile_no
+        );
     }
 
     public function updateDeliveryAddress($request, $order_id)
@@ -610,16 +611,16 @@ class ShipRocketService
             //         'Authorization: Bearer ' . $token
             //     ),
             // ));
-            
+
 
             $response = Http::withToken($token)
-            ->withHeaders([
-                'Content-Type' => 'application/json',
-            ])
-            ->post('https://apiv2.shiprocket.in/v1/external/orders/address/update', $request);
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->post('https://apiv2.shiprocket.in/v1/external/orders/address/update', $request);
             if ($response->successful()) {
-log::info('got the response data');
-            // if($response_data){
+                log::info('got the response data');
+                // if($response_data){
                 log::info('inside response data');
                 $ins_params['order_update_request_data'] = json_encode($request);
                 $ins_params['order_update_response_data'] = $response;
@@ -628,11 +629,9 @@ log::info('got the response data');
                 CartShiprocketResponse::where('order_id', $order_id)->update($ins_params);
                 log::info('not worked');
                 return $response->json();
-
-            }else{
+            } else {
                 return null;
             }
-            
         } catch (Exception $e) {
             log::debug($e);
             log::debug($request);
