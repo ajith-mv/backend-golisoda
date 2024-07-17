@@ -287,7 +287,7 @@ class ShipRocketService
                                         $createResponse = $this->createOrder($params, $brandId);
                                         $shiprocket_order_id = $createResponse['order_id'];
                                     }
-                                    if (isset($createResponse) && !empty($createResponse['order_id'])) {
+                                    if (isset($createResponse) && !empty($shiprocket_order_id)) {
                                         // $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
                                         $shiprocket_shipping_charges = $this->getShippingCharges($shiprocket_order_id, $measure_ment, $pickup_post_code, $delivery_post_code);
                                         $shipping_amount = $shipping_amount + $shiprocket_shipping_charges;
@@ -375,7 +375,7 @@ class ShipRocketService
             "pickup_postcode" => $pickup_post_code,
             "delivery_postcode" => $delivery_post_code,
 
-            // "order_id" => $order_id,
+            "order_id" => $order_id,
             "cod" =>  false,
             "weight" => $measure_ment['weight'],
             "length" => $measure_ment['length'],
