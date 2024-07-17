@@ -514,7 +514,7 @@ class ShipRocketService
             "shipping_address" => $cartShipAddress->address_line1,
             "shipping_address_2" => $cartShipAddress->address_line2,
             "shipping_city" => $cartShipAddress->city,
-            // "shipping_pincode" => $cartShipAddress->post_code,
+            "shipping_pincode" => $cartShipAddress->post_code,
             "shipping_country" => "India",
             "shipping_state" => $cartShipAddress->state ?? 'Tamil nadu',
             "shipping_email" => $cartShipAddress->email ?? $customer->email,
@@ -564,6 +564,25 @@ class ShipRocketService
             return null;
         }
     }
+
+//     public function getRequestForAddressUpdate($order_id, $shippingAddress){
+//         {
+//             return [
+//                 "order_id" => $order_id,
+// "shipping_customer_name" => ,
+// "shipping_phone" => ,
+// "shipping_address" =>,
+// "shipping_address_2" =>,
+// "shipping_city" =>,
+// "shipping_city" =>,
+// "shipping_state" =>,
+// "shipping_country" =>,
+// "shipping_pincode" =>,
+// "shipping_email" =>,
+// "billing_alternate_phone" =>
+//             ];
+        
+//     }
 
     // public function updateOrder($orderId, $params)
     // {
