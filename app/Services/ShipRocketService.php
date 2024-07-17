@@ -78,7 +78,6 @@ class ShipRocketService
 
     public function updateOrder($params)
     {
-        log::debug($params);
         try {
             $token = $this->getToken();
             $curl = curl_init();
@@ -102,7 +101,7 @@ class ShipRocketService
             $response = curl_exec($curl);
 
             curl_close($curl);
-            log::debug($response);
+            // log::debug($response);
             return json_decode($response);
         } catch (Exception  $e) {
             log::debug($e);
@@ -279,6 +278,8 @@ class ShipRocketService
                                         log::info('Updating existing order in Shiprocket');
                                         $createResponse = $this->updateOrder($params);
                                         $shiprocket_order_id = $createResponse->order_id;
+                                        $address_request = $this->getRequestForAddressUpdation($shiprocket_order_id, $data['cartShipAddress'], $customer);
+                                        $this->updateDeliveryAddress($address_request);
                                     } else {
                                         log::info('Creating new order in Shiprocket');
                                         $createResponse = $this->createOrder($params, $brandId);
@@ -317,7 +318,7 @@ class ShipRocketService
                                         // $shipment['cart_id'] = $data['citems']->id;
                                         // $shipment['brand_id'] = $brandId;
                                         // CartShipment::create($shipment);
-                                    }else {
+                                    } else {
                                         log::info('works inside else');
                                         $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['breadth'], $data['measurement']['height']);
                                         $shipment['shipping_amount'] = $flat_shipping * 50;
@@ -337,7 +338,6 @@ class ShipRocketService
                                             // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
                                             CartShipment::create($shipment);
                                         }
-
                                     }
                                 }
                             }
@@ -514,7 +514,7 @@ class ShipRocketService
             "shipping_address" => $cartShipAddress->address_line1,
             "shipping_address_2" => $cartShipAddress->address_line2,
             "shipping_city" => $cartShipAddress->city,
-            "shipping_pincode" => $cartShipAddress->post_code,
+            // "shipping_pincode" => $cartShipAddress->post_code,
             "shipping_country" => "India",
             "shipping_state" => $cartShipAddress->state ?? 'Tamil nadu',
             "shipping_email" => $cartShipAddress->email ?? $customer->email,
@@ -565,24 +565,56 @@ class ShipRocketService
         }
     }
 
-//     public function getRequestForAddressUpdate($order_id, $shippingAddress){
-//         {
-//             return [
-//                 "order_id" => $order_id,
-// "shipping_customer_name" => ,
-// "shipping_phone" => ,
-// "shipping_address" =>,
-// "shipping_address_2" =>,
-// "shipping_city" =>,
-// "shipping_city" =>,
-// "shipping_state" =>,
-// "shipping_country" =>,
-// "shipping_pincode" =>,
-// "shipping_email" =>,
-// "billing_alternate_phone" =>
-//             ];
-        
-//     }
+    public function getRequestForAddressUpdation($order_id, $shippingAddress, $customer)
+    {
+        return [
+            "order_id" => $order_id,
+            "shipping_customer_name" => $shippingAddress->name,
+            "shipping_address" => $shippingAddress->address_line1,
+            "shipping_address_2" => $shippingAddress->address_line2,
+            "shipping_city" => $shippingAddress->city,
+            "shipping_pincode" => $shippingAddress->post_code,
+            "shipping_country" => "India",
+            "shipping_state" => $shippingAddress->state ?? 'Tamil nadu',
+            "shipping_email" => $shippingAddress->email ?? $customer->email,
+            "shipping_phone" => $shippingAddress->mobile_no,
+            "billing_alternate_phone" => $shippingAddress->mobile_no
+        ];
+    }
+
+    public function updateDeliveryAddress($request)
+    {
+        try {
+            $token = $this->getToken();
+            $curl = curl_init();
+
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/address/update',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => $request,
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $token
+
+                ),
+            ));
+
+            $response = curl_exec($curl);
+
+            curl_close($curl);
+            return json_decode($response);
+        } catch (Exception $e) {
+            log::debug($e);
+            log::debug($request);
+            return null;
+        }
+    }
 
     // public function updateOrder($orderId, $params)
     // {
