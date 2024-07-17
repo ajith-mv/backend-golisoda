@@ -279,7 +279,11 @@ class ShipRocketService
                                         $createResponse = $this->updateOrder($params);
                                         $shiprocket_order_id = $createResponse->order_id;
                                         $address_request = $this->getRequestForAddressUpdation($shiprocket_order_id, $data['cartShipAddress'], $customer);
-                                        $this->updateDeliveryAddress($address_request);
+                                        log::debug('Address request');
+                                        log::debug($address_request);
+                                        $address_update = $this->updateDeliveryAddress($address_request);
+                                        log::debug("Address response");
+                                        log::debug($address_update);
                                     } else {
                                         log::info('Creating new order in Shiprocket');
                                         $createResponse = $this->createOrder($params, $brandId);
