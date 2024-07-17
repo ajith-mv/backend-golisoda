@@ -275,7 +275,7 @@ class ShipRocketService
                                     if ($existingOrder) {
                                         log::info('Updating existing order in Shiprocket');
                                         $createResponse = $this->updateOrder($params);
-                                        dd($createResponse['order_id']);
+                                        dd($createResponse);
 
                                     } else {
                                         log::info('Creating new order in Shiprocket');
