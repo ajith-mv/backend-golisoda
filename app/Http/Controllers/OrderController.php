@@ -330,9 +330,12 @@ class OrderController extends Controller
 
                     // $filePath = 'storage/orderDocument/' . $info->order_no . '/document/' . $imagName;
                     
-                    $filePath = "";
+                    // $filePath = "";
                     // $send_mail = new OrderMail($templateMessage, $title, $filePath);
-                     $send_mail = new OrderMail($templateMessage, $title);
+                    //  $send_mail = new OrderMail($templateMessage, $title);
+                    $filePath = 'storage/invoice_order/' . $info->order_no . '.pdf';
+                    $send_mail = new OrderMail($templateMessage, $title, $filePath);
+
                     // return $send_mail->render();
                      $bccEmails = explode(',', env('BCC_EMAILS'));
                      $bccRecipients = array_merge($bccEmails, [$info->billing_email]);

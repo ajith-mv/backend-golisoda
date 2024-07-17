@@ -262,7 +262,7 @@ class ShipRocketService
                                     $orderItems = $data['cartItemsarr'];
                                     $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
-                                    $brand_name = $brand_data->brand_name;
+                                    $brand_name = 'test';//$brand_data->brand_name;
                                     $order_id_goli = $customer_id . '_' . $brandId;
                                     $params = $this->getRequestForCreateOrderApi(
                                         $order_id_goli,
@@ -288,7 +288,7 @@ class ShipRocketService
                                     } else {
                                         log::info('Creating new order in Shiprocket');
                                         $createResponse = $this->createOrder($params, $brandId);
-                                        $shiprocket_order_id = $createResponse['order_id'];
+                                        $shiprocket_order_id = isset($createResponse) ? $createResponse['order_id'] : '';
                                     }
                                     if (isset($createResponse) && !empty($shiprocket_order_id)) {
                                         // $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
