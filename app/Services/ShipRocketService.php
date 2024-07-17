@@ -607,15 +607,16 @@ class ShipRocketService
                 CURLOPT_HTTPHEADER => array(
                     'Content-Type: application/json',
                     'Authorization: Bearer ' . $token
-
                 ),
             ));
+            
 
             $response = curl_exec($curl);
 
             curl_close($curl);
             $response_data = json_decode($response);
-            if($response){
+
+            if($response_data){
                 $ins_params['order_update_request_data'] = json_encode($request);
                 $ins_params['order_update_response_data'] = $response;
                 $ins_params['request_type'] = 'update_order';
