@@ -14,6 +14,7 @@ use App\Models\Product\Product;
 use App\Models\Settings\Tax;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Seshac\Shiprocket\Shiprocket;
 
@@ -594,38 +595,44 @@ class ShipRocketService
             $token = $this->getToken();
             $curl = curl_init();
 
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/address/update',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS => $request,
-                CURLOPT_HTTPHEADER => array(
-                    'Content-Type: application/json',
-                    'Authorization: Bearer ' . $token
-                ),
-            ));
+            // curl_setopt_array($curl, array(
+            //     CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/address/update',
+            //     CURLOPT_RETURNTRANSFER => true,
+            //     CURLOPT_ENCODING => '',
+            //     CURLOPT_MAXREDIRS => 10,
+            //     CURLOPT_TIMEOUT => 0,
+            //     CURLOPT_FOLLOWLOCATION => true,
+            //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            //     CURLOPT_CUSTOMREQUEST => 'POST',
+            //     CURLOPT_POSTFIELDS => $request,
+            //     CURLOPT_HTTPHEADER => array(
+            //         'Content-Type: application/json',
+            //         'Authorization: Bearer ' . $token
+            //     ),
+            // ));
             
 
-            $response = curl_exec($curl);
-
-            curl_close($curl);
-            $response_data = json_decode($response);
+            $response = Http::withToken($token)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+            ])
+            ->post('https://apiv2.shiprocket.in/v1/external/orders/address/update', $request);
+            if ($response->successful()) {
 log::info('got the response data');
-            if($response_data){
+            // if($response_data){
                 log::info('inside response data');
                 $ins_params['order_update_request_data'] = json_encode($request);
                 $ins_params['order_update_response_data'] = $response;
                 $ins_params['request_type'] = 'update_order';
 
                 CartShiprocketResponse::where('order_id', $order_id)->update($ins_params);
+                log::info('not worked');
+                return $response->json();
+
+            }else{
+                return null;
             }
-            log::info('not worked');
-            return $response_data;
+            
         } catch (Exception $e) {
             log::debug($e);
             log::debug($request);
