@@ -272,7 +272,7 @@ class ShipRocketService
                                     // Check if order exists in Shiprocket and update it
                                     Log::info("cart token: ". $cart_token);
                                     Log::info("brand_id: ". $brandId);
-                                    $existingOrder = CartShiprocketResponse::where('cart_token', $cart_token)->where('brand_id', $brandId)->first();
+                                    $existingOrder = CartShiprocketResponse::where('cart_token', $order_id_goli)->where('brand_id', $brandId)->first();
                                     if ($existingOrder) {
                                         log::info('Updating existing order in Shiprocket');
                                         $createResponse = $this->updateOrder($existingOrder->order_id, $params);
