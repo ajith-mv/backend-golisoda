@@ -60,6 +60,7 @@ class ShipRocketService
 
             return $response;
         } catch (Exception  $e) {
+            log::debug($params);
             log::debug($e);
             return null;
         }
@@ -71,6 +72,7 @@ class ShipRocketService
 
     public function updateOrder($params)
     {
+        log::debug($params);
         try {
             $token = $this->getToken();
             $curl = curl_init();
@@ -98,6 +100,7 @@ class ShipRocketService
             return json_decode($response);
         } catch (Exception  $e) {
             log::debug($e);
+            log::debug($params);
             return null;
         }
     }
