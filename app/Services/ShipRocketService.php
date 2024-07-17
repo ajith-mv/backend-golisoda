@@ -400,7 +400,7 @@ class ShipRocketService
             "pickup_postcode" => $pickup_post_code,
             "delivery_postcode" => $delivery_post_code,
 
-            "order_id" => $order_id,
+            // "order_id" => $order_id,
             "cod" =>  false,
             "weight" => $measure_ment['weight'],
             "length" => $measure_ment['length'],
@@ -519,7 +519,7 @@ class ShipRocketService
             "shipping_address" => $cartShipAddress->address_line1,
             "shipping_address_2" => $cartShipAddress->address_line2,
             "shipping_city" => $cartShipAddress->city,
-            // "shipping_pincode" => $cartShipAddress->post_code,
+            "shipping_pincode" => $cartShipAddress->post_code,
             "shipping_country" => "India",
             "shipping_state" => $cartShipAddress->state ?? 'Tamil nadu',
             "shipping_email" => $cartShipAddress->email ?? $customer->email,
