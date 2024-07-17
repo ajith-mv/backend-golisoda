@@ -327,6 +327,11 @@ class ShipRocketService
                                         // $shipment['cart_id'] = $data['citems']->id;
                                         // $shipment['brand_id'] = $brandId;
                                         // CartShipment::create($shipment);
+                                    }else {
+                                        $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['breadth'], $data['measurement']['height']);
+                                        $shipment['shipping_amount'] = $flat_shipping * 50;
+                                        $shipment['shipping_type'] = 'flat_shipping';
+                                        $shipment['shipping_id'] = 3;
                                     }
                                 }
                             }
