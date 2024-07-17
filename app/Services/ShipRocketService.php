@@ -278,6 +278,7 @@ class ShipRocketService
                                     } else {
                                         log::info('Creating new order in Shiprocket');
                                         $createResponse = $this->createOrder($params, $brandId);
+                                        dd($createResponse);
                                     }
                                     if (isset($createResponse) && !empty($createResponse['order_id'])) {
                                         // $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
