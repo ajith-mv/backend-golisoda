@@ -576,7 +576,7 @@ class ShipRocketService
             "order_id" => $order_id,
             "shipping_customer_name" => $shippingAddress->name,
             "shipping_address" => $shippingAddress->address_line1,
-            "shipping_address_2" => isset($shippingAddress->address_line2) ?? '',
+            "shipping_address_2" => isset($shippingAddress->address_line2) ? $shippingAddress->address_line2 : '',
             "shipping_city" => $shippingAddress->city,
             "shipping_pincode" => $shippingAddress->post_code,
             "shipping_country" => "India",
