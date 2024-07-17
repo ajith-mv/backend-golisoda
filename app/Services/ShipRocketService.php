@@ -76,7 +76,7 @@ class ShipRocketService
 
     }
 
-    public function updateOrder($params)
+    public function updateOrder($params, $order_id)
     {
         try {
             $token = $this->getToken();
@@ -102,7 +102,16 @@ class ShipRocketService
 
             curl_close($curl);
             // log::debug($response);
-            return json_decode($response);
+            $response = json_decode($response);
+            if($response){
+                $ins_params['order_update_request_data'] = json_encode($params);
+                $ins_params['order_update_response_data'] = $response;
+                $ins_params['request_type'] = 'update_order';
+
+                CartShiprocketResponse::where('order_id', $orderId)->update($ins_params);
+            }
+            
+            return $response;
         } catch (Exception  $e) {
             log::debug($e);
             log::debug($params);
@@ -276,7 +285,7 @@ class ShipRocketService
                                     $existingOrder = CartShiprocketResponse::where('cart_token', $order_id_goli)->where('brand_id', $brandId)->first();
                                     if ($existingOrder) {
                                         log::info('Updating existing order in Shiprocket');
-                                        $createResponse = $this->updateOrder($params);
+                                        $createResponse = $this->updateOrder($params, $existingOrder->order_id);
                                         $shiprocket_order_id = $createResponse->order_id;
                                         $address_request = $this->getRequestForAddressUpdation($shiprocket_order_id, $data['cartShipAddress'], $customer);
                                         log::debug('Address request');
