@@ -297,6 +297,8 @@ class ShipRocketService
                                         $shiprocket_order_id = isset($createResponse) ? $createResponse['order_id'] : '';
                                     }
                                     if (isset($createResponse) && !empty($shiprocket_order_id)) {
+                                        log::info('works inside if');
+
                                         // $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
                                         $shiprocket_shipping_charges = $this->getShippingCharges($shiprocket_order_id, $measure_ment, $pickup_post_code, $delivery_post_code);
                                         $shipping_amount = $shipping_amount + $shiprocket_shipping_charges;
@@ -328,10 +330,18 @@ class ShipRocketService
                                         // $shipment['brand_id'] = $brandId;
                                         // CartShipment::create($shipment);
                                     }else {
+                                        log::info('works inside else');
                                         $flat_shipping = getVolumeMetricCalculation($data['measurement']['length'], $data['measurement']['breadth'], $data['measurement']['height']);
                                         $shipment['shipping_amount'] = $flat_shipping * 50;
                                         $shipment['shipping_type'] = 'flat_shipping';
                                         $shipment['shipping_id'] = 3;
+                                        foreach ($data['citems'] as $citem) {
+                                            CartShipment::where('cart_id', $citem['id'])->delete();
+                                            $shipment['cart_id'] = $citem['id'];
+                                            $shipment['brand_id'] = $brandId;
+                                            // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
+                                            CartShipment::create($shipment);
+                                        }
                                     }
                                 }
                             }
