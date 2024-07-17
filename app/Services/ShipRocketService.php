@@ -572,7 +572,7 @@ class ShipRocketService
 
     public function getRequestForAddressUpdation($order_id, $shippingAddress, $customer)
     {
-        return [
+        return array(
             "order_id" => $order_id,
             "shipping_customer_name" => $shippingAddress->name,
             "shipping_address" => $shippingAddress->address_line1,
@@ -584,7 +584,7 @@ class ShipRocketService
             "shipping_email" => $shippingAddress->email ?? $customer->email,
             "shipping_phone" => $shippingAddress->mobile_no,
             "billing_alternate_phone" => $shippingAddress->mobile_no
-        ];
+        );
     }
 
     public function updateDeliveryAddress($request)
