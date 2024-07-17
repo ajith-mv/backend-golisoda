@@ -69,33 +69,33 @@ class ShipRocketService
 
     }
 
-    // public function updateOrder($params)
-    // {
-    //     $token = $this->getToken();
-    //     $curl = curl_init();
+    public function updateOrder($params)
+    {
+        $token = $this->getToken();
+        $curl = curl_init();
 
-    //     curl_setopt_array($curl, array(
-    //         CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/update/adhoc',
-    //         CURLOPT_RETURNTRANSFER => true,
-    //         CURLOPT_ENCODING => '',
-    //         CURLOPT_MAXREDIRS => 10,
-    //         CURLOPT_TIMEOUT => 0,
-    //         CURLOPT_FOLLOWLOCATION => true,
-    //         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    //         CURLOPT_CUSTOMREQUEST => 'POST',
-    //         CURLOPT_POSTFIELDS => json_encode($params),
-    //         CURLOPT_HTTPHEADER => array(
-    //             'Content-Type: application/json',
-    //             'Authorization: Bearer ' . $token
-    //         ),
-    //     ));
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/update/adhoc',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode($params),
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token
+            ),
+        ));
 
-    //     $response = curl_exec($curl);
+        $response = curl_exec($curl);
 
-    //     curl_close($curl);
-
-    //     return $response;
-    // }
+        curl_close($curl);
+        dd($response);
+        return $response;
+    }
 
     /**
      * Method getShippingRocketOrderDimensions
@@ -538,26 +538,26 @@ class ShipRocketService
         }
     }
 
-    public function updateOrder($orderId, $params)
-    {
-        try {
-            $token =  $this->getToken();
-            $response =  Shiprocket::order($token)->update($orderId, $params);
-            log::info('status code for update order' . $response['status_code']);
-            if ($response['status_code'] == 1) {
-                $ins_params['rocket_order_request_data'] = json_encode($params);
-                $ins_params['rocket_order_response_data'] = $response;
-                $ins_params['request_type'] = 'update_order';
+    // public function updateOrder($orderId, $params)
+    // {
+    //     try {
+    //         $token =  $this->getToken();
+    //         $response =  Shiprocket::order($token)->update($orderId, $params);
+    //         log::info('status code for update order' . $response['status_code']);
+    //         if ($response['status_code'] == 1) {
+    //             $ins_params['rocket_order_request_data'] = json_encode($params);
+    //             $ins_params['rocket_order_response_data'] = $response;
+    //             $ins_params['request_type'] = 'update_order';
 
-                CartShiprocketResponse::where('order_id', $orderId)->update($ins_params);
-            } else {
-                log::debug($response);
-            }
+    //             CartShiprocketResponse::where('order_id', $orderId)->update($ins_params);
+    //         } else {
+    //             log::debug($response);
+    //         }
 
-            return $response;
-        } catch (Exception  $e) {
-            log::debug($e);
-            return null;
-        }
-    }
+    //         return $response;
+    //     } catch (Exception  $e) {
+    //         log::debug($e);
+    //         return null;
+    //     }
+    // }
 }
