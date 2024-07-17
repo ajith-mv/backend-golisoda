@@ -192,18 +192,6 @@ class ShipRocketService
                             // $cartItemsarr[$citems->brand_id][] = $tmp;
                             $cartTotal = $citems->sub_total;
 
-                            // $measure = DB::table('product_measurements')
-                            //     ->selectRaw("width, hight, length, weight")
-                            //     ->where('product_id', $product_id)->first();
-
-                            // $measure_ment = [
-                            //     "sub_total" => $cartTotal,
-                            //     "length" => isset($measure->length) ? $measure->length : 1,
-                            //     "breadth" => isset($measure->width) ? $measure->width : 1,
-                            //     "height" => isset($measure->height) ? $measure->height : 1,
-                            //     "weight" => $total_weight
-                            // ];
-
                             $brandIds[] = $citems->brand_id;
                             // Initialize createOrderData for each brand_id
                             if (!isset($createOrderData[$citems->brand_id])) {
@@ -253,7 +241,7 @@ class ShipRocketService
                             $count = 1;
                             foreach ($uniqueBrandIds as $brandId) {
                                 $brand_data = Brands::find($brandId);
-                                log::info('count called' . $count);
+                                log::info('brand id' . $brandId);
                                 // log::info($createOrderData[$brandId]);
                                 // if (isset($brand_data) && ($brand_data->is_free_shipping != 1)) {
                                 if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
