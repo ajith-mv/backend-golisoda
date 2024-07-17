@@ -71,29 +71,35 @@ class ShipRocketService
 
     public function updateOrder($params)
     {
-        $token = $this->getToken();
-        $curl = curl_init();
+        try {
+            $token = $this->getToken();
+            $curl = curl_init();
 
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/update/adhoc',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode($params),
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $token
-            ),
-        ));
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/update/adhoc',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => json_encode($params),
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $token
+                ),
+            ));
 
-        $response = curl_exec($curl);
+            $response = curl_exec($curl);
 
-        curl_close($curl);
-        return json_decode($response);
+            curl_close($curl);
+            log::debug($response);
+            return json_decode($response);
+        } catch (Exception  $e) {
+            log::debug($e);
+            return null;
+        }
     }
 
     /**
@@ -254,7 +260,7 @@ class ShipRocketService
                                     $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
                                     $brand_name = $brand_data->brand_name;
-                                    $order_id_goli = $customer_id.'_'.$brandId;
+                                    $order_id_goli = $customer_id . '_' . $brandId;
                                     $params = $this->getRequestForCreateOrderApi(
                                         $order_id_goli,
                                         $data['cartShipAddress'],
@@ -269,21 +275,21 @@ class ShipRocketService
 
                                     // $createResponse = $this->createOrder($params);
                                     // Check if order exists in Shiprocket and update it
-                                    Log::info("cart token: ". $cart_token);
-                                    Log::info("brand_id: ". $brandId);
+                                    Log::info("cart token: " . $cart_token);
+                                    Log::info("brand_id: " . $brandId);
                                     $existingOrder = CartShiprocketResponse::where('cart_token', $order_id_goli)->where('brand_id', $brandId)->first();
                                     if ($existingOrder) {
                                         log::info('Updating existing order in Shiprocket');
                                         $createResponse = $this->updateOrder($params);
-                                        dd($createResponse->order_id);
-
+                                        $shiprocket_order_id = $createResponse->order_id;
                                     } else {
                                         log::info('Creating new order in Shiprocket');
                                         $createResponse = $this->createOrder($params, $brandId);
+                                        $shiprocket_order_id = $createResponse['order_id'];
                                     }
                                     if (isset($createResponse) && !empty($createResponse['order_id'])) {
                                         // $shipping_amount = $shipping_amount + $this->getShippingCharges($createResponse['order_id'], $createOrderData[$brandId]['measurement'], $pickup_post_code, $delivery_post_code);
-                                        $shiprocket_shipping_charges = $this->getShippingCharges($createResponse['order_id'], $measure_ment, $pickup_post_code, $delivery_post_code);
+                                        $shiprocket_shipping_charges = $this->getShippingCharges($shiprocket_order_id, $measure_ment, $pickup_post_code, $delivery_post_code);
                                         $shipping_amount = $shipping_amount + $shiprocket_shipping_charges;
                                         if (isset($shiprocket_shipping_charges) && !empty($shiprocket_shipping_charges) && ($shiprocket_shipping_charges != 0)) {
                                             $shipment['shiprocket_amount'] = $shiprocket_shipping_charges;
