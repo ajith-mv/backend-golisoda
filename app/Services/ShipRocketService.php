@@ -283,8 +283,8 @@ class ShipRocketService
                                     if ($existingOrder) {
                                         log::info('Updating existing order in Shiprocket');
                                         $createResponse = $this->updateOrder($params);
-                                        $shiprocket_order_id = $createResponse->order_id;
-                                        $shiprocket_shipment_id = $createResponse->shipment_id;
+                                        $shiprocket_order_id = isset($createResponse) ? $createResponse->order_id : '';
+                                        $shiprocket_shipment_id = isset($createResponse) ? $createResponse->shipment_id : '';
                                         $address_request = $this->getRequestForAddressUpdation($shiprocket_order_id, $data['cartShipAddress'], $customer);
                                         log::debug('Address request');
                                         log::debug($address_request);
@@ -293,7 +293,7 @@ class ShipRocketService
                                         log::info('Creating new order in Shiprocket');
                                         $createResponse = $this->createOrder($params, $brandId);
                                         $shiprocket_order_id = isset($createResponse) ? $createResponse['order_id'] : '';
-                                        $shiprocket_shipment_id = $createResponse->shipment_id;
+                                        $shiprocket_shipment_id = isset($createResponse) ? $createResponse->shipment_id : '';
                                     }
                                     if (isset($createResponse) && !empty($shiprocket_order_id)) {
                                         log::info('works inside if');
