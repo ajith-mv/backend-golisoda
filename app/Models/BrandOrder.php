@@ -25,7 +25,9 @@ class BrandOrder extends Model
         'shipping_id',
         'shipping_type',
         'shipping_amount',
-        'shiprocket_amount'
+        'shiprocket_amount',
+        'shiprocket_order_id',
+        'shiprocket_shipment_id'
     ];
 
     public function order()

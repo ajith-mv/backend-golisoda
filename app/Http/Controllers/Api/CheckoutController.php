@@ -261,6 +261,8 @@ class CheckoutController extends Controller
                 $ins['shiprocket_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : 0;
                 $ins['shipping_id'] = isset($cart_shipment) ? $cart_shipment->shipping_id : '';
                 $ins['shipping_type'] = isset($cart_shipment) ? $cart_shipment->shiprocket_type : '';
+                $ins['shiprocket_order_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_order_id : '';
+                $ins['shiprocket_shipment_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_shipment_id : '';
                 $brand_order = BrandOrder::create($ins);
 
                 //insert variations
@@ -664,6 +666,9 @@ class CheckoutController extends Controller
                 $ins['shiprocket_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : 0;
                 $ins['shipping_id'] = isset($cart_shipment) ? $cart_shipment->shipping_id : '';
                 $ins['shipping_type'] = isset($cart_shipment) ? $cart_shipment->shiprocket_type : '';
+                $ins['shiprocket_order_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_order_id : '';
+                $ins['shiprocket_shipment_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_shipment_id : '';
+
                 $brand_order = BrandOrder::create($ins);
 
                 if (isset($product_info->warranty_id) && !empty($product_info->warranty_id)) {
