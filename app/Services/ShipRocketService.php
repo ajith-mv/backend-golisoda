@@ -214,6 +214,7 @@ class ShipRocketService
                             ];
                             $createOrderData[$citems->brand_id]['cartItemsarr'][] = $tmp;
                             $createOrderData[$citems->brand_id]['cartTotal'] += $citems->sub_total;
+                            $createOrderData[$citems->brand_id]['totalDiscount'] += $citems->coupon_amount;
                             $createOrderData[$citems->brand_id]['total_weight'] += $total_weight;
 
                             $measure = DB::table('product_measurements')
@@ -269,7 +270,8 @@ class ShipRocketService
                                         $data['cartTotal'],
                                         $data['total_weight'],
                                         $cart_token,
-                                        $brand_name
+                                        $brand_name,
+                                        $data['totalDiscount'],
                                     );
 
                                     // $createResponse = $this->createOrder($params);
@@ -281,17 +283,16 @@ class ShipRocketService
                                         log::info('Updating existing order in Shiprocket');
                                         $createResponse = $this->updateOrder($params);
                                         $shiprocket_order_id = $createResponse->order_id;
+                                        $shiprocket_shipment_id = $createResponse->shipment_id;
                                         $address_request = $this->getRequestForAddressUpdation($shiprocket_order_id, $data['cartShipAddress'], $customer);
                                         log::debug('Address request');
                                         log::debug($address_request);
                                         $address_update = $this->updateDeliveryAddress($address_request, $shiprocket_order_id);
-                                        // log::debug("Address response");
-                                        // dd($address_update);
-                                        // log::info($address_update);
                                     } else {
                                         log::info('Creating new order in Shiprocket');
                                         $createResponse = $this->createOrder($params, $brandId);
                                         $shiprocket_order_id = isset($createResponse) ? $createResponse['order_id'] : '';
+                                        $shiprocket_shipment_id = $createResponse->shipment_id;
                                     }
                                     if (isset($createResponse) && !empty($shiprocket_order_id)) {
                                         log::info('works inside if');
@@ -319,6 +320,8 @@ class ShipRocketService
                                             CartShipment::where('cart_id', $citem['id'])->delete();
                                             $shipment['cart_id'] = $citem['id'];
                                             $shipment['brand_id'] = $brandId;
+                                            $shipment['shiprocket_order_id'] = $shiprocket_order_id;
+                                            $shipment['shiprocket_shipment_id'] = $shiprocket_shipment_id;
                                             // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
                                             CartShipment::create($shipment);
                                         }
@@ -498,7 +501,7 @@ class ShipRocketService
      *
      * @return array
      */
-    public function getRequestForCreateOrderApi($order_id_goli, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight, $cart_token, $brand_name)
+    public function getRequestForCreateOrderApi($order_id_goli, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight, $cart_token, $brand_name, $total_discount)
     {
         return array(
             "order_id" => $order_id_goli,
@@ -532,7 +535,7 @@ class ShipRocketService
             "shipping_charges" => 0,
             "giftwrap_charges" => 0,
             "transaction_charges" => 0,
-            "total_discount" => 0,
+            "total_discount" => $total_discount,
             "sub_total" => $cartTotal,
             "length" => isset($measure['length']) ? $measure['length'] : 1,
             "breadth" => isset($measure['width']) ? $measure['width'] : 1,
