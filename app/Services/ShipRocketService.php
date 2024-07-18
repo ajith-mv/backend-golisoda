@@ -199,7 +199,7 @@ class ShipRocketService
                                 'hsn' => $pro->hsn_code ?? '',
                                 'name' => $pro->product_name,
                                 'sku' => $pro->sku . implode('-', $variation_option_id),
-                                'tax' => $tax_total ?? '',
+                                'tax' => 18,//$tax_total ?? '',
                                 'discount' => '',
                                 'units' => $citems->quantity,
                                 'selling_price' => $price_with_tax
