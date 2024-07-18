@@ -183,7 +183,6 @@ class ShipRocketService
                             }
                             $tmp = [
                                 'hsn' => $pro->hsn_code ?? '',
-                                'category' => $category->name,
                                 'name' => $pro->product_name,
                                 'sku' => $pro->sku . implode('-', $variation_option_id),
                                 'tax' => $tax_total ?? '',
