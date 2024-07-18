@@ -405,6 +405,7 @@ class ShipRocketService
             if($shipping_amount_db < 1){
                 $shipping_name = "free_shipping";
                 $is_free = 1;
+                $shipping_amount_db = 0;
             }
 
             log::info('got the shipping amount as' . number_format($shipping_amount_db, 2));
