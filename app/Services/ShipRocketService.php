@@ -175,7 +175,7 @@ class ShipRocketService
                             $tax = [];
                             $category               = $pro->productCategory;
                             $salePrices             = getProductPrice($pro);
-                            $price_with_tax = (($citems->sub_total / $citems->quantity) + $total_variation_amount - $total_discount_amount);
+                            $price_with_tax = ($citems->sub_total / $citems->quantity);
                             if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
                                 $tax_info = Tax::find($category->parent->tax_id);
                             } else if (isset($category->tax_id) && !empty($category->tax_id)) {
