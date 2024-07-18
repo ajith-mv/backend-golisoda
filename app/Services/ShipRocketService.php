@@ -155,6 +155,7 @@ class ShipRocketService
 
                             $pro = $citems->products;
                             $product_id = $pro->id;
+                            $variation_id = [];
                             $variation_option_id = [];
                             $total_variation_amount = 0;
                             $total_discount_amount = 0;
