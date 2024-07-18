@@ -171,7 +171,7 @@ class ShipRocketService
                             $tax = [];
                             $category               = $pro->productCategory;
                             $salePrices             = getProductPrice($pro);
-
+log::info($salePrices);
                             if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
                                 $tax_info = Tax::find($category->parent->tax_id);
                             } else if (isset($category->tax_id) && !empty($category->tax_id)) {
