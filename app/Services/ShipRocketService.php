@@ -402,7 +402,7 @@ class ShipRocketService
                 }
             }
 
-            if($shipping_amount_db < 1){
+            if ($shipping_amount_db < 1) {
                 $shipping_name = "free_shipping";
                 $is_free = 1;
                 $shipping_amount_db = 0;
@@ -612,25 +612,6 @@ class ShipRocketService
     {
         try {
             $token = $this->getToken();
-            $curl = curl_init();
-
-            // curl_setopt_array($curl, array(
-            //     CURLOPT_URL => 'https://apiv2.shiprocket.in/v1/external/orders/address/update',
-            //     CURLOPT_RETURNTRANSFER => true,
-            //     CURLOPT_ENCODING => '',
-            //     CURLOPT_MAXREDIRS => 10,
-            //     CURLOPT_TIMEOUT => 0,
-            //     CURLOPT_FOLLOWLOCATION => true,
-            //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            //     CURLOPT_CUSTOMREQUEST => 'POST',
-            //     CURLOPT_POSTFIELDS => $request,
-            //     CURLOPT_HTTPHEADER => array(
-            //         'Content-Type: application/json',
-            //         'Authorization: Bearer ' . $token
-            //     ),
-            // ));
-
-
             $response = Http::withToken($token)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
@@ -657,26 +638,30 @@ class ShipRocketService
         }
     }
 
-    // public function updateOrder($orderId, $params)
-    // {
-    //     try {
-    //         $token =  $this->getToken();
-    //         $response =  Shiprocket::order($token)->update($orderId, $params);
-    //         log::info('status code for update order' . $response['status_code']);
-    //         if ($response['status_code'] == 1) {
-    //             $ins_params['rocket_order_request_data'] = json_encode($params);
-    //             $ins_params['rocket_order_response_data'] = $response;
-    //             $ins_params['request_type'] = 'update_order';
+    public function cancelShiprocketOrder($order_ids)
+    {
+        try {
+            $token = $this->getToken();
+            log::debug('order ids passed for cancel');
 
-    //             CartShiprocketResponse::where('order_id', $orderId)->update($ins_params);
-    //         } else {
-    //             log::debug($response);
-    //         }
+            log::debug($order_ids);
 
-    //         return $response;
-    //     } catch (Exception  $e) {
-    //         log::debug($e);
-    //         return null;
-    //     }
-    // }
+            $response = Http::withToken($token)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->post('https://apiv2.shiprocket.in/v1/external/orders/cancel', $order_ids);
+
+            if ($response->successful()) {
+              
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception $e) {
+            log::debug($e);
+            log::debug($order_ids);
+            return false;
+        }
+    }
 }

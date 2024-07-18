@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\CartAddress;
+use App\Models\CartShipment;
 use App\Models\CartProductAddon;
 use App\Models\Master\Customer;
 use App\Models\Product\Product;
@@ -853,11 +854,25 @@ class CartController extends Controller
         if (isset($cart_id)) {
             $checkCart      = Cart::find($cart_id);
         }
+        $shiprocket_order_ids = [];
         if ($checkCart) {
             $checkCart->addons()->delete();
             $checkCart->variationOptions()->delete();
-            // $checkCart->rocketResponse()->delete();
-            $checkCart->shipments()->delete();
+            $shipments = $checkCart->shipments();
+            $shiprocketOrderId = $shipments->first()->shiprocket_order_id ?? null;
+
+            if ($shiprocketOrderId) {
+                // Count how many carts are associated with this shiprocket_order_id
+                $count = CartShipment::where('shiprocket_order_id', $shiprocketOrderId)->count();
+                if ($count <= 1) {
+                    $shiprocket_order_ids[] = $shiprocketOrderId;
+                    // If only one cart is associated, cancel the Shiprocket order
+                    $this->cancelOrder($shiprocket_order_ids);
+                    $checkCart->rocketResponse()->delete();
+                    $checkCart->shipments()->delete();
+                }
+            }
+
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;
             $checkCart->delete();
@@ -879,7 +894,7 @@ class CartController extends Controller
 
         $customer_id        = $request->customer_id;
         $guest_token        = $request->guest_token;
-
+        $cart_ids = [];
         if ($customer_id || $guest_token) {
             $data = Cart::when($customer_id != '', function ($q) use ($customer_id) {
                 $q->where('customer_id', $customer_id);
@@ -889,6 +904,7 @@ class CartController extends Controller
 
             if (isset($data) && count($data) > 0) {
                 foreach ($data as $item) {
+                    $cart_ids[] = $item->id;
                     $item->addons()->delete();
                     $item->variationOptions()->delete();
                     $item->rocketResponse()->delete();
@@ -901,7 +917,8 @@ class CartController extends Controller
             })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
                 $q->where('guest_token', $guest_token);
             })->delete();
-
+            $shipment_order_ids = $this->getShipmentOrderIds($cart_ids);
+            $this->rocketService->cancelShiprocketOrder($shipment_order_ids);
             $data = $this->getCartListAll($customer_id, $guest_token);
             $error = 0;
             $message = 'Cart Cleared successful';
@@ -1571,5 +1588,17 @@ class CartController extends Controller
             // Default fallback (optional based on your needs)
             return null;
         }
+    }
+
+    public function getShipmentOrderIds($cart_ids)
+    {
+        if (!empty($cart_ids)) {
+            $uniqueShiprocketOrderIds = CartShipment::whereIn('cart_id', $cart_ids)
+                ->pluck('shiprocket_order_id')
+                ->unique()
+                ->values()
+                ->toArray();
+        }
+        return $uniqueShiprocketOrderIds;
     }
 }
