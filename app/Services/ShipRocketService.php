@@ -188,25 +188,7 @@ class ShipRocketService
                             $category               = $pro->productCategory;
                             $salePrices             = getProductPrice($pro);
                             $price_with_tax = ($citems->sub_total / $citems->quantity);
-                            if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
-                                $tax_info = Tax::find($category->parent->tax_id);
-                            } else if (isset($category->tax_id) && !empty($category->tax_id)) {
-                                $tax_info = Tax::find($category->tax_id);
-                            }
-                            if (isset($tax_info) && !empty($tax_info)) {
-                                $tax = getAmountExclusiveTax($price_with_tax, $pro->productCategory->tax->pecentage ?? 12);
-                                $tax_total =  $tax_total + ($tax['gstAmount'] * $citems->quantity) ?? 0;
-                            }
 
-                            // if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
-                            //     $tax_info = Tax::find($category->parent->tax_id);
-                            // } else if (isset($category->tax_id) && !empty($category->tax_id)) {
-                            //     $tax_info = Tax::find($category->tax_id);
-                            // }
-                            // if (isset($tax_info) && !empty($tax_info)) {
-                            //     $tax = getAmountExclusiveTax($salePrices['price_original'], $tax_info->pecentage);
-                            //     $tax_total =  $tax_total + ($tax['gstAmount'] * $citems->quantity) ?? 0;
-                            // }
                             $tmp = [
                                 'hsn' => $pro->hsn_code ?? '',
                                 'name' => $pro->product_name . $variation_title,
@@ -271,6 +253,8 @@ class ShipRocketService
                             $count = 1;
                             foreach ($uniqueBrandIds as $brandId) {
                                 $brand_data = Brands::find($brandId);
+                                $branch_data = BrandVendorLocation::where([['brand_id', $brandId], ['is_default', 1]])->first();
+
                                 log::info('brand id' . $brandId);
                                 // log::info($createOrderData[$brandId]);
                                 // if (isset($brand_data) && ($brand_data->is_free_shipping != 1)) {
@@ -418,7 +402,10 @@ class ShipRocketService
                 }
             }
 
-
+            if($shipping_amount_db < 1){
+                $shipping_name = "free_shipping";
+                $is_free = 1;
+            }
 
             log::info('got the shipping amount as' . number_format($shipping_amount_db, 2));
             return ['shipping_title' => ucwords(str_replace('_', ' ', $shipping_name)), 'is_free' => $is_free, 'charges' =>  number_format($shipping_amount_db, 2)];

@@ -348,7 +348,7 @@
                         </tr>
                     @endif
 
-                    @if ($order_info->shipping_amount > 0)
+                    @if ($order_info->shipping_amount > 1)
                         <tr>
                             <td style="text-align: right;">
                                 <div>Shipping Fee </div>
@@ -359,6 +359,17 @@
                                 {{ number_format($order_info->shipping_amount, 2) }}
                             </td>
                         </tr>
+                    @else
+                    <tr>
+                        <td style="text-align: right;">
+                            <div>Shipping Fee </div>
+                            <small>Free Shipping</small>
+                        </td>
+                        <td class="w-100" style="text-align: right;"><span
+                                style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
+                            FREE
+                        </td>
+                    </tr>
                     @endif
                     @if ($order_info->is_cod == 1)
                         <tr>

@@ -258,9 +258,9 @@
                     <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
 
                     @if ($order_info->coupon_amount > 0 && isset($item->coupon_id))
-                        <td>{{ number_format(($item->strice_price * $item->quantity), 2) }}</td>
+                        <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
                     @else
-                        <td>{{ number_format(($item->price * $item->quantity), 2) }}</td>
+                        <td>{{ number_format($item->price * $item->quantity, 2) }}</td>
                     @endif
 
                 </tr>
@@ -351,7 +351,7 @@
                         </tr>
                     @endif
 
-                    @if ($order_info->shipping_amount > 0)
+                    @if ($order_info->shipping_amount > 1)
                         <tr>
                             <td style="text-align: right;">
                                 <div>Shipping Fee </div>
@@ -360,6 +360,17 @@
                             </td>
                             <td class="w-100" style="text-align: right;"><span
                                     style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>{{ number_format($order_info->shipping_amount, 2) }}
+                            </td>
+                        </tr>
+                    @else
+                        <tr>
+                            <td style="text-align: right;">
+                                <div>Shipping Fee </div>
+                                <small>Free Shipping</small>
+                            </td>
+                            <td class="w-100" style="text-align: right;"><span
+                                    style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
+                                FREE
                             </td>
                         </tr>
                     @endif
