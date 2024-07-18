@@ -141,7 +141,6 @@ class ShipRocketService
             $shippingTypes = [];
             $shipping_name = '';
             if ($cartShipAddress) {
-                $variation_title = '';
                 $product_id = [];
                 $cartItemsarr = [];
                 $cartTotal = 0;
@@ -155,7 +154,9 @@ class ShipRocketService
 
                             $pro = $citems->products;
                             $product_id = $pro->id;
-                            $variation_id = [];
+                            $variation_title = '';
+
+                            $variation_id = $variation_value = [];
                             $variation_option_id = [];
                             $total_variation_amount = 0;
                             $total_discount_amount = 0;
@@ -172,9 +173,8 @@ class ShipRocketService
                                 $variations = Variation::whereIn('id', $variation_id)->get();
                                 $data = $variation_value;
 
-                                foreach ($variations as $key => $value){
+                                foreach ($variations as $key => $value) {
                                     $variation_title = $value->title . ' : ' . $data[$key];
-
                                 }
                             }
                             $pro_measure = DB::table('product_measurements')
@@ -209,7 +209,7 @@ class ShipRocketService
                             // }
                             $tmp = [
                                 'hsn' => $pro->hsn_code ?? '',
-                                'name' => $pro->product_name.$variation_title,
+                                'name' => $pro->product_name . $variation_title,
                                 'sku' => $pro->sku . implode('-', $variation_option_id),
                                 'tax' => $pro->productCategory->tax->pecentage ?? 12, //$tax_total ?? '',
                                 'discount' => '',
