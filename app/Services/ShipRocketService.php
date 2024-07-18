@@ -102,7 +102,7 @@ class ShipRocketService
             $response = curl_exec($curl);
 
             curl_close($curl);
-            // log::debug($response);
+            log::debug($params);
             $response = json_decode($response);
 
             return $response;
