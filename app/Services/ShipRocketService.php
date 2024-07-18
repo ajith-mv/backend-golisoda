@@ -10,6 +10,7 @@ use App\Models\CartShiprocketResponse;
 use App\Models\Master\Brands;
 use App\Models\Master\BrandVendorLocation;
 use App\Models\Master\Customer;
+use App\Models\Master\Variation;
 use App\Models\Product\Product;
 use App\Models\Settings\Tax;
 use Exception;
@@ -140,7 +141,7 @@ class ShipRocketService
             $shippingTypes = [];
             $shipping_name = '';
             if ($cartShipAddress) {
-
+                $variation_title = '';
                 $product_id = [];
                 $cartItemsarr = [];
                 $cartTotal = 0;
@@ -161,8 +162,18 @@ class ShipRocketService
                             if (isset($variationData) && !empty($variationData)) {
                                 foreach ($variationData as $variationOptionData) {
                                     $variation_option_id[] = $variationOptionData->variation_option_id;
+                                    $variation_id[] = $variationOptionData->variation_id;
+                                    $variation_value[] = $variationOptionData->value;
+
                                     $total_variation_amount = $total_variation_amount + $variationOptionData->amount;
                                     $total_discount_amount = $total_discount_amount + $variationOptionData->discount_amount;
+                                }
+                                $variations = Variation::whereIn('id', $variation_id)->get();
+                                $data = $variation_value;
+
+                                foreach ($variations as $key => $value){
+                                    $variation_title = $value->title . ' : ' . $data[$key];
+
                                 }
                             }
                             $pro_measure = DB::table('product_measurements')
@@ -184,8 +195,8 @@ class ShipRocketService
                             if (isset($tax_info) && !empty($tax_info)) {
                                 $tax = getAmountExclusiveTax($price_with_tax, $pro->productCategory->tax->pecentage ?? 12);
                                 $tax_total =  $tax_total + ($tax['gstAmount'] * $citems->quantity) ?? 0;
-                            } 
-                            
+                            }
+
                             // if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
                             //     $tax_info = Tax::find($category->parent->tax_id);
                             // } else if (isset($category->tax_id) && !empty($category->tax_id)) {
@@ -197,9 +208,9 @@ class ShipRocketService
                             // }
                             $tmp = [
                                 'hsn' => $pro->hsn_code ?? '',
-                                'name' => $pro->product_name,
+                                'name' => $pro->product_name.$variation_title,
                                 'sku' => $pro->sku . implode('-', $variation_option_id),
-                                'tax' => $pro->productCategory->tax->pecentage ?? 12,//$tax_total ?? '',
+                                'tax' => $pro->productCategory->tax->pecentage ?? 12, //$tax_total ?? '',
                                 'discount' => '',
                                 'units' => $citems->quantity,
                                 'selling_price' => $price_with_tax
@@ -275,7 +286,7 @@ class ShipRocketService
                                     $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
                                     $brand_name = $brand_data->brand_name;
-                                    $order_id_goli = 'ORD'.$customer_id . $brandId;
+                                    $order_id_goli = 'ORD' . $customer_id . $brandId;
                                     $params = $this->getRequestForCreateOrderApi(
                                         $order_id_goli,
                                         $data['cartShipAddress'],
