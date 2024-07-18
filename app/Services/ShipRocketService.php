@@ -175,16 +175,26 @@ class ShipRocketService
                             $tax = [];
                             $category               = $pro->productCategory;
                             $salePrices             = getProductPrice($pro);
-                            
+                            $price_with_tax = (($citems->sub_total / $citems->quantity) + $total_variation_amount - $total_discount_amount);
                             if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
                                 $tax_info = Tax::find($category->parent->tax_id);
                             } else if (isset($category->tax_id) && !empty($category->tax_id)) {
                                 $tax_info = Tax::find($category->tax_id);
                             }
                             if (isset($tax_info) && !empty($tax_info)) {
-                                $tax = getAmountExclusiveTax($salePrices['price_original'], $tax_info->pecentage);
+                                $tax = getAmountExclusiveTax($price_with_tax, $pro->productCategory->tax->pecentage ?? 12);
                                 $tax_total =  $tax_total + ($tax['gstAmount'] * $citems->quantity) ?? 0;
-                            }
+                            } 
+                            
+                            // if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
+                            //     $tax_info = Tax::find($category->parent->tax_id);
+                            // } else if (isset($category->tax_id) && !empty($category->tax_id)) {
+                            //     $tax_info = Tax::find($category->tax_id);
+                            // }
+                            // if (isset($tax_info) && !empty($tax_info)) {
+                            //     $tax = getAmountExclusiveTax($salePrices['price_original'], $tax_info->pecentage);
+                            //     $tax_total =  $tax_total + ($tax['gstAmount'] * $citems->quantity) ?? 0;
+                            // }
                             $tmp = [
                                 'hsn' => $pro->hsn_code ?? '',
                                 'name' => $pro->product_name,
@@ -192,7 +202,7 @@ class ShipRocketService
                                 'tax' => $tax_total ?? '',
                                 'discount' => '',
                                 'units' => $citems->quantity,
-                                'selling_price' => (($citems->sub_total / $citems->quantity) + $total_variation_amount - $total_discount_amount)
+                                'selling_price' => $price_with_tax
                             ];
 
                             // $cartItemsarr[$citems->brand_id][] = $tmp;
