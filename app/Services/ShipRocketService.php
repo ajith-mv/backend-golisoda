@@ -188,7 +188,7 @@ class ShipRocketService
                                 'tax' => $tax_total ?? '',
                                 'discount' => '',
                                 'units' => $citems->quantity,
-                                'selling_price' => $citems->sub_total
+                                'selling_price' => ($citems->sub_total / $citems->quantity)
                             ];
 
                             // $cartItemsarr[$citems->brand_id][] = $tmp;
