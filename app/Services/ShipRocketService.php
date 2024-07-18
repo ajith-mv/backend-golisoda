@@ -205,7 +205,8 @@ class ShipRocketService
                                     'cartItemsarr' => [],
                                     'measure' => null,
                                     'cartTotal' => 0,
-                                    'total_weight' => 0
+                                    'total_weight' => 0,
+                                    'totalDiscount' => 0
                                 ];
                             }
                             $createOrderData[$citems->brand_id]['citems'][] = [
