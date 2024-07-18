@@ -155,10 +155,14 @@ class ShipRocketService
                             $pro = $citems->products;
                             $product_id = $pro->id;
                             $variation_option_id = [];
+                            $total_variation_amount = 0;
+                            $total_discount_amount = 0;
                             $variationData = CartProductVariationOption::where([['cart_id', $citems->id], ['product_id', $product_id]])->get();
                             if (isset($variationData) && !empty($variationData)) {
                                 foreach ($variationData as $variationOptionData) {
                                     $variation_option_id[] = $variationOptionData->variation_option_id;
+                                    $total_variation_amount = $total_variation_amount + $variationOptionData->amount;
+                                    $total_discount_amount = $total_discount_amount + $variationOptionData->discount_amount;
                                 }
                             }
                             $pro_measure = DB::table('product_measurements')
@@ -171,7 +175,7 @@ class ShipRocketService
                             $tax = [];
                             $category               = $pro->productCategory;
                             $salePrices             = getProductPrice($pro);
-log::info($salePrices);
+                            
                             if (isset($category->parent->tax_id) && !empty($category->parent->tax_id)) {
                                 $tax_info = Tax::find($category->parent->tax_id);
                             } else if (isset($category->tax_id) && !empty($category->tax_id)) {
@@ -188,7 +192,7 @@ log::info($salePrices);
                                 'tax' => $tax_total ?? '',
                                 'discount' => '',
                                 'units' => $citems->quantity,
-                                'selling_price' => ($citems->sub_total / $citems->quantity)
+                                'selling_price' => (($citems->sub_total / $citems->quantity) + $total_variation_amount - $total_discount_amount)
                             ];
 
                             // $cartItemsarr[$citems->brand_id][] = $tmp;
