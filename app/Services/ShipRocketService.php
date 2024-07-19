@@ -646,12 +646,14 @@ class ShipRocketService
             log::debug('order ids passed for cancel');
 
             log::debug($order_ids);
-
+            $payload = [
+                'ids' => $order_ids
+            ];
             $response = Http::withToken($token)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                 ])
-                ->post('https://apiv2.shiprocket.in/v1/external/orders/cancel', $order_ids);
+                ->post('https://apiv2.shiprocket.in/v1/external/orders/cancel', $payload);
 log::info('debug data for cancel');
                 log::debug([
                     'request' => [
