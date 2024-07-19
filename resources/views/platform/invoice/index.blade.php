@@ -367,7 +367,7 @@
                         </td>
                         <td class="w-100" style="text-align: right;"><span
                                 style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
-                            FREE
+                            0.00
                         </td>
                     </tr>
                     @endif
