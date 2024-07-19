@@ -518,6 +518,7 @@ class ShipRocketService
      */
     public function getRequestForCreateOrderApi($order_id_goli, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight, $cart_token, $brand_name, $total_discount)
     {
+        log::debug('Total discount is:'. $total_discount);
         return array(
             "order_id" => $order_id_goli,
             "order_date" => date('Y-m-d h:i'),
