@@ -640,6 +640,7 @@ class ShipRocketService
 
     public function cancelShiprocketOrder($order_ids)
     {
+        log::info('works inside cancel order');
         try {
             $token = $this->getToken();
             log::debug('order ids passed for cancel');
@@ -653,9 +654,11 @@ class ShipRocketService
                 ->post('https://apiv2.shiprocket.in/v1/external/orders/cancel', $order_ids);
 
             if ($response->successful()) {
-              
+              log::info($response);
                 return true;
             } else {
+              log::info($response);
+
                 return false;
             }
         } catch (Exception $e) {
