@@ -222,7 +222,7 @@ class ShipRocketService
                                 'id' => $citems->id
                             ];
                             $createOrderData[$citems->brand_id]['cartItemsarr'][] = $tmp;
-                            $createOrderData[$citems->brand_id]['cartTotal'] += $citems->sub_total;
+                            $createOrderData[$citems->brand_id]['cartTotal'] += ($citems->sub_total + $citems->coupon_amount);
                             $createOrderData[$citems->brand_id]['totalDiscount'] += $citems->coupon_amount;
                             $createOrderData[$citems->brand_id]['total_weight'] += $total_weight;
 
@@ -518,7 +518,6 @@ class ShipRocketService
      */
     public function getRequestForCreateOrderApi($order_id_goli, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight, $cart_token, $brand_name, $total_discount)
     {
-        log::debug('Total discount is:'. $total_discount);
         if($brand_name == 'Goli Soda'){
             $brand_name = 'Golisoda';
         }
