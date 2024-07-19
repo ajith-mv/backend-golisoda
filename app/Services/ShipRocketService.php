@@ -652,7 +652,14 @@ class ShipRocketService
                     'Content-Type' => 'application/json',
                 ])
                 ->post('https://apiv2.shiprocket.in/v1/external/orders/cancel', $order_ids);
-
+                log::info([
+                    'request' => [
+                        'url' => $response->effectiveUri(),
+                        'headers' => $response->headers(),
+                        'body' => $response->body()
+                    ],
+                    'response' => $response->json()
+                ]);
             if ($response->successful()) {
               log::info($response);
                 return true;
