@@ -520,7 +520,7 @@ log::debug($data['citems']);
     public function getRequestForCreateOrderApi($citems, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight, $cart_token, $brand_name, $total_discount)
     {
         return array(
-            "order_id" => $citems->cart_order_no,
+            "order_id" => isset($citems[0]['cart_order_no']) ? $citems[0]['cart_order_no'] : '',
             "order_date" => date('Y-m-d h:i'),
             "pickup_location" =>  $brand_name,
             "channel_id" =>  "",
