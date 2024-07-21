@@ -1424,52 +1424,50 @@ class CartController extends Controller
                         $item->update();
                     }
                 }
+
+                // Fetch or create base unique ID for the customer
                 $base_unique_id = Cart::where('customer_id', $customer_id)
-                    // ->whereNull('brand_id')
                     ->value('base_unique_id');
 
                 if (!$base_unique_id) {
                     // Create a new base unique ID if it doesn't exist
                     $base_unique_id = Str::uuid(); // Generate a new UUID
-                    // Cart::create([
-                    //     'customer_id' => $customer_id,
-                    //     'base_unique_id' => $base_unique_id,
-                    //     'brand_id' => null // Indicate that this is the base record
-                    // ]);
                     $item->base_unique_id = $base_unique_id;
                     $item->update();
                 }
 
-                // Determine suffix based on brand_id
-                $existingCart = Cart::where('customer_id', $customer_id)
-                    ->where('brand_id', $brandId)
-                    ->first();
+                // Determine suffix based on brand_id and ensure uniqueness
+                $existingCarts = Cart::where('customer_id', $customer_id)
+                    ->where('base_unique_id', $base_unique_id)
+                    ->get();
 
-                if ($existingCart) {
-                    // Fetch the existing suffix for this brand and customer combination
-                    $suffix = $existingCart->suffix;
+                if ($existingCarts->isNotEmpty()) {
+                    $suffix = $existingCarts->where('brand_id', $brandId)->first()->suffix ?? '';
+
+                    if (!$suffix) {
+                        // Generate a new suffix if it does not exist for the brand
+                        $suffix = $existingCarts->max('suffix') + 1; // Increment suffix
+                        $suffix = str_pad($suffix, 2, '0', STR_PAD_LEFT); // Ensure suffix is two digits
+
+                        // Store the suffix in the database
+                        $item->suffix = $suffix;
+                        $item->update();
+                    }
                 } else {
-                    // Generate a new suffix if it does not exist
-                    $suffix = Cart::where('customer_id', $customer_id)
-                        ->max('suffix') + 1; // Increment suffix
-                    $suffix = str_pad($suffix, 2, '0', STR_PAD_LEFT); // Ensure suffix is two digits
-
-                    // // Store the suffix in the database
-                    // Cart::updateOrCreate(
-                    //     ['customer_id' => $customer_id, 'brand_id' => $brandId],
-                    //     ['suffix' => $suffix]
-
-                    // );
-                    
+                    // If no existing carts, start suffix from '01'
+                    $suffix = '01';
                     $item->suffix = $suffix;
                     $item->update();
                 }
 
                 // Generate the unique number
-                $unique_number = $base_unique_id . '-' . $suffix;
+                $unique_number = $suffix ? $base_unique_id . '-' . $suffix : $base_unique_id;
 
                 // Ensure unique_number is unique
-                while (Cart::where('shiprocket_order_number', $unique_number)->where('brand_id', '!=', $item->brand_id)->orderBy('brand_id', 'asc')->exists()) {
+                while (Cart::where('shiprocket_order_number', $unique_number)
+                    ->where('brand_id', '!=', $item->brand_id)
+                    ->exists()
+                ) {
                     $suffix = str_pad(++$suffix, 2, '0', STR_PAD_LEFT); // Increment suffix
                     $unique_number = $base_unique_id . '-' . $suffix;
                 }
