@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Master\CustomerAddress;
 use App\Services\ShipRocketService;
+use Illuminate\Support\Str;
 
 class CartController extends Controller
 {
