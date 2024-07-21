@@ -11,57 +11,57 @@
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">Branch name</label>
                                 <input type="text" name="branch_name" class="form-control  required"
-                                    placeholder="Enter Branch name" value={{ $vendor_location->branch_name }} />
+                                    placeholder="Enter Branch name" value="{{ $vendor_location->branch_name }}" />
                             </div>
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">Address Line 1</label>
                                 <input type="text" name="address_line_1" class="form-control  required"
-                                    placeholder="Enter Address line1" value={{ $vendor_location->address_line1 }} />
+                                    placeholder="Enter Address line1" value="{{ $vendor_location->address_line1 }}" />
                             </div>
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">Address Line 2</label>
                                 <input type="text" name="address_line_2" class="form-control  required"
-                                    placeholder="Enter Address line2" value={{ $vendor_location->address_line2 }} />
+                                    placeholder="Enter Address line2" value="{{ $vendor_location->address_line2 }}" />
                             </div>
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">City</label>
                                 <input type="text" name="city" class="form-control  required"
-                                    placeholder="Enter City" value={{ $vendor_location->city }} />
+                                    placeholder="Enter City" value="{{ $vendor_location->city }}" />
                             </div>
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">State</label>
                                 <input type="text" name="state" class="form-control  required"
-                                    placeholder="Enter State" value={{ $vendor_location->state }} />
+                                    placeholder="Enter State" value="{{ $vendor_location->state }}" />
                             </div>
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">Pincode</label>
                                 <input type="text" name="pincode" class="form-control  required"
-                                    placeholder="Enter Pincode" value={{ $vendor_location->pincode }} />
+                                    placeholder="Enter Pincode" value="{{ $vendor_location->pincode }}" />
                             </div>
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">Email</label>
                                 <input type="email" name="email_id" class="form-control  required"
-                                    placeholder="Enter Email" value={{ $vendor_location->email_id }} />
+                                    placeholder="Enter Email" value="{{ $vendor_location->email_id }}" />
                             </div>
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">Mobile number</label>
                                 <input type="text" name="mobile_number" class="form-control  required"
-                                    placeholder="Enter Mobile number" value={{ $vendor_location->mobile_no }} />
+                                    placeholder="Enter Mobile number" value="{{ $vendor_location->mobile_no }}" />
                             </div>
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">Contact person</label>
                                 <input type="text" name="contact_person" class="form-control  required"
-                                    placeholder="Enter Contact Person" value={{ $vendor_location->contact_person }} />
+                                    placeholder="Enter Contact Person" value="{{ $vendor_location->contact_person }}" />
                             </div>
                             <div class="col-md-3">
                                 <label class="required form-label fs-6 mb-2">Contact number</label>
                                 <input type="text" name="contact_number" class="form-control  required"
-                                    placeholder="Enter Contact Number" value={{ $vendor_location->contact_number }} />
+                                    placeholder="Enter Contact Number" value="{{ $vendor_location->contact_number }}" />
                             </div>
                             <div class="col-md-2">
                                 <label class=" form-label fs-6 mb-2">Is Default</label>
                                 <div class="input-group pb-3" style="margin-top: 13px">
-                                    <input type="checkbox" class="is-default-checkbox" name="is_default" value={{ $vendor_location->is_default }} @if($vendor_location->is_default == 1) checked @endif>
+                                    <input type="checkbox" class="is-default-checkbox" name="is_default" value="{{ $vendor_location->is_default }}" @if($vendor_location->is_default == 1) checked @endif>
                                 </div>
                             </div>
                             <div class="col-md-4">
