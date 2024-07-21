@@ -1431,7 +1431,7 @@ class CartController extends Controller
 
                 if (!$base_unique_id) {
                     // Create a new base unique ID if it doesn't exist
-                    $base_unique_id = Str::uuid(); // Generate a new UUID
+                    $base_unique_id = date('YmdHis'); // Generate a new UUID
                     $item->base_unique_id = $base_unique_id;
                     $item->update();
                 }
