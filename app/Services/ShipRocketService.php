@@ -270,7 +270,7 @@ class ShipRocketService
                                     $orderItems = $data['cartItemsarr'];
                                     $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
-                                    $brand_name = $branch_data->branch_name;
+                                    $brand_name = isset($branch_data) ? $branch_data->branch_name : '';
                                     $order_id_goli = 'ORD' . $customer_id . $brandId;
                                     $params = $this->getRequestForCreateOrderApi(
                                         $order_id_goli,
