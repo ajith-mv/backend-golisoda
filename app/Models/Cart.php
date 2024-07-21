@@ -30,7 +30,8 @@ class Cart extends Model
         'cart_id',
         'brand_id',
         'shiprocket_order_number',
-        'base_unique_id'
+        'base_unique_id',
+        'suffix'
     ];
 
     public function getCustomCartNoAttribute()
