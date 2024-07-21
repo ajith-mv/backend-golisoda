@@ -1428,7 +1428,7 @@ class CartController extends Controller
                 $base_unique_id = $customer_id . $brandId;
 
                 // Check if a unique number already exists for the current base identifier
-                $existing = Cart::where('customer_id', $customer_id)->where('brand_id', $brandId)->first();
+                $existing = Cart::where('customer_id', $customer_id)->where('base_unique_id', $base_unique_id)->where('brand_id', $brandId)->first();
 
                 if (!$existing) {
                     // If no existing record, create a new unique identifier
