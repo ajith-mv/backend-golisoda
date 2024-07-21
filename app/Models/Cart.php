@@ -28,7 +28,8 @@ class Cart extends Model
         'coupon_code', 
         'coupon_type',
         'cart_id',
-        'brand_id'
+        'brand_id',
+        'shiprocket_order_number'
     ];
 
     public function getCustomCartNoAttribute()

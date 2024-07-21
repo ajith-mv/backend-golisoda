@@ -859,19 +859,19 @@ class CartController extends Controller
             $checkCart->addons()->delete();
             $checkCart->variationOptions()->delete();
             $shipments = $checkCart->shipments();
-            // $shiprocketOrderId = $shipments->first()->shiprocket_order_id ?? null;
+            $shiprocketOrderId = $shipments->first()->shiprocket_order_id ?? null;
 
-            // if ($shiprocketOrderId) {
-            //     // Count how many carts are associated with this shiprocket_order_id
-            //     $count = CartShipment::where('shiprocket_order_id', $shiprocketOrderId)->count();
-            //     if ($count <= 1) {
-            //         $shiprocket_order_ids[] = $shiprocketOrderId;
-            //         // If only one cart is associated, cancel the Shiprocket order
-            //         $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
+            if ($shiprocketOrderId) {
+                // Count how many carts are associated with this shiprocket_order_id
+                $count = CartShipment::where('shiprocket_order_id', $shiprocketOrderId)->count();
+                if ($count <= 1) {
+                    $shiprocket_order_ids[] = $shiprocketOrderId;
+                    // If only one cart is associated, cancel the Shiprocket order
+                    $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
                     $checkCart->rocketResponse()->delete();
                     $checkCart->shipments()->delete();
-            //     }
-            // }
+                }
+            }
 
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;
@@ -917,8 +917,8 @@ class CartController extends Controller
             })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
                 $q->where('guest_token', $guest_token);
             })->delete();
-            // $shipment_order_ids = $this->getShipmentOrderIds($cart_ids);
-            // $this->rocketService->cancelShiprocketOrder($shipment_order_ids);
+            $shipment_order_ids = $this->getShipmentOrderIds($cart_ids);
+            $this->rocketService->cancelShiprocketOrder($shipment_order_ids);
             $data = $this->getCartListAll($customer_id, $guest_token);
             $error = 0;
             $message = 'Cart Cleared successful';
@@ -1405,6 +1405,7 @@ class CartController extends Controller
         $is_free = [];
         $flat_charges = 0;
         $overall_flat_charges = 0;
+        $brandSuffix = 1; // Initialize suffix counter
         // dd( $all_cart );
         if (isset($all_cart) && !empty($all_cart)) {
             foreach ($all_cart as $item) {
@@ -1423,6 +1424,43 @@ class CartController extends Controller
                         $item->update();
                     }
                 }
+                // Generate or retrieve base unique identifier
+                $base_unique_id = $customer_id . $brandId;
+
+                // Check if a unique number already exists for the current base identifier
+                $existing = Cart::where('customer_id', $customer_id)->where('brand_id', $brandId)->first();
+
+                if (!$existing) {
+                    // If no existing record, create a new unique identifier
+                    $unique_identifier = Str::uuid(); // Generate a new UUID
+                    $base_unique_id = $unique_identifier;
+
+                    // Store the base unique identifier in the database for future reference
+                    $item->base_unique_id = $base_unique_id;
+                    $item->save();
+                } else {
+                    // Use the existing unique identifier
+                    $base_unique_id = $existing->base_unique_id;
+                }
+
+                // Generate suffix
+                $suffix = str_pad($brandSuffix++, 2, '0', STR_PAD_LEFT); // Ensure suffix is two digits
+
+                // Combine base unique identifier with suffix
+                $unique_number = $base_unique_id . '-' . $suffix;
+
+                // Check for uniqueness
+                $existing = Cart::where('unique_number', $unique_number)->first();
+                while ($existing) {
+                    $suffix = str_pad(++$brandSuffix, 2, '0', STR_PAD_LEFT); // Increment suffix
+                    $unique_number = $base_unique_id . '-' . $suffix;
+                    $existing = Cart::where('unique_number', $unique_number)->first();
+                }
+
+                // Update item with the new unique number
+                $item->shiprocket_order_number = $unique_number;
+                $item->update();
+
                 log::info($item->products->productMeasurement);
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
             }
