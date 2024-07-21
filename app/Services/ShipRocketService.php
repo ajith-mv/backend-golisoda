@@ -272,6 +272,8 @@ class ShipRocketService
                                     $measure_ment = $data['measurement'];
                                     $brand_name = isset($branch_data) ? $branch_data->branch_name : '';
                                     // $order_id_goli = 'ORD' . $customer_id . $brandId;
+log::debug($data['citems']);
+
                                     $params = $this->getRequestForCreateOrderApi(
                                         $data['citems'],
                                         $data['cartShipAddress'],
@@ -284,7 +286,6 @@ class ShipRocketService
                                         $brand_name,
                                         $data['totalDiscount'],
                                     );
-log::debug($data['citems']);
                                     // $createResponse = $this->createOrder($params);
                                     // Check if order exists in Shiprocket and update it
                                     Log::info("cart token: " . $cart_token);
