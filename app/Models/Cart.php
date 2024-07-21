@@ -34,11 +34,6 @@ class Cart extends Model
         'suffix'
     ];
 
-    public function getCustomCartNoAttribute()
-    {
-        return 'ORD'.$this->customer_id . $this->brand_id;
-    }
-
     public function products()
     {
         return $this->hasOne(Product::class, 'id', 'product_id');
@@ -56,7 +51,7 @@ class Cart extends Model
 
     public function rocketResponse()
     {
-        return $this->hasOne(CartShiprocketResponse::class, 'cart_token', 'custom_cart_no');
+        return $this->hasOne(CartShiprocketResponse::class, 'cart_token', 'shiprocket_order_number');
     }
 
     public function shipments()
