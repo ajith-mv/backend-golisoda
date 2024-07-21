@@ -1469,7 +1469,7 @@ class CartController extends Controller
                 $unique_number = $base_unique_id . '-' . $suffix;
 
                 // Ensure unique_number is unique
-                while (Cart::where('shiprocket_order_number', $unique_number)->where('id', '!=', $item->id)->exists()) {
+                while (Cart::where('shiprocket_order_number', $unique_number)->where('brand_id', '!=', $item->brand_id)->orderBy('brand_id', 'asc')->exists()) {
                     $suffix = str_pad(++$suffix, 2, '0', STR_PAD_LEFT); // Increment suffix
                     $unique_number = $base_unique_id . '-' . $suffix;
                 }
