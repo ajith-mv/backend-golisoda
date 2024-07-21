@@ -809,7 +809,8 @@ class CheckoutController extends Controller
                     'razorpay_signature' => $razor_response['razorpay_signature']
                 );
 
-                $api->utility->verifyPaymentSignature($attributes);
+                $verify_payment = $api->utility->verifyPaymentSignature($attributes);
+                log::debug($verify_payment);
             } catch (SignatureVerificationError $e) {
                 $success = false;
                 $error_message = 'Razorpay Error : ' . $e->getMessage();
