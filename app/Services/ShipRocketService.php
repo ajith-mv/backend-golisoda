@@ -284,7 +284,7 @@ class ShipRocketService
                                         $brand_name,
                                         $data['totalDiscount'],
                                     );
-
+log::debug($data['citems']);
                                     // $createResponse = $this->createOrder($params);
                                     // Check if order exists in Shiprocket and update it
                                     Log::info("cart token: " . $cart_token);
