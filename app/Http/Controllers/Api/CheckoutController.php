@@ -435,7 +435,7 @@ class CheckoutController extends Controller
             } catch (\Throwable $th) {
                 Log::info($th->getMessage());
             }
-            event(new OrderCreated($brandIds, $orderId));
+            event(new OrderCreated($brandIds, $order_id));
             // $this->sendBrandVendorEmail($brandIds, $order_info->id); //email to brand vendor
             #send sms for notification
             $sms_params = array(
