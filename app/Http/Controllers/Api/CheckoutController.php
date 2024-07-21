@@ -8,7 +8,6 @@ use App\Models\BrandOrder;
 use App\Models\Cart;
 use App\Models\GlobalSettings;
 use App\Models\Master\Brands;
-use App\Models\Master\BrandVendorLocation;
 use App\Models\Master\EmailTemplate;
 use App\Models\Master\OrderStatus;
 use App\Models\Offers\Coupons;
@@ -25,6 +24,7 @@ use App\Models\Master\Variation;
 use App\Models\OrderProductVariationOption;
 use App\Models\Product\ProductVariationOption;
 use App\Models\Warranty;
+use App\Events\OrderCreated;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -264,7 +264,7 @@ class CheckoutController extends Controller
                 $ins['shiprocket_order_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_order_id : '';
                 $ins['shiprocket_shipment_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_shipment_id : '';
                 $brand_order = BrandOrder::create($ins);
-
+                $this->generateOrderNumbers();
                 //insert variations
                 if (isset($item['chosen_variation_option_ids']) && !empty($item['chosen_variation_option_ids'])) {
                     foreach ($item['chosen_variation_option_ids'] as $variation_option_id) {
@@ -435,7 +435,8 @@ class CheckoutController extends Controller
             } catch (\Throwable $th) {
                 Log::info($th->getMessage());
             }
-            $this->sendBrandVendorEmail($brandIds, $order_info->id); //email to brand vendor
+            event(new OrderCreated($brandIds, $orderId));
+            // $this->sendBrandVendorEmail($brandIds, $order_info->id); //email to brand vendor
             #send sms for notification
             $sms_params = array(
                 'company_name' => env('APP_NAME'),
@@ -935,7 +936,8 @@ class CheckoutController extends Controller
                     } catch (\Throwable $th) {
                         Log::info($th->getMessage());
                     }
-                    $this->sendBrandVendorEmail($brandIds, $order_info->id); //email to brand vendor
+                    // $this->sendBrandVendorEmail($brandIds, $order_info->id); //email to brand vendor
+                    event(new OrderCreated($brandIds, $orderId));
                     #send sms for notification
                     $sms_params = array(
                         'company_name' => env('APP_NAME'),
@@ -1038,111 +1040,111 @@ class CheckoutController extends Controller
         return response()->json(array('error' => 1, 'status_code' => 200, 'message' => 'Something went wrong', 'status' => 'failure', 'success' => []), 200);
     }
 
-    /**
-     * Method sendBrandVendorEmail
-     *
-     * @param $brandIds array
-     *
-     * @return void
-     */
-    public function sendBrandVendorEmail($brandIds, $order_id)
-    {
-        $uniqueBrandIds =  array_unique($brandIds);
-        $globalInfo = GlobalSettings::first();
-        if (!empty($uniqueBrandIds)) {
-            foreach ($uniqueBrandIds as $singleBrandId) {
-                $brandOrderData = BrandOrder::join('orders', 'orders.id', '=', 'brand_orders.order_id')
-                    ->where([['brand_id', $singleBrandId], ['order_id', $order_id]])
-                    ->get();
-                if ($brandOrderData) {
-                    $order_info = $brandOrderData[0]->order;
-                    $variations = $this->getVariations($order_info);
-                    $brand_address = BrandVendorLocation::where([['brand_id', $singleBrandId], ['is_default', 1]])
-                        ->join('brands', 'brand_vendor_locations.brand_id', '=', 'brands.id')
-                        ->select('brand_vendor_locations.*', 'brands.brand_name')
-                        ->first();
-                    if (isset($brand_address) && (!empty($brand_address))) {
-                        $pdf = PDF::loadView('platform.vendor_invoice.index', compact('brand_address', 'order_info', 'globalInfo', 'variations', 'singleBrandId'));
-                        Storage::put('public/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf', $pdf->output());
-                        $email_slug = 'new-order-vendor';
-                        $to_email_address = $brand_address->email_id;
-                        $globalInfo = GlobalSettings::first();
-                        $filePath = 'storage/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf';
-                        $extract = array(
-                            'name' => $brand_address->brand_name,
-                            'regards' => $globalInfo->site_name,
-                            'company_website' => '',
-                            'company_mobile_no' => $globalInfo->site_mobile_no,
-                            'company_address' => $globalInfo->address,
-                            'dynamic_content' => '',
-                            'order_id' => $order_info->order_no
-                        );
+    // /**
+    //  * Method sendBrandVendorEmail
+    //  *
+    //  * @param $brandIds array
+    //  *
+    //  * @return void
+    //  */
+    // public function sendBrandVendorEmail($brandIds, $order_id)
+    // {
+    //     $uniqueBrandIds =  array_unique($brandIds);
+    //     $globalInfo = GlobalSettings::first();
+    //     if (!empty($uniqueBrandIds)) {
+    //         foreach ($uniqueBrandIds as $singleBrandId) {
+    //             $brandOrderData = BrandOrder::join('orders', 'orders.id', '=', 'brand_orders.order_id')
+    //                 ->where([['brand_id', $singleBrandId], ['order_id', $order_id]])
+    //                 ->get();
+    //             if ($brandOrderData) {
+    //                 $order_info = $brandOrderData[0]->order;
+    //                 $variations = $this->getVariations($order_info);
+    //                 $brand_address = BrandVendorLocation::where([['brand_id', $singleBrandId], ['is_default', 1]])
+    //                     ->join('brands', 'brand_vendor_locations.brand_id', '=', 'brands.id')
+    //                     ->select('brand_vendor_locations.*', 'brands.brand_name')
+    //                     ->first();
+    //                 if (isset($brand_address) && (!empty($brand_address))) {
+    //                     $pdf = PDF::loadView('platform.vendor_invoice.index', compact('brand_address', 'order_info', 'globalInfo', 'variations', 'singleBrandId'));
+    //                     Storage::put('public/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf', $pdf->output());
+    //                     $email_slug = 'new-order-vendor';
+    //                     $to_email_address = $brand_address->email_id;
+    //                     $globalInfo = GlobalSettings::first();
+    //                     $filePath = 'storage/invoice_order/' . $brandOrderData[0]->order_id . '/' . $singleBrandId . '/' . $brandOrderData[0]->order->order_no . '.pdf';
+    //                     $extract = array(
+    //                         'name' => $brand_address->brand_name,
+    //                         'regards' => $globalInfo->site_name,
+    //                         'company_website' => '',
+    //                         'company_mobile_no' => $globalInfo->site_mobile_no,
+    //                         'company_address' => $globalInfo->address,
+    //                         'dynamic_content' => '',
+    //                         'order_id' => $order_info->order_no
+    //                     );
 
-                        $this->sendEmailNotificationByArray($email_slug, $extract, $to_email_address, $filePath);
-                    }
-                }
-            }
-        }
-    }
+    //                     $this->sendEmailNotificationByArray($email_slug, $extract, $to_email_address, $filePath);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
-    /**
-     * Method sendEmailNotificationByArray
-     *
-     * @param $email_slug string
-     * @param $extract array
-     * @param $to_email_address string
-     * @param $filePath string
-     *
-     * @return void
-     */
-    public function sendEmailNotificationByArray($email_slug, $extract, $to_email_address, $filePath)
-    {
-        $emailTemplate = EmailTemplate::select('email_templates.*')
-            ->join('sub_categories', 'sub_categories.id', '=', 'email_templates.type_id')
-            ->where('sub_categories.slug', $email_slug)->first();
+    // /**
+    //  * Method sendEmailNotificationByArray
+    //  *
+    //  * @param $email_slug string
+    //  * @param $extract array
+    //  * @param $to_email_address string
+    //  * @param $filePath string
+    //  *
+    //  * @return void
+    //  */
+    // public function sendEmailNotificationByArray($email_slug, $extract, $to_email_address, $filePath)
+    // {
+    //     $emailTemplate = EmailTemplate::select('email_templates.*')
+    //         ->join('sub_categories', 'sub_categories.id', '=', 'email_templates.type_id')
+    //         ->where('sub_categories.slug', $email_slug)->first();
 
-        $templateMessage = $emailTemplate->message;
-        $templateMessage = str_replace("{", "", addslashes($templateMessage));
-        $templateMessage = str_replace("}", "", $templateMessage);
-        extract($extract);
-        eval("\$templateMessage = \"$templateMessage\";");
+    //     $templateMessage = $emailTemplate->message;
+    //     $templateMessage = str_replace("{", "", addslashes($templateMessage));
+    //     $templateMessage = str_replace("}", "", $templateMessage);
+    //     extract($extract);
+    //     eval("\$templateMessage = \"$templateMessage\";");
 
-        $title = $emailTemplate->title;
-        $title = str_replace("{", "", addslashes($title));
-        $title = str_replace("}", "", $title);
-        eval("\$title = \"$title\";");
+    //     $title = $emailTemplate->title;
+    //     $title = str_replace("{", "", addslashes($title));
+    //     $title = str_replace("}", "", $title);
+    //     eval("\$title = \"$title\";");
 
-        // $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
-        $send_mail = new OrderMail($templateMessage, $title, $filePath);
-        // return $send_mail->render();
-        try {
-            $bccEmails = explode(',', env('ORDER_EMAILS'));
-            Mail::to($to_email_address)->bcc($bccEmails)->send($send_mail);
-        } catch (\Throwable $th) {
-            Log::info($th->getMessage());
-        }
-    }
+    //     // $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
+    //     $send_mail = new OrderMail($templateMessage, $title, $filePath);
+    //     // return $send_mail->render();
+    //     try {
+    //         $bccEmails = explode(',', env('ORDER_EMAILS'));
+    //         Mail::to($to_email_address)->bcc($bccEmails)->send($send_mail);
+    //     } catch (\Throwable $th) {
+    //         Log::info($th->getMessage());
+    //     }
+    // }
 
-    /**
-     * Method getVariations
-     *
-     * @param $order_info object
-     *
-     * @return array
-     */
-    public function getVariations($order_info)
-    {
-        $variation_id = [];
-        $variations = [];
-        if (isset($order_info->Variation) && !empty($order_info->Variation)) {
-            $data = $order_info->Variation;
-            foreach ($data as $value) {
-                $variation_id[] = $value->variation_id;
-            }
-            $variations = Variation::whereIn('id', $variation_id)->get();
-        }
-        return $variations;
-    }
+    // /**
+    //  * Method getVariations
+    //  *
+    //  * @param $order_info object
+    //  *
+    //  * @return array
+    //  */
+    // public function getVariations($order_info)
+    // {
+    //     $variation_id = [];
+    //     $variations = [];
+    //     if (isset($order_info->Variation) && !empty($order_info->Variation)) {
+    //         $data = $order_info->Variation;
+    //         foreach ($data as $value) {
+    //             $variation_id[] = $value->variation_id;
+    //         }
+    //         $variations = Variation::whereIn('id', $variation_id)->get();
+    //     }
+    //     return $variations;
+    // }
 
 
     public function determineFinalShippingType($shippingTypes)
@@ -1162,6 +1164,42 @@ class CheckoutController extends Controller
             }
             // Default fallback (optional based on your needs)
             return null;
+        }
+    }
+
+    public function generateOrderNumbers()
+    {
+        // Fetch distinct order_ids from the brand_orders table
+        $orders = BrandOrder::select('order_id')
+            ->distinct()
+            ->get();
+
+        foreach ($orders as $order) {
+            $orderId = $order->order_id;
+
+            // Fetch the order_no from the Orders table
+            $orderInfo = Order::where('id', $orderId)->first(['order_no']);
+            $orderNo = $orderInfo->order_no;
+
+            // Fetch all brand_ids associated with the current order_id
+            $brands = BrandOrder::where('order_id', $orderId)
+                ->get(['id', 'brand_id']);
+
+            // Generate the base order number using the order_no
+            $baseOrderNumber = $orderNo;
+
+            // Initialize the suffix counter
+            $count = 1;
+
+            // Update each brand order with the generated order number
+            foreach ($brands as $brandOrder) {
+                $brandOrderNumber = $baseOrderNumber . '-' . str_pad($count, 2, '0', STR_PAD_LEFT);
+                $count++;
+
+                // Update the brand order with the generated order number
+                $brandOrder->order_number = $brandOrderNumber;
+                $brandOrder->save();
+            }
         }
     }
 }
