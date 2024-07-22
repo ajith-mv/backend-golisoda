@@ -271,7 +271,7 @@ class ShipRocketService
                                     $cart_total = $data['cartTotal'];
                                     $measure_ment = $data['measurement'];
                                     $brand_name = isset($branch_data) ? $branch_data->branch_name : '';
-                                    // $order_id_goli = 'ORD' . $customer_id . $brandId;
+                                    $order_id_goli = isset($citems[0]['cart_order_no']) ? $citems[0]['cart_order_no'] : '';
 log::debug($data['citems']);
 
                                     $params = $this->getRequestForCreateOrderApi(
@@ -517,10 +517,10 @@ log::debug($data['citems']);
      *
      * @return array
      */
-    public function getRequestForCreateOrderApi($citems, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight, $cart_token, $brand_name, $total_discount)
+    public function getRequestForCreateOrderApi($order_id_goli, $cartShipAddress, $customer, $cartItemsarr, $measure, $cartTotal, $total_weight, $cart_token, $brand_name, $total_discount)
     {
         return array(
-            "order_id" => isset($citems[0]['cart_order_no']) ? $citems[0]['cart_order_no'] : '',
+            "order_id" => $order_id_goli,
             "order_date" => date('Y-m-d h:i'),
             "pickup_location" =>  $brand_name,
             "channel_id" =>  "",
