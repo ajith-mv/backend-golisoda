@@ -860,7 +860,7 @@ class CartController extends Controller
             $checkCart->addons()->delete();
             $checkCart->variationOptions()->delete();
             $shipments = $checkCart->shipments();
-            $shiprocketOrderId = $shipments->first()->shiprocket_order_id ?? null;
+            $shiprocketOrderId = CartShipment::where('cart_id', $checkCart->id)->first()->shiprocket_order_id;
 
             if ($shiprocketOrderId) {
                 // Count how many carts are associated with this shiprocket_order_id
