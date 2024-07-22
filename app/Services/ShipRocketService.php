@@ -648,7 +648,7 @@ log::debug($data['citems']);
 
             log::debug($order_ids);
             $payload = [
-                'ids' => $order_ids
+                'ids' => implode(', ',$order_ids)
             ];
             $response = Http::withToken($token)
                 ->withHeaders([
