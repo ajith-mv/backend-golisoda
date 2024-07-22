@@ -550,7 +550,7 @@ log::debug($order_id_goli);
             "shipping_email" => $cartShipAddress->email ?? $customer->email,
             "shipping_phone" => $cartShipAddress->mobile_no,
             "order_items" => $cartItemsarr,
-            "payment_method" => "cod",
+            "payment_method" => "Prepaid",
             "shipping_charges" => 0,
             "giftwrap_charges" => 0,
             "transaction_charges" => 0,
