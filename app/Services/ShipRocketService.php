@@ -275,7 +275,7 @@ class ShipRocketService
 log::debug($order_id_goli);
 
                                     $params = $this->getRequestForCreateOrderApi(
-                                        $data['citems'],
+                                        $order_id_goli,
                                         $data['cartShipAddress'],
                                         $data['customer'],
                                         $orderItems,
