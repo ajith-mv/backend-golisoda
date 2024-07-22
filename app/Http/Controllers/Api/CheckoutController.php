@@ -338,6 +338,12 @@ class CheckoutController extends Controller
         $delete_cart = Cart::where('customer_id', $customer_id)->get();
         foreach ($delete_cart as $delete_data) {
             $delete_data->variationOptions()->delete();
+            $shiprocket_order_id_to_be_updated = $delete_data->rocketResponse()->order_id;
+            $request = json_decode($delete_data->rocketResponse()->rocket_order_request_data);
+            if (isset($request['payment_method'])) {
+                $request['payment_method'] = 'COD';
+            }
+            $this->rocketService->updateOrder($request);
             $delete_data->rocketResponse()->delete();
             $delete_data->shipments()->delete();
             $delete_data->delete();
