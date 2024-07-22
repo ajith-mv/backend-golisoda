@@ -19,6 +19,7 @@ use App\Models\Payment;
 use App\Models\Product\OrderProductAddon;
 use App\Models\Product\Product;
 use App\Models\CartShipment;
+Use App\Models\CartShiprocketResponse;
 use App\Models\Master\CustomerAddress;
 use App\Models\Master\Variation;
 use App\Models\OrderProductVariationOption;
@@ -338,8 +339,8 @@ class CheckoutController extends Controller
         $delete_cart = Cart::where('customer_id', $customer_id)->get();
         foreach ($delete_cart as $delete_data) {
             $delete_data->variationOptions()->delete();
-            $shiprocket_order_id_to_be_updated = $delete_data->rocketResponse()->order_id;
-            $request = json_decode($delete_data->rocketResponse()->rocket_order_request_data);
+            $shiprocket_response_data = CartShiprocketResponse::where('order_id', $delete_data->shiprocket_order_number)->first();
+            $request = json_decode($shiprocket_response_data->rocket_order_request_data);
             if (isset($request['payment_method'])) {
                 $request['payment_method'] = 'COD';
             }
