@@ -1441,27 +1441,18 @@ class CartController extends Controller
                     ->where('base_unique_id', $base_unique_id)
                     ->get();
 
+                $suffix = '01'; // Default suffix
+
                 if ($existingCarts->isNotEmpty()) {
-                    $suffix = $existingCarts->where('brand_id', $brandId)->first()->suffix ?? '';
-
-                    if (!$suffix) {
-                        // Generate a new suffix if it does not exist for the brand
-                        $suffix = $existingCarts->max('suffix') + 1; // Increment suffix
-                        $suffix = str_pad($suffix, 2, '0', STR_PAD_LEFT); // Ensure suffix is two digits
-
-                        // Store the suffix in the database
-                        $item->suffix = $suffix;
-                        $item->update();
+                    // Get the highest existing suffix for the current customer and base_unique_id
+                    $maxSuffix = $existingCarts->max('suffix');
+                    if ($maxSuffix) {
+                        $suffix = str_pad($maxSuffix + 1, 2, '0', STR_PAD_LEFT);
                     }
-                } else {
-                    // If no existing carts, start suffix from '01'
-                    $suffix = '01';
-                    $item->suffix = $suffix;
-                    $item->update();
                 }
 
                 // Generate the unique number
-                $unique_number = $suffix ? $base_unique_id . '-' . $suffix : $base_unique_id;
+                $unique_number = $base_unique_id . '-' . $suffix;
 
                 // Ensure unique_number is unique
                 while (Cart::where('shiprocket_order_number', $unique_number)
@@ -1473,6 +1464,7 @@ class CartController extends Controller
                 }
 
                 // Update item with the new unique number
+                $item->suffix = $suffix;
                 $item->shiprocket_order_number = $unique_number;
                 $item->update();
 
