@@ -1427,11 +1427,12 @@ class CartController extends Controller
 
                 // Fetch or create base unique ID for the customer
                 $base_unique_id = Cart::where('customer_id', $customer_id)
+                    ->where('brand_id', $brandId)
                     ->value('base_unique_id');
 
                 if (!$base_unique_id) {
                     // Create a new base unique ID if it doesn't exist
-                    $base_unique_id = date('YmdHis'); // Generate a new UUID
+                    $base_unique_id = date('YmdHis'); // Generate a new unique ID
                     $item->base_unique_id = $base_unique_id;
                     $item->update();
                 }
@@ -1441,20 +1442,29 @@ class CartController extends Controller
                     ->where('base_unique_id', $base_unique_id)
                     ->get();
 
-                $suffix = '01'; // Default suffix
-
                 if ($existingCarts->isNotEmpty()) {
-                    // Get the highest existing suffix for the current customer and base_unique_id
-                    $maxSuffix = $existingCarts->max('suffix');
-                    if ($maxSuffix) {
-                        $suffix = str_pad($maxSuffix + 1, 2, '0', STR_PAD_LEFT);
+                    $suffix = $existingCarts->where('brand_id', $brandId)->first()->suffix ?? null;
+
+                    if (!$suffix) {
+                        // Generate a new suffix if it does not exist for the brand
+                        $maxSuffix = $existingCarts->max('suffix');
+                        $suffix = str_pad($maxSuffix + 1, 2, '0', STR_PAD_LEFT); // Increment suffix and ensure it's two digits
+
+                        // Store the new suffix in the database
+                        $item->suffix = $suffix;
+                        $item->update();
                     }
+                } else {
+                    // If no existing carts, start suffix from '01'
+                    $suffix = '01';
+                    $item->suffix = $suffix;
+                    $item->update();
                 }
 
                 // Generate the unique number
-                $unique_number = $base_unique_id . '-' . $suffix;
+                $unique_number = $suffix ? $base_unique_id . '-' . $suffix : $base_unique_id;
 
-                // Ensure unique_number is unique
+                // Ensure unique_number is unique across different brands
                 while (Cart::where('shiprocket_order_number', $unique_number)
                     ->where('brand_id', '!=', $item->brand_id)
                     ->exists()
@@ -1464,9 +1474,9 @@ class CartController extends Controller
                 }
 
                 // Update item with the new unique number
-                $item->suffix = $suffix;
                 $item->shiprocket_order_number = $unique_number;
                 $item->update();
+
 
                 log::info($item->products->productMeasurement);
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
