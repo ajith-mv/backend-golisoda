@@ -106,7 +106,7 @@ class ShipRocketService
             log::debug($params);
             $response = json_decode($response);
             $ins_params['rocket_order_request_data'] = json_encode($params);
-            $ins_params['request_type'] = 'update_order';
+            $ins_params['request_type'] = 'update_orders';
 
             CartShiprocketResponse::where('order_id', $params['order_id'])->update($ins_params);
             return $response;
