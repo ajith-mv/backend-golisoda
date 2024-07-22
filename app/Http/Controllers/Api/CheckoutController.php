@@ -341,7 +341,8 @@ class CheckoutController extends Controller
             $delete_data->variationOptions()->delete();
             $shiprocket_response_data = CartShiprocketResponse::where('cart_token', $delete_data->shiprocket_order_number)->first();
             if(isset($shiprocket_response_data)){
-                $request = json_decode($shiprocket_response_data->rocket_order_request_data);
+                $request = json_decode($shiprocket_response_data->rocket_order_request_data, true);
+                log::debug($request);
                 if (isset($request['payment_method'])) {
                     $request['payment_method'] = 'COD';
                 }
