@@ -821,7 +821,7 @@ class CheckoutController extends Controller
                     $unique_shiprocket_order_ids = array_unique($shiprocket_order_ids);
                     $this->rocketService->cancelShiprocketOrder($unique_shiprocket_order_ids);
                     // Update the cart's shiprocket_order_number
-                    Cart::whereIn('id', $cart_ids)->update(['shiprocket_order_number' => NULL]);
+                    Cart::whereIn('id', $cart_ids)->update(['base_unique_id' => NULL]);
                     log::info('shiprocket order cancelled and shiprocket order number set as null in cart');
                 }
             }
