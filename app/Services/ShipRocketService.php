@@ -648,7 +648,7 @@ log::debug($order_id_goli);
 
             log::debug($order_ids);
             $payload = [
-                'ids' => implode(', ',$order_ids)
+                'ids' => $order_ids
             ];
             $response = Http::withToken($token)
                 ->withHeaders([
