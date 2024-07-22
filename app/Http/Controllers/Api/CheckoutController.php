@@ -802,8 +802,8 @@ class CheckoutController extends Controller
         $success = true;
         $error_message = "Payment Success";
         // log::debug($razor_response);
-        if (isset($array['error']) && isset($array['error']['reason']) && !empty($array['error']['reason'])) {
-            $reason = $array['error']['reason'];
+        if (isset($razor_response['error']) && isset($razor_response['error']['reason']) && !empty($razor_response['error']['reason'])) {
+            $reason = $razor_response['error']['reason'];
             if ($reason == 'payment_cancelled') {
                 log::info('payment cancelled called');
                 $carts = Cart::where('customer_id', $customer_id)
