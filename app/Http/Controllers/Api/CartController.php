@@ -1425,13 +1425,14 @@ class CartController extends Controller
                     }
                 }
 
-                // Fetch or create base unique ID for the customer
+                // Fetch or create base unique ID for the customer and brand
                 $base_unique_id = Cart::where('customer_id', $customer_id)
+                    ->where('brand_id', $brandId)
                     ->value('base_unique_id');
 
                 if (!$base_unique_id) {
                     // Create a new base unique ID if it doesn't exist
-                    $base_unique_id = date('YmdHis'); // Generate a new UUID
+                    $base_unique_id = date('YmdHis'); // Generate a new unique ID
                     $item->base_unique_id = $base_unique_id;
                     $item->update();
                 }
@@ -1475,6 +1476,7 @@ class CartController extends Controller
                 // Update item with the new unique number
                 $item->shiprocket_order_number = $unique_number;
                 $item->update();
+
 
                 log::info($item->products->productMeasurement);
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
