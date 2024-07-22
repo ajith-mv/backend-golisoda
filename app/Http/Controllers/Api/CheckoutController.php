@@ -793,6 +793,7 @@ class CheckoutController extends Controller
 
         $success = true;
         $error_message = "Payment Success";
+        log::debug($razor_response);
 
         if (isset($razor_response['razorpay_payment_id']) && empty($razor_response['razorpay_payment_id']) === false) {
             $razorpay_order_id = $razor_response['razorpay_order_id'];
@@ -810,7 +811,6 @@ class CheckoutController extends Controller
                 );
 
                 $verify_payment = $api->utility->verifyPaymentSignature($attributes);
-                log::debug($verify_payment);
             } catch (SignatureVerificationError $e) {
                 $success = false;
                 $error_message = 'Razorpay Error : ' . $e->getMessage();
