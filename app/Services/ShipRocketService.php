@@ -225,7 +225,7 @@ class ShipRocketService
                                 'id' => $citems->id
                             ];
                             $createOrderData[$citems->brand_id]['cartItemsarr'][] = $tmp;
-                            $createOrderData[$citems->brand_id]['cartTotal'] += ($citems->sub_total + $citems->coupon_amount);
+                            $createOrderData[$citems->brand_id]['cartTotal'] += $citems->sub_total;
                             $createOrderData[$citems->brand_id]['totalDiscount'] += $citems->coupon_amount;
                             $createOrderData[$citems->brand_id]['total_weight'] += $total_weight;
 
