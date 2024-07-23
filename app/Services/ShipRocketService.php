@@ -297,8 +297,8 @@ log::debug($order_id_goli);
                                     if ($existingOrder) {
                                         log::info('Updating existing order in Shiprocket');
                                         $createResponse = $this->updateOrder($params);
-                                        $shiprocket_order_id = isset($createResponse) ? $createResponse->order_id : '';
-                                        $shiprocket_shipment_id = isset($createResponse) ? $createResponse->shipment_id : '';
+                                        $shiprocket_order_id = isset($createResponse->order_id) ? $createResponse->order_id : '';
+                                        $shiprocket_shipment_id = isset($createResponse->shipment_id) ? $createResponse->shipment_id : '';
                                         $address_request = $this->getRequestForAddressUpdation($shiprocket_order_id, $data['cartShipAddress'], $customer);
                                         log::debug('Address request');
                                         log::debug($address_request);
