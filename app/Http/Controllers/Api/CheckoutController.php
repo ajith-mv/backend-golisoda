@@ -273,7 +273,7 @@ class CheckoutController extends Controller
                 $ins['shiprocket_order_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_order_id : '';
                 $ins['shiprocket_shipment_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_shipment_id : '';
                 $brand_order = BrandOrder::create($ins);
-                $this->generateOrderNumbers();
+               // $this->generateOrderNumbers();
                 //insert variations
                 if (isset($item['chosen_variation_option_ids']) && !empty($item['chosen_variation_option_ids'])) {
                     foreach ($item['chosen_variation_option_ids'] as $variation_option_id) {
