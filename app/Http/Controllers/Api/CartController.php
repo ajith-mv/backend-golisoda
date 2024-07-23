@@ -855,23 +855,28 @@ class CartController extends Controller
         if (isset($cart_id)) {
             $checkCart      = Cart::find($cart_id);
         }
-        // $shiprocket_order_ids = [];
+         $shiprocket_order_ids = [];
+         $shiprocketOrderId = null;
         if ($checkCart) {
             $checkCart->addons()->delete();
             $checkCart->variationOptions()->delete();
             $shipments = $checkCart->shipments();
-            $shiprocketOrderId = CartShipment::where('cart_id', $checkCart->id)->first()->shiprocket_order_id;
+            $shiprocketOrder = CartShipment::where('cart_id', $checkCart->id)->first();
+            if(isset($shiprocketOrder)){
+                   $shiprocketOrderId =  $shiprocketOrder->shiprocket_order_id;
+
+            }
 
             if ($shiprocketOrderId) {
                 // Count how many carts are associated with this shiprocket_order_id
-                $count = CartShipment::where('shiprocket_order_id', $shiprocketOrderId)->count();
-                if ($count <= 1) {
+                 $count = CartShipment::where('shiprocket_order_id', $shiprocketOrderId)->count();
+                 if ($count <= 1) {
                     $shiprocket_order_ids[] = $shiprocketOrderId;
                     // If only one cart is associated, cancel the Shiprocket order
                     $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
                     $checkCart->rocketResponse()->delete();
                     $checkCart->shipments()->delete();
-                }
+                 }
             }
 
             $customer_id    = $checkCart->customer_id;
