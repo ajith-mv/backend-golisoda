@@ -1432,7 +1432,7 @@ class CartController extends Controller
 
                 if (!$base_unique_id) {
                     // Create a new base unique ID if it doesn't exist
-                    $base_unique_id = date('YmdHis'); // Generate a new unique ID
+                    $base_unique_id = $customer_id.'-'.date('YmdHis'); // Generate a new unique ID
                     $item->base_unique_id = $base_unique_id;
                     $item->update();
                 }
