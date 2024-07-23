@@ -91,7 +91,7 @@ class OrderController extends Controller
                     return strtoupper($row->payment_type ?? '');
                 })
                 ->editColumn('order_status', function ($row) {
-                    return ucwords($row->status);
+                    return ucwords(str_replace('_', ' ', $row->status));
                 })
                 ->editColumn('created_at', function ($row) {
                     $created_at = Carbon::createFromFormat('Y-m-d H:i:s', $row['created_at'])->format('d-m-Y');
@@ -354,6 +354,13 @@ class OrderController extends Controller
 
                 default:
                     # code...
+                    $orderStatus = OrderStatus::find($request->order_status_id);
+                    if(isset($orderStatus)){
+                        $action = $orderStatus->status_name;
+                        $info->status = strtolower(str_replace(' ', '_', $action));
+                    }else{
+                        $action = '';
+                    }
                     break;
             }
 
