@@ -242,7 +242,7 @@ class CheckoutController extends Controller
                 $items_ins['sku'] = $item['sku'];
                 $items_ins['quantity'] = $item['quantity'];
                 $items_ins['price'] = $item['price'];
-                $items_ins['strice_price'] = $item['strike_price'];
+                $items_ins['strice_price'] = number_format($item['strike_price'], 2);
                 $items_ins['save_price'] = $item['save_price'];
                 $items_ins['base_price'] = $item['tax']['basePrice'];
                 $items_ins['tax_amount'] = ($item['tax']['gstAmount'] ?? 0) * $item['quantity'];
@@ -659,7 +659,7 @@ class CheckoutController extends Controller
                 $items_ins['sku'] = $item['sku'];
                 $items_ins['quantity'] = $item['quantity'];
                 $items_ins['price'] = $item['price'];
-                $items_ins['strice_price'] = $item['strike_price'];
+                $items_ins['strice_price'] = number_format($item['strike_price'], 2);
                 $items_ins['save_price'] = $item['save_price'];
                 $items_ins['base_price'] = $item['tax']['basePrice'];
                 $items_ins['tax_amount'] = ($item['tax']['gstAmount'] ?? 0) * $item['quantity'];
