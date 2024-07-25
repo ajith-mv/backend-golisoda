@@ -197,6 +197,7 @@
         </tr>
         @if (isset($order_info->orderItems) && !empty($order_info->orderItems))
             @php
+                $save_price = 0;
                 $i = 1;
             @endphp
             @foreach ($order_info->orderItems as $item)
@@ -241,12 +242,16 @@
                     </td>
                     <td> {{ $item->hsn_code ?? '85044030' }} </td>
                     <td> {{ $item->quantity }} nos</td>
-                    @if ($order_info->coupon_amount > 0 && isset($item->coupon_id))
-                        <td>{{ number_format($item->strice_price, 2) }}</td>
-                    @else
+                    <?php
+                    if (!($order_info->coupon_amount > 0 && isset($item->coupon_id))) {
+                        $save_price = number_format($save_price + $item->save_price * $item->quantity, 2);
+                    }
+                    ?>
+                    {{-- @if ($order_info->coupon_amount > 0 && isset($item->coupon_id)) --}}
+                    <td>{{ number_format($item->strice_price, 2) }}</td>
+                    {{-- @else
                         <td>{{ number_format($item->price, 2) }}</td>
-                    @endif
-
+                    @endif --}}
 
                     {{-- <td> {{ number_format($item->price, 2) }} </td>
                     <td>{{ number_format($item->price, 2) }}</td> --}}
@@ -332,7 +337,7 @@
                     </tr>
                     @if ($order_info->coupon_amount > 0 && isset($order_info->coupon_code))
                         <tr>
-                            <td style="text-align: right;">
+                            <td class="w-70" style="text-align: right;">
                                 <div>Coupon Amount </div>
                                 @if ($order_info->coupon_type == 'percentage')
                                     <small> ( {{ $order_info->coupon_code }} -
@@ -341,13 +346,25 @@
                                     <small>( {{ $order_info->coupon_code }})</small>
                                 @endif
                             </td>
-                            <td class="w-100" style="text-align: right;"> - <span
+
+                            <td class="w-30" style="text-align: right;"> - <span
                                     style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
-                                {{ number_format($order_info->coupon_amount, 2) }}
+                                {{ number_format(($order_info->coupon_amount + $save_price), 2) }}
                             </td>
                         </tr>
-                    @endif
+                    @elseif ($save_price > 0)
+                    <tr>
+                        <td class="w-70" style="text-align: right;">
+                            <div>Discount Amount </div>
+                            
+                        </td>
 
+                        <td class="w-30" style="text-align: right;"> - <span
+                                style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
+                            {{ $save_price }}
+                        </td>
+                    </tr>
+                    @endif
                     @if ($order_info->shipping_amount > 1)
                         <tr>
                             <td style="text-align: right;">
@@ -360,16 +377,16 @@
                             </td>
                         </tr>
                     @else
-                    <tr>
-                        <td style="text-align: right;">
-                            <div>Shipping Fee </div>
-                            <small>Free Shipping</small>
-                        </td>
-                        <td class="w-100" style="text-align: right;"><span
-                                style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
-                            0.00
-                        </td>
-                    </tr>
+                        <tr>
+                            <td style="text-align: right;">
+                                <div>Shipping Fee </div>
+                                <small>Free Shipping</small>
+                            </td>
+                            <td class="w-100" style="text-align: right;"><span
+                                    style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
+                                0.00
+                            </td>
+                        </tr>
                     @endif
                     @if ($order_info->is_cod == 1)
                         <tr>
