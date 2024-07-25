@@ -352,17 +352,18 @@
 
                             <td class="w-30" style="text-align: right;"> - <span
                                     style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
-                                {{ number_format(($order_info->coupon_amount + $save_price), 2) }}
+                                {{ number_format(($order_info->coupon_amount), 2) }}
                             </td>
                         </tr>
-                    @elseif ($save_price > 0)
+                    @endif
+                    @if ($save_price > 0)
                     <tr>
                         <td class="w-70" style="text-align: right;">
                             <div>Discount Amount </div>
                             
                         </td>
 
-                        <td class="w-30" style="text-align: right;"> - <span
+                        <td class="w-30" style="text-align: right;"><span
                                 style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
                             {{ $save_price }}
                         </td>
