@@ -183,7 +183,7 @@
             <th rowspan="2"> ITEM DESCRIPTION </th>
             <th rowspan="2" style="width: 40px;"> HSN</th>
             <th rowspan="2" style="width: 30px;"> QTY</th>
-            <th rowspan="2" style="width: 30px;"> RATE </th>
+            <th rowspan="2" style="width: 30px;"> MRP </th>
             {{-- <th rowspan="2" style="width: 40px;"> TAXABLE VALUE </th> --}}
             <th colspan="2" style="width: 100px;"> CGST </th>
             <th colspan="2" style="width: 100px;"> SGST </th>
