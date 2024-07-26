@@ -260,11 +260,11 @@
                     <td>{{ $item->tax_percentage / 2 }}%</td>
                     <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
                     {{-- <td>{{ number_format($item->sub_total, 2) }}</td> --}}
-                    @if ($order_info->coupon_amount > 0 && isset($item->coupon_id))
+                    {{-- @if ($order_info->coupon_amount > 0 && isset($item->coupon_id)) --}}
                         <td>{{ number_format($item->strice_price * $item->quantity, 2) }}</td>
-                    @else
+                    {{-- @else
                         <td>{{ number_format($item->price * $item->quantity, 2) }}</td>
-                    @endif
+                    @endif --}}
 
                 </tr>
                 @php
@@ -324,7 +324,7 @@
                         </td>
                         <td class="w-100" style="text-align: right;">
                             <span style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
-                            {{ number_format($order_info->sub_total, 2) }}
+                            {{ number_format(($order_info->sub_total + $save_price), 2) }}
                         </td>
                     </tr>
                     <tr>
@@ -360,7 +360,7 @@
                             
                         </td>
 
-                        <td class="w-30" style="text-align: right;"><span
+                        <td class="w-30" style="text-align: right;"> - <span
                                 style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
                             {{ $save_price }}
                         </td>
