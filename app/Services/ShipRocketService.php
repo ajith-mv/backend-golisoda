@@ -546,7 +546,7 @@ log::debug($order_id_goli);
             "shipping_city" => $cartShipAddress->city,
             "shipping_pincode" => $cartShipAddress->post_code,
             "shipping_country" => "India",
-            "shipping_state" => $cartShipAddress->state ?? 'Tamil nadu',
+            "shipping_state" => $cartShipAddress->state ?? '',
             "shipping_email" => $cartShipAddress->email ?? $customer->email,
             "shipping_phone" => $cartShipAddress->mobile_no,
             "order_items" => $cartItemsarr,
