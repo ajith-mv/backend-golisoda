@@ -1517,7 +1517,7 @@ class CartController extends Controller
             $ins_cart['address_line1'] = $shippingAddress->address_line1;
             $ins_cart['country'] = 'india';
             $ins_cart['post_code'] = $shippingAddress->PostCode->pincode;
-            $ins_cart['state'] = $shippingAddress->state;
+            $ins_cart['state'] = $shippingAddress->states->state_name;;
             $ins_cart['city'] = $shippingAddress->city;
 
             $cart_address = CartAddress::create($ins_cart);
@@ -1615,7 +1615,6 @@ class CartController extends Controller
             $ins_cart['post_code'] = $shippingAddress->PostCode->pincode;
             $ins_cart['state'] = $shippingAddress->states->state_name;
             $ins_cart['city'] = $shippingAddress->city;
-log::debug($ins_cart);
             $cart_address = CartAddress::create($ins_cart);
             log::info('works here');
             $data = $this->rocketService->getShippingRocketOrderDimensions($customer_id, $cart_info->guest_token ?? null, $cart_address->id);
