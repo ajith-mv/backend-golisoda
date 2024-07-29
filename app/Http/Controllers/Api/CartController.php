@@ -1301,9 +1301,9 @@ class CartController extends Controller
                 } else {
                     $coupon_amount = $coupon_data->coupon_amount;
                 }
-                // if ($coupon_amount < 1) {
-                //     $is_coupon = 0;
-                // }
+                if ($coupon_amount < 1) {
+                    $is_coupon = 0;
+                }
             }
             $tmp['cart_total']          = array(
                 'total' => number_format(round($grand_total), 2),
