@@ -85,6 +85,8 @@ Route::get('/ccavenue/payment/processing/{customer_id?}/{order_id?}', [App\Http\
 
 Route::get('/site-map', [App\Http\Controllers\TestController::class, 'generateSiteMap']);
 
+Route::post('/webhook/razorpay', [App\Http\Controllers\Api\WebhookController::class, 'handleWebhook']);
+
 Route::middleware(['client'])->group(function () {
     //get profile data
     Route::post('/get/profile', [App\Http\Controllers\Api\CustomerController::class, 'getProfileDetails']);
