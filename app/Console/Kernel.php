@@ -21,6 +21,7 @@ class Kernel extends ConsoleKernel
     {
       
       $schedule->command('update:daily')->dailyAt('23:59');
+      $schedule->command('payments:update-failed')->dailyAt('00:30');
     //   ->dailyAt('23:59');
     }
 
