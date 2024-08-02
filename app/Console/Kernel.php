@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\ClearCart::class,
+        Commands\UpdateFailedPayments::class,
 
     ];
     protected function schedule(Schedule $schedule)

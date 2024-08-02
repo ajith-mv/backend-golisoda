@@ -197,7 +197,7 @@
             });
 
             $.ajax({
-                url: "{{ route('vendor_wise_sale.view') }}",
+                url: "{{ route('reports.vendor_wise_sale.view') }}",
                 type: 'POST',
                 data: {
                     id: id,
@@ -239,7 +239,7 @@
             });
 
             $.ajax({
-                url: "{{ route('vendor_wise_sale.download') }}",
+                url: "{{ route('reports.vendor_wise_sale.download') }}",
                 type: 'POST',
                 data: {
                     id: id,
@@ -280,7 +280,7 @@
             });
 
             $.ajax({
-                url: "{{ route('vendor_wise_sale.send') }}",
+                url: "{{ route('reports.vendor_wise_sale.send') }}",
                 type: 'POST',
                 data: {
                     id: id,

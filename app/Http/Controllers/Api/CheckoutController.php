@@ -1140,4 +1140,26 @@ class CheckoutController extends Controller
             }
         }
     }
+
+    public function sendEmailToVendors(Request $request){
+        $order_no = $request->order_no;
+        $order_info = Order::where('order_no', $order_no)->first();
+        $brandIds = [];
+        if ($order_info) {
+            $order_items = OrderProduct::where('order_id', $order_info->id)->get();
+
+            if (isset($order_items) && !empty($order_items)) {
+                foreach ($order_items as $product) {
+                    $product_info = Product::find($product->product_id);
+                    $brandIds[] = $product_info->brand_id;
+                }
+            }
+            if(!empty($brandIds)){
+                event(new OrderCreated($brandIds, $order_info->id));
+            }
+
+        }
+        return response()->json(array('error' => 1, 'status_code' => 200, 'message' => 'Success', 'status' => 'success', 'success' => []), 200);
+
+    }
 }

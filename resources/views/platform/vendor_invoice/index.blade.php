@@ -112,39 +112,6 @@
                 <table class="no-border" style="width: 100%">
                     <tr>
                         <td class="w-35">
-                            <div><b> Bill To: </b></div>
-                            <div><b>{{ $order_info->billing_name }}</b></div>
-                            <div>{{ $order_info->billing_address_line1 }}</div>
-                            <div>{{ $order_info->billing_city }}</div>
-                            <div>{{ $order_info->billing_state }} - {{ $order_info->billing_pincode->pincode ?? '' }}
-                            </div>
-                            <div>{{ $order_info->billing_mobile_no }}</div>
-                            <div>{{ $order_info->billing_email }}</div>
-                        </td>
-                        @if (isset($pickup_details) && !empty($pickup_details))
-                            <td class="w-35">
-                                <div><b> Pickup from Store: </b></div>
-                                <div><b>{{ $pickup_details->title }}</b></div>
-                                <div>{{ $pickup_details->address }}</div>
-                                <div>{{ $pickup_details->group_contacts }}</div>
-                                <div>{{ $pickup_details->group_emails }}</div>
-                            </td>
-                        @else
-                            <td class="w-35">
-                                <div><b> Ship To: </b></div>
-                                <div><b>{{ $order_info->shipping_name }}</b></div>
-                                <div>{{ $order_info->shipping_address_line1 }}</div>
-                                <div>{{ $order_info->shipping_city }}</div>
-                                <div>{{ $order_info->shipping_state }} -
-                                    {{ $order_info->shipping_pincode->pincode ?? '' }}</div>
-                                <div>{{ $order_info->shipping_mobile_no }}</div>
-                                <div>{{ $order_info->shipping_email }}</div>
-                            </td>
-                        @endif
-
-
-                        <td class="w-40">
-
                             <table class="invoice-table w-100">
                                 <tr>
                                     <td class="w-50">Invoice No</td>
@@ -154,6 +121,12 @@
                                     <td class="w-50">Invoice Date</td>
                                     <td class="w-50">{{ date('d/m/Y', strtotime($order_info->created_at)) }}</td>
                                 </tr>
+                            </table>
+                        </td>
+
+                        <td class="w-35">
+                            <table class="invoice-table w-100">
+
                                 <tr>
                                     <td class="w-50">Order No</td>
                                     <td class="w-50">{{ $order_info->order_no }}</td>
@@ -162,6 +135,14 @@
                                     <td class="w-50">Customer ID</td>
                                     <td class="w-50">{{ $order_info->customer->customer_no }}</td>
                                 </tr>
+                            </table>
+                        </td>
+
+
+                        <td class="w-40">
+
+                            <table class="invoice-table w-100">
+
                                 <tr>
                                     <td class="w-50"> Payment Status </td>
                                     <td class="w-50"> {{ $order_info->payments->status ?? '' }} </td>
@@ -252,7 +233,7 @@
                         <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
                         <td>{{ $item->tax_percentage / 2 }}%</td>
                         <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
-                        <td>{{ number_format($item->sub_total, 2) }}</td>
+                        <td style="text-align: right;">{{ number_format($item->sub_total, 2) }}</td>
                     </tr>
                     @php
                         $sub_total = (float) $item->sub_total;
@@ -285,7 +266,7 @@
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td>{{ number_format($item->amount, 2) }}</td>
+                    <td style="text-align:right;">{{ number_format($item->amount, 2) }}</td>
                 </tr>
                 @php
                     $i++;
@@ -293,7 +274,7 @@
             @endforeach
         @endif
         <tr>
-            <td colspan="7">
+            <td colspan="9" style="font-size:12px;">
                 <div>
                     <label for="">Total in words </label>
                 </div>
@@ -305,21 +286,24 @@
 
                 </div>
             </td>
-            <td colspan="5" style="text-align:right;width:100%;">
-                <table class="w-100 no-border" style="text-align:right">
+            <td colspan="3" style="text-align:right; width:100%; font-size:12px;">
+                {{-- <table class="w-100 no-border" style="text-align:right">
 
                     <tr>
-                        <td style="text-align: right;font-weight:700;font-size:14px;">Total</td>
-                        <td class="w-100" style="text-align: right;font-weight:700;font-size:14px;">
-                            <span style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
-                            {{ number_format($total, 2) }}
-                        </td>
-                    </tr>
+                        <td style="font-weight:700; font-size:12px; text-align:left;">Total</td>
+                        <td class="w-100" style="font-weight:700; font-size:12px; text-align:right;"> --}}
+                <div> Sub Total <span style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
+                    {{ number_format($total, 2) }}</div>
+                <div><b> Total <span style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
+                        {{ number_format($total, 2) }}</b></div>
+                {{-- </td>
+                    </tr> --}}
 
-                </table>
-            </td>
 
-        </tr>
+    </table>
+    </td>
+
+    </tr>
 
     </table>
 

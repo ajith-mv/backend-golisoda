@@ -139,6 +139,8 @@ Route::middleware(['client'])->group(function () {
 
     Route::post('/get/recent/view', [App\Http\Controllers\Api\CollectionController::class, 'getRecentViews']);
     Route::post('/generate-customer-invoice', [App\Http\Controllers\Api\CheckoutController::class, 'generateInvoice']);
+    Route::post('/send-vendor-email', [App\Http\Controllers\Api\CheckoutController::class, 'sendEmailToVendors']);
+
 
     Route::post('/get/shipping/rocket/charges', [App\Http\Controllers\Api\CartController::class, 'getShippingRocketCharges']);
 

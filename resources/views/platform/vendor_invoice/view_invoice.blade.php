@@ -159,19 +159,19 @@
         </tr>
         <tr>
             <td>Total Shipments</td>
-            <td>{{ isset($shipment_data->total_shipments) ? $shipment_data->total_shipments : '' }}</td>
+            <td style="text-align:right">{{ isset($shipment_data->total_shipments) ? $shipment_data->total_shipments : '' }}</td>
         </tr>
         <tr>
             <td>Total Sales (Inclusive Tax)</td>
-            <td>{{ isset($data->sale_amount) ? $data->sale_amount : '' }}</td>
+            <td style="text-align:right">{{ isset($data->sale_amount) ? $data->sale_amount : '' }}</td>
         </tr>
         <tr>
             <td> Total Sales (Exclusive Tax)</td>
-            <td> {{ isset($data->sale_amount_excluding_tax) ? $data->sale_amount_excluding_tax : '' }} </td>
+            <td style="text-align:right"> {{ isset($data->sale_amount_excluding_tax) ? $data->sale_amount_excluding_tax : '' }} </td>
         </tr>
         <tr>
             <td> Commission(B) {{(isset($data->com_percentage) && ($data->com_percentage != '0.00')) ? '@ '.round($data->com_percentage). '%' :  '' }} </td>
-            <td> {{ isset($data->com_amount) ? number_format($data->com_amount, 2) :  '' }} </td>
+            <td style="text-align:right"> {{ isset($data->com_amount) ? number_format($data->com_amount, 2) :  '' }} </td>
         </tr>
         
         @php
@@ -192,19 +192,19 @@
         @endphp
         <tr>
             <td> Shipping Charges</td>
-            <td> {{ $shipping_charge }} </td>
+            <td style="text-align:right"> {{ $shipping_charge }} </td>
         </tr>
         <tr>
             <td> CGST on Commission + Shipping (9%) ©</td>
-            <td> {{ $cgst_commission }} </td>
+            <td style="text-align:right"> {{ $cgst_commission }} </td>
         </tr>
         <tr>
             <td> SGST on Commission + Shipping (9%) ©</td>
-            <td> {{ $sgst_commission }} </td>
+            <td style="text-align:right"> {{ $sgst_commission }} </td>
         </tr>
         <tr>
             <td> TDS (1 %)</td>
-            <td> {{ $tds_commission }} </td>
+            <td style="text-align:right"> {{ $tds_commission }} </td>
         </tr>
         <tr>
             <td><b>Net Payable Amount</b></td>
@@ -212,7 +212,7 @@
                $com_amount = isset($data->com_amount) ? $data->com_amount : 0;
                $net_total = ($sale_amount) - ($com_amount) - ($cgst_commission) - ($sgst_commission) - ($shipping_charge) - ($tds_commission);
            @endphp
-            <td><b>{{ round($net_total) }}</b></td>
+            <td style="text-align:right"><b>{{ round($net_total) }}</b></td>
         </tr>
         
     </table>
@@ -252,7 +252,7 @@
                 <td>{{ $order->order_no}}</td>
                 <td>{{ $order->payment_type }}</td>
                 <td>{{ $order->tracking_id}}</td>
-                <td>{{ $order->vendor_order_amount}}</td>
+                <td style="text-align:right">{{ $order->vendor_order_amount}}</td>
             </tr>
             @php
                 $count++;
