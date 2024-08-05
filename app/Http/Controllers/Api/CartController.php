@@ -878,6 +878,8 @@ class CartController extends Controller
                     $checkCart->rocketResponse()->delete();
                     $checkCart->shipments()->delete();
                 }
+            }else{
+                log::info("no shiprocket id present");
             }
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;
