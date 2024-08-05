@@ -149,6 +149,7 @@ class OrderController extends Controller
         // Get brand names for each brand_id
         foreach ($brandOrders as $brandOrder) {
             $brand = Brands::find($brandOrder->brand_id);
+            if(isset($brand))
             $brandOrder->brand_name = $brand->brand_name;
         }
 
@@ -169,17 +170,20 @@ class OrderController extends Controller
            
                 $trackingIds = $request->input('tracking_id');
                 $arrivalDates = $request->input('estimated_arrival_date');
-            
+                            if(isset($trackingIds) || isset($arrivalDates)){
+
                 foreach ($trackingIds as $brandId => $trackingId) {
                     $brandOrders = BrandOrder::where([['order_id', $id], ['brand_id', $brandId]])->get();
-                    foreach($brandOrders as $brandOrder){
-                        $brandOrder->tracking_id = $trackingId;
-                        $brandOrder->estimated_arrival_date = $arrivalDates[$brandId];
-                        $brandOrder->save();
+                    if(isset($brandOrders) && !empty($brandOrders)){
+                        foreach($brandOrders as $brandOrder){
+                            $brandOrder->tracking_id = $trackingId;
+                            $brandOrder->estimated_arrival_date = $arrivalDates[$brandId];
+                            $brandOrder->save();
+                        }
                     }
                     
                 }
-            
+                            }
             
 
            if($request->order_status_id==6){

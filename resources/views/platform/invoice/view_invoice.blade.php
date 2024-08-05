@@ -160,7 +160,7 @@
                                 </tr>
                                 <tr>
                                     <td class="w-50">Customer ID</td>
-                                    <td class="w-50">{{ $order_info->customer->customer_no }}</td>
+                                    <td class="w-50">{{ $order_info->customer->customer_no ?? '' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="w-50"> Payment Status </td>
@@ -327,7 +327,7 @@
                         </td>
                         <td class="w-30" style="text-align: right;">
                             <span style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
-                            {{ number_format(($order_info->sub_total + $save_price), 2) }}
+                            {{ number_format($order_info->sub_total, 2) }}
                         </td>
                     </tr>
                     <tr>

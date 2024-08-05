@@ -266,7 +266,7 @@ class CheckoutController extends Controller
                 $ins['commission_type'] = $brand_data->commission_type;
                 $ins['commission_value'] = $brand_data->commission_value;
                 $cart_shipment = CartShipment::where('cart_id', $item['cart_id'])->first();
-                $ins['shipping_amount'] = isset($cart_shipment) ? $cart_shipment->shipping_amount : 0;
+                $ins['shipping_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : 0;
                 $ins['shiprocket_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : 0;
                 $ins['shipping_id'] = isset($cart_shipment) ? $cart_shipment->shipping_id : '';
                 $ins['shipping_type'] = isset($cart_shipment) ? $cart_shipment->shiprocket_type : '';
@@ -682,7 +682,7 @@ class CheckoutController extends Controller
                 $ins['commission_type'] = $brand_data->commission_type;
                 $ins['commission_value'] = $brand_data->commission_value;
                 $cart_shipment = CartShipment::where('cart_id', $item['cart_id'])->first();
-                $ins['shipping_amount'] = isset($cart_shipment) ? $cart_shipment->shipping_amount : 0;
+                $ins['shipping_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : 0;
                 $ins['shiprocket_amount'] = isset($cart_shipment) ? $cart_shipment->shiprocket_amount : 0;
                 $ins['shipping_id'] = isset($cart_shipment) ? $cart_shipment->shipping_id : '';
                 $ins['shipping_type'] = isset($cart_shipment) ? $cart_shipment->shiprocket_type : '';
@@ -912,17 +912,22 @@ class CheckoutController extends Controller
                             $product_info->save();
                         }
                     }
-
-                    $pay_ins['order_id'] = $order_info->id;
-                    $pay_ins['payment_no'] = $razor_response['razorpay_payment_id'];
-                    $pay_ins['amount'] = $order_info->amount;
-                    $pay_ins['paid_amount'] = $order_info->amount;
-                    $pay_ins['payment_type'] = 'razorpay';
-                    $pay_ins['payment_mode'] = 'online';
-                    $pay_ins['response'] = serialize($finalorder);
-                    $pay_ins['status'] = $finalorder['status'];
-
-                    Payment::create($pay_ins);
+                    $orderDetails = Payment::where('payment_no', $razor_response['razorpay_payment_id'])->first();
+                    if(!isset($orderDetails)){
+                        $pay_ins['order_id'] = $order_info->id;
+                        $pay_ins['payment_no'] = $razor_response['razorpay_payment_id'];
+                        $pay_ins['amount'] = $order_info->amount;
+                        $pay_ins['paid_amount'] = $order_info->amount;
+                        $pay_ins['payment_type'] = 'razorpay';
+                        $pay_ins['payment_mode'] = 'online';
+                        $pay_ins['response'] = serialize($finalorder);
+                        $pay_ins['status'] = $finalorder['status'];
+    
+                        Payment::create($pay_ins);
+                    }else{
+                        Payment::where('payment_no', $razor_response['razorpay_payment_id'])->update(['response' => serialize($finalorder)]);
+                    }
+                    
 
                     /**** order history */
                     $his['order_id'] = $order_info->id;
