@@ -153,7 +153,7 @@ class ShipRocketService
                     foreach ($checkCart as $citems) {
 
                         if ($citems->products) {
-                            CartShipment::where('cart_id', $citems->id)->delete();
+                            // CartShipment::where('cart_id', $citems->id)->delete();
 
                             $pro = $citems->products;
                             $product_id = $pro->id;
@@ -338,6 +338,8 @@ log::debug($order_id_goli);
                                             $shipment['shiprocket_order_id'] = $shiprocket_order_id;
                                             $shipment['shiprocket_shipment_id'] = $shiprocket_shipment_id;
                                             // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
+                                            log::info('created an entry in cart shipment table');
+
                                             CartShipment::create($shipment);
                                         }
                                         // CartShipment::where('cart_id', $data['citems']->id)->delete();
@@ -362,6 +364,7 @@ log::debug($order_id_goli);
                                             $shipment['cart_id'] = $citem['id'];
                                             $shipment['brand_id'] = $brandId;
                                             // $shipment['cart_order_no'] = $citem['cart_order_no']; // Include the cart_order_no
+                                            log::info('created an entry in cart shipment table');
                                             CartShipment::create($shipment);
                                         }
                                     }
