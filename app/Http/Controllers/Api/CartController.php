@@ -1400,15 +1400,16 @@ class CartController extends Controller
 
         $from_type = $request->from_type;
         $address = $request->address;
-        if (!isset($address) && (empty($address))) {
+        $customer_id = $request->customer_id;
+
+        $cart_info = Cart::where('customer_id', $customer_id)->first(); //get from token
+        if ((!isset($address) && (empty($address)) || (!isset($cart_info)))) {
             return response()->json(array('error' => 1, 'status_code' => 400, 'message' => 'Address not set', 'status' => 'failure', 'data' => []), 200);
         }
         $shippingAddress = CustomerAddress::find($address);
         log::debug($shippingAddress);
         log::debug('address id is' . $address);
-        $customer_id = $request->customer_id;
-
-        $cart_info = Cart::where('customer_id', $customer_id)->first(); //get from token
+        
         /**
          * get volume metric value for kg
          */
