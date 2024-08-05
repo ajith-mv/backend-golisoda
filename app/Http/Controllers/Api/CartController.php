@@ -866,17 +866,17 @@ class CartController extends Controller
                 $shiprocketOrderId = $shiprocketOrder->shiprocket_order_id;
                 $brand_id = $shiprocketOrder->brand_id;
             }
-    
+
             if ($shiprocketOrderId && $brand_id) {
                 log::info($shiprocketOrderId . ' shiprocket order id');
-    
+
                 // Get count of carts associated with this shiprocket_order_id for the same customer and brand_id
                 $count = CartShipment::whereIn('cart_id', function ($query) use ($customer_id, $brand_id) {
                     $query->select('id')->from('carts')->where('customer_id', $customer_id)->where('brand_id', $brand_id);
                 })->where('shiprocket_order_id', $shiprocketOrderId)->where('brand_id', $brand_id)->count();
-    
+
                 log::info('count of data ' . $count);
-    
+
                 if ($count <= 1) {
                     $shiprocket_order_ids[] = $shiprocketOrderId;
                     // If only one cart is associated, cancel the Shiprocket order
@@ -887,7 +887,7 @@ class CartController extends Controller
                 log::info("no shiprocket id or brand id present");
             }
             if (isset($shiprocketOrder)) {
-                log::info('deleted entry from shipment'. $shiprocketOrder->id);
+                log::info('deleted entry from shipment' . $shiprocketOrder->id);
                 $shiprocketOrder->delete();
             }
             $customer_id    = $checkCart->customer_id;
@@ -1415,7 +1415,7 @@ class CartController extends Controller
         $shippingAddress = CustomerAddress::find($address);
         log::debug($shippingAddress);
         log::debug('address id is' . $address);
-        
+
         /**
          * get volume metric value for kg
          */
@@ -1482,6 +1482,7 @@ class CartController extends Controller
                 $unique_number = $suffix ? $base_unique_id . '-' . $suffix : $base_unique_id;
                 // Store the existing shiprocket_order_number
                 $old_shiprocket_order_number = $item->shiprocket_order_number;
+                $old_brand_id = $item->brand_id;
                 // Ensure unique_number is unique across different brands
                 while (Cart::where('shiprocket_order_number', $unique_number)
                     ->where('brand_id', '!=', $item->brand_id)
@@ -1494,14 +1495,16 @@ class CartController extends Controller
                 // Update item with the new unique number
                 $item->shiprocket_order_number = $unique_number;
                 $item->update();
-                if ($old_shiprocket_order_number !== $unique_number) {
-                    log::info("Shiprocket Order Number changed from $old_shiprocket_order_number to $unique_number");
-                    $shiprocket_order_ids[] = $item->shipments()->shiprocket_order_id;
-                    // If only one cart is associated, cancel the Shiprocket order
-                    $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
-                    $item->shipments()->delete();
+                if ($old_shiprocket_order_number !== $unique_number && $old_brand_id === $item->brand_id) {
+                    log::info("Shiprocket Order Number changed from $old_shiprocket_order_number to $unique_number for brand id $old_brand_id");
+                    $shiprocketOrder = CartShipment::where('cart_id', $item->id)->first();
+                    if (isset($shiprocketOrder)) {
+                        $shiprocketOrderId = $shiprocketOrder->shiprocket_order_id;
+                        log::info("order id to be cancelled is $shiprocketOrderId");
+                        // $brand_id = $shiprocketOrder->brand_id;
+                    }
                 } else {
-                    log::info("Shiprocket Order Number remains unchanged: $unique_number");
+                    log::info("Shiprocket Order Number remains unchanged: $unique_number for brand id $old_brand_id");
                 }
 
                 log::info($item->products->productMeasurement);
