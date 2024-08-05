@@ -847,11 +847,11 @@ class CartController extends Controller
         $guest_token = $request->guest_token;
         $product_id = $request->product_id;
 
-        $checkCart = Cart::when($customer_id != '', function ($q) use ($customer_id) {
-            $q->where('customer_id', $customer_id);
-        })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
-            $q->where('guest_token', $guest_token);
-        })->where('product_id', $product_id)->first();
+        // $checkCart = Cart::when($customer_id != '', function ($q) use ($customer_id) {
+        //     $q->where('customer_id', $customer_id);
+        // })->when($customer_id == '' && $guest_token != '', function ($q) use ($guest_token) {
+        //     $q->where('guest_token', $guest_token);
+        // })->where('product_id', $product_id)->first();
         if (isset($cart_id)) {
             $checkCart      = Cart::find($cart_id);
         }
