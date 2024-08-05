@@ -876,10 +876,9 @@ class CartController extends Controller
                     $shiprocket_order_ids[] = $shiprocketOrderId;
                     // If only one cart is associated, cancel the Shiprocket order
                     $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
-                   
+                    $checkCart->rocketResponse()->delete();
                  }
             }
-            $checkCart->rocketResponse()->delete();
             $checkCart->shipments()->delete();
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;

@@ -247,7 +247,7 @@
                     <td> {{ $item->quantity }} nos</td>
                     <?php
                     if (!($order_info->coupon_amount > 0 && isset($item->coupon_id))){
-                        $save_price = number_format(($save_price + ($item->save_price * $item->quantity)) , 2);
+                        $save_price = ($save_price + ($item->save_price * $item->quantity));
                     }
                     ?>
                     {{-- @if ($order_info->coupon_amount > 0 && isset($item->coupon_id)) --}}
@@ -327,7 +327,7 @@
                         </td>
                         <td class="w-30" style="text-align: right;">
                             <span style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
-                            {{ number_format(($order_info->sub_total + (float)$save_price), 2) }}
+                            {{ number_format(($order_info->sub_total + $save_price), 2) }}
                         </td>
                     </tr>
                     <tr>
