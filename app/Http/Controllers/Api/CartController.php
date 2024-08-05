@@ -855,31 +855,30 @@ class CartController extends Controller
         if (isset($cart_id)) {
             $checkCart      = Cart::find($cart_id);
         }
-         $shiprocket_order_ids = [];
-         $shiprocketOrderId = null;
+        $shiprocket_order_ids = [];
+        $shiprocketOrderId = null;
         if ($checkCart) {
             $checkCart->addons()->delete();
             $checkCart->variationOptions()->delete();
             $shipments = $checkCart->shipments();
             $shiprocketOrder = CartShipment::where('cart_id', $checkCart->id)->first();
-            if(isset($shiprocketOrder)){
-                   $shiprocketOrderId =  $shiprocketOrder->shiprocket_order_id;
-
+            if (isset($shiprocketOrder)) {
+                $shiprocketOrderId =  $shiprocketOrder->shiprocket_order_id;
             }
 
             if ($shiprocketOrderId) {
-                log::info($shiprocketOrderId. 'shiprocket order id');
+                log::info($shiprocketOrderId . 'shiprocket order id');
                 // Count how many carts are associated with this shiprocket_order_id
-                 $count = CartShipment::where('shiprocket_order_id', $shiprocketOrderId)->count();
-                 log::info('count of data'. $count);
-                 if ($count <= 1) {
+                $count = CartShipment::where('shiprocket_order_id', $shiprocketOrderId)->count();
+                log::info('count of data' . $count);
+                if ($count <= 1) {
                     $shiprocket_order_ids[] = $shiprocketOrderId;
                     // If only one cart is associated, cancel the Shiprocket order
                     $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
                     $checkCart->rocketResponse()->delete();
-                 }
+                    $checkCart->shipments()->delete();
+                }
             }
-            $checkCart->shipments()->delete();
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;
             $checkCart->delete();
@@ -1438,7 +1437,7 @@ class CartController extends Controller
 
                 if (!$base_unique_id) {
                     // Create a new base unique ID if it doesn't exist
-                    $base_unique_id = $customer_id.'-'.date('YmdHis'); // Generate a new unique ID
+                    $base_unique_id = $customer_id . '-' . date('YmdHis'); // Generate a new unique ID
                     $item->base_unique_id = $base_unique_id;
                     $item->update();
                 }
