@@ -1480,8 +1480,8 @@ class CartController extends Controller
 
                 // Generate the unique number
                 $unique_number = $suffix ? $base_unique_id . '-' . $suffix : $base_unique_id;
-// Store the existing shiprocket_order_number
-$old_shiprocket_order_number = $item->shiprocket_order_number;
+                // Store the existing shiprocket_order_number
+                $old_shiprocket_order_number = $item->shiprocket_order_number;
                 // Ensure unique_number is unique across different brands
                 while (Cart::where('shiprocket_order_number', $unique_number)
                     ->where('brand_id', '!=', $item->brand_id)
@@ -1496,6 +1496,10 @@ $old_shiprocket_order_number = $item->shiprocket_order_number;
                 $item->update();
                 if ($old_shiprocket_order_number !== $unique_number) {
                     log::info("Shiprocket Order Number changed from $old_shiprocket_order_number to $unique_number");
+                    $shiprocket_order_ids[] = $item->shipments()->shiprocket_order_id;
+                    // If only one cart is associated, cancel the Shiprocket order
+                    $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
+                    $item->shipments()->delete();
                 } else {
                     log::info("Shiprocket Order Number remains unchanged: $unique_number");
                 }
