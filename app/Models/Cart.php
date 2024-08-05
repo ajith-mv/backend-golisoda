@@ -56,6 +56,6 @@ class Cart extends Model
 
     public function shipments()
     {
-        return $this->hasMany(CartShipment::class, 'cart_id');
+        return $this->hasOne(CartShipment::class, 'cart_id');
     }
 }
