@@ -1480,7 +1480,8 @@ class CartController extends Controller
 
                 // Generate the unique number
                 $unique_number = $suffix ? $base_unique_id . '-' . $suffix : $base_unique_id;
-
+// Store the existing shiprocket_order_number
+$old_shiprocket_order_number = $item->shiprocket_order_number;
                 // Ensure unique_number is unique across different brands
                 while (Cart::where('shiprocket_order_number', $unique_number)
                     ->where('brand_id', '!=', $item->brand_id)
@@ -1493,7 +1494,8 @@ class CartController extends Controller
                 // Update item with the new unique number
                 $item->shiprocket_order_number = $unique_number;
                 $item->update();
-
+                log::info("Old Shiprocket Order Number: " . $old_shiprocket_order_number);
+                log::info("New Shiprocket Order Number: " . $unique_number);
 
                 log::info($item->products->productMeasurement);
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
