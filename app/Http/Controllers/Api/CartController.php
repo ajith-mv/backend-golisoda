@@ -877,10 +877,12 @@ class CartController extends Controller
                     $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
                     $checkCart->rocketResponse()->delete();
                 }
-            }else{
+            } else {
                 log::info("no shiprocket id present");
             }
-            $shiprocketOrder->delete();
+            if (isset($shiprocketOrder)) {
+                $shiprocketOrder->delete();
+            }
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;
             $checkCart->delete();
