@@ -869,7 +869,9 @@ class CartController extends Controller
             if ($shiprocketOrderId) {
                 log::info($shiprocketOrderId . 'shiprocket order id');
                 // Count how many carts are associated with this shiprocket_order_id
-                $count = CartShipment::where('shiprocket_order_id', $shiprocketOrderId)->count();
+                $count = CartShipment::whereIn('cart_id', function($query) use ($customer_id) {
+                    $query->select('id')->from('gbs_carts')->where('customer_id', $customer_id);
+                })->where('shiprocket_order_id', $shiprocketOrderId)->count();
                 log::info('count of data' . $count);
                 if ($count <= 1) {
                     $shiprocket_order_ids[] = $shiprocketOrderId;
