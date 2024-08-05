@@ -324,7 +324,7 @@
                         </td>
                         <td class="w-100" style="text-align: right;">
                             <span style="font-family: DejaVu Sans; sans-serif;">&#8377;</span>
-                            {{ number_format(($order_info->sub_total + $save_price), 2) }}
+                            {{ number_format(($order_info->sub_total + (float)$save_price), 2) }}
                         </td>
                     </tr>
                     <tr>
