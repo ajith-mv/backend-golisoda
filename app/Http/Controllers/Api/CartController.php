@@ -1494,8 +1494,11 @@ $old_shiprocket_order_number = $item->shiprocket_order_number;
                 // Update item with the new unique number
                 $item->shiprocket_order_number = $unique_number;
                 $item->update();
-                log::info("Old Shiprocket Order Number: " . $old_shiprocket_order_number);
-                log::info("New Shiprocket Order Number: " . $unique_number);
+                if ($old_shiprocket_order_number !== $unique_number) {
+                    log::info("Shiprocket Order Number changed from $old_shiprocket_order_number to $unique_number");
+                } else {
+                    log::info("Shiprocket Order Number remains unchanged: $unique_number");
+                }
 
                 log::info($item->products->productMeasurement);
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
