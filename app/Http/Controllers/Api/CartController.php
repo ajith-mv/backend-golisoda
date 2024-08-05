@@ -863,16 +863,20 @@ class CartController extends Controller
             $shipments = $checkCart->shipments();
             $shiprocketOrder = CartShipment::where('cart_id', $checkCart->id)->first();
             if (isset($shiprocketOrder)) {
-                $shiprocketOrderId =  $shiprocketOrder->shiprocket_order_id;
+                $shiprocketOrderId = $shiprocketOrder->shiprocket_order_id;
+                $brand_id = $shiprocketOrder->brand_id;
             }
-
-            if ($shiprocketOrderId) {
-                log::info($shiprocketOrderId . 'shiprocket order id');
-                // Count how many carts are associated with this shiprocket_order_id
-                $count = CartShipment::whereIn('cart_id', function($query) use ($customer_id) {
-                    $query->select('id')->from('carts')->where('customer_id', $customer_id);
-                })->where('shiprocket_order_id', $shiprocketOrderId)->count();
-                log::info('count of data' . $count);
+    
+            if ($shiprocketOrderId && $brand_id) {
+                log::info($shiprocketOrderId . ' shiprocket order id');
+    
+                // Get count of carts associated with this shiprocket_order_id for the same customer and brand_id
+                $count = CartShipment::whereIn('cart_id', function ($query) use ($customer_id, $brand_id) {
+                    $query->select('id')->from('carts')->where('customer_id', $customer_id)->where('brand_id', $brand_id);
+                })->where('shiprocket_order_id', $shiprocketOrderId)->where('brand_id', $brand_id)->count();
+    
+                log::info('count of data ' . $count);
+    
                 if ($count <= 1) {
                     $shiprocket_order_ids[] = $shiprocketOrderId;
                     // If only one cart is associated, cancel the Shiprocket order
@@ -880,7 +884,7 @@ class CartController extends Controller
                     $checkCart->rocketResponse()->delete();
                 }
             } else {
-                log::info("no shiprocket id present");
+                log::info("no shiprocket id or brand id present");
             }
             if (isset($shiprocketOrder)) {
                 log::info('deleted entry from shipment'. $shiprocketOrder->id);
