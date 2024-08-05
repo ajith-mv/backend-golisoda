@@ -881,6 +881,7 @@ class CartController extends Controller
                 log::info("no shiprocket id present");
             }
             if (isset($shiprocketOrder)) {
+                log::info('deleted entry from shipment'. $shiprocketOrder->id);
                 $shiprocketOrder->delete();
             }
             $customer_id    = $checkCart->customer_id;
