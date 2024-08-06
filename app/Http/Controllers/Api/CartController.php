@@ -1468,25 +1468,18 @@ class CartController extends Controller
 
                     if (!$suffix) {
                         // Generate a new suffix if it does not exist for the brand
-                        $maxSuffix = $existingCarts->max('suffix') ?? 0;
+                        $maxSuffix = $existingCarts->max('suffix');
                         $suffix = str_pad($maxSuffix + 1, 2, '0', STR_PAD_LEFT); // Increment suffix and ensure it's two digits
-                    } else {
-                        $suffix = str_pad($suffix, 2, '0', STR_PAD_LEFT); // Ensure suffix is two digits
+
+                        // Store the new suffix in the database
+                        $item->suffix = $suffix;
+                        $item->update();
                     }
                 } else {
                     // If no existing carts, start suffix from '01'
                     $suffix = '01';
-                }
-
-                // Update all relevant items with the correct suffix
-                foreach ($existingCarts as $existingItem) {
-                    if ($existingItem->brand_id == $brandId) {
-                        $existingItem->suffix = $suffix;
-                        $existingItem->update();
-
-                        // Increment suffix for the next item
-                        $suffix = str_pad($suffix + 1, 2, '0', STR_PAD_LEFT);
-                    }
+                    $item->suffix = $suffix;
+                    $item->update();
                 }
 
                 // Generate the unique number
