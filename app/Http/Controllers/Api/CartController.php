@@ -1451,57 +1451,33 @@ class CartController extends Controller
                 if (!$base_unique_id) {
                     // Create a new base unique ID if it doesn't exist
                     $base_unique_id = $customer_id . '-' . date('YmdHis'); // Generate a new unique ID
+                    // Assign base_unique_id to all relevant items
+                    Cart::where('customer_id', $customer_id)
+                        ->where('brand_id', $brandId)
+                        ->update(['base_unique_id' => $base_unique_id]);
                 }
 
-                // Ensure all relevant items have the base_unique_id
-                Cart::where('customer_id', $customer_id)
-                    ->where('brand_id', $brandId)
-                    ->update(['base_unique_id' => $base_unique_id]);
-
-                // Determine suffix based on brand_id and ensure uniqueness
+                // Determine suffix based on base_unique_id and ensure uniqueness
                 $existingCarts = Cart::where('customer_id', $customer_id)
                     ->where('base_unique_id', $base_unique_id)
                     ->get();
 
-                if (!isset($brand_suffix_map[$brandId])) {
+                if (!isset($brand_suffix_map[$base_unique_id])) {
                     if ($existingCarts->isNotEmpty()) {
                         // Determine the highest existing suffix
-                        $maxSuffix = $existingCarts->where('brand_id', $brandId)->max('suffix');
+                        $maxSuffix = $existingCarts->max('suffix');
                         $suffix = $maxSuffix ? str_pad($maxSuffix + 1, 2, '0', STR_PAD_LEFT) : '01';
                     } else {
                         // If no existing carts, start suffix from '01'
                         $suffix = '01';
                     }
-                    $brand_suffix_map[$brandId] = $suffix;
+                    $brand_suffix_map[$base_unique_id] = $suffix;
                 } else {
-                    $suffix = $brand_suffix_map[$brandId];
+                    $suffix = $brand_suffix_map[$base_unique_id];
                 }
 
-                // Update all relevant items with the correct suffix
-                foreach ($existingCarts as $existingItem) {
-                    if ($existingItem->brand_id == $brandId) {
-                        $existingItem->suffix = $suffix;
-                        $existingItem->update();
-                    }
-                }
-
-                // Generate the unique number
-                $unique_number = $suffix ? $base_unique_id . '-' . $suffix : $base_unique_id;
-                // Store the existing shiprocket_order_number
-                $old_shiprocket_order_number = $item->shiprocket_order_number;
-                $old_brand_id = $item->brand_id;
-
-                // Ensure unique_number is unique across different brands
-                while (Cart::where('shiprocket_order_number', $unique_number)
-                    ->where('brand_id', '!=', $item->brand_id)
-                    ->exists()
-                ) {
-                    $suffix = str_pad(++$suffix, 2, '0', STR_PAD_LEFT); // Increment suffix
-                    $unique_number = $base_unique_id . '-' . $suffix;
-                }
-
-                // Update item with the new unique number
-                $item->shiprocket_order_number = $unique_number;
+                // Update item with the correct suffix
+                $item->suffix = $suffix;
                 $item->update();
 
                 // if ($old_shiprocket_order_number !== $unique_number && $old_brand_id === $item->brand_id) {
