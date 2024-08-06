@@ -890,7 +890,7 @@ class CartController extends Controller
             } else {
                 log::info("no shiprocket id or brand id present");
             }
-            
+
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;
             $checkCart->delete();
@@ -1451,9 +1451,12 @@ class CartController extends Controller
                 if (!$base_unique_id) {
                     // Create a new base unique ID if it doesn't exist
                     $base_unique_id = $customer_id . '-' . date('YmdHis'); // Generate a new unique ID
-                    $item->base_unique_id = $base_unique_id;
-                    $item->update();
                 }
+
+                // Ensure all relevant items have the base_unique_id
+                Cart::where('customer_id', $customer_id)
+                    ->where('brand_id', $brandId)
+                    ->update(['base_unique_id' => $base_unique_id]);
 
                 // Determine suffix based on brand_id and ensure uniqueness
                 $existingCarts = Cart::where('customer_id', $customer_id)
