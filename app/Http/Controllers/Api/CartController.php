@@ -1497,34 +1497,34 @@ class CartController extends Controller
                 $item->shiprocket_order_number = $unique_number;
                 $item->update();
 
-                if ($old_shiprocket_order_number !== $unique_number && $old_brand_id === $item->brand_id) {
-                    log::info("Shiprocket Order Number changed from $old_shiprocket_order_number to $unique_number for brand id $old_brand_id");
-                    $shiprocketOrder = Cart::where('shiprocket_order_number', $old_shiprocket_order_number)
-                        ->join('cart_shipments', 'carts.id', '=', 'cart_shipments.cart_id')
-                        ->select('shiprocket_order_id', 'carts.id AS cartid')
-                        ->first();
-                    if (isset($shiprocketOrder)) {
-                        $shiprocketOrderId = $shiprocketOrder->shiprocket_order_id;
-                        log::info("order id to be cancelled is $shiprocketOrderId");
-                        $shiprocket_order_ids[] = $shiprocketOrderId;
-                        // If only one cart is associated, cancel the Shiprocket order
-                        $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
-                        $cart_data = Cart::find($shiprocketOrder->cart_id);
+                // if ($old_shiprocket_order_number !== $unique_number && $old_brand_id === $item->brand_id) {
+                //     log::info("Shiprocket Order Number changed from $old_shiprocket_order_number to $unique_number for brand id $old_brand_id");
+                //     $shiprocketOrder = Cart::where('shiprocket_order_number', $old_shiprocket_order_number)
+                //         ->join('cart_shipments', 'carts.id', '=', 'cart_shipments.cart_id')
+                //         ->select('shiprocket_order_id', 'carts.id AS cartid')
+                //         ->first();
+                //     if (isset($shiprocketOrder)) {
+                //         $shiprocketOrderId = $shiprocketOrder->shiprocket_order_id;
+                //         log::info("order id to be cancelled is $shiprocketOrderId");
+                //         $shiprocket_order_ids[] = $shiprocketOrderId;
+                //         // If only one cart is associated, cancel the Shiprocket order
+                //         $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
+                //         $cart_data = Cart::find($shiprocketOrder->cart_id);
 
-                        if ($cart_data) {
-                            // Delete related rocketResponse
-                            if ($cart_data->rocketResponse) {
-                                $cart_data->rocketResponse()->delete();
-                            }
+                //         if ($cart_data) {
+                //             // Delete related rocketResponse
+                //             if ($cart_data->rocketResponse) {
+                //                 $cart_data->rocketResponse()->delete();
+                //             }
 
-                            // Delete related shipments
-                            // $cart_data->shipments()->delete();
-                        }
-                        // $brand_id = $shiprocketOrder->brand_id;
-                    }
-                } else {
-                    log::info("Shiprocket Order Number remains unchanged: $unique_number for brand id $old_brand_id");
-                }
+                //             // Delete related shipments
+                //             // $cart_data->shipments()->delete();
+                //         }
+                //         // $brand_id = $shiprocketOrder->brand_id;
+                //     }
+                // } else {
+                //     log::info("Shiprocket Order Number remains unchanged: $unique_number for brand id $old_brand_id");
+                // }
 
                 log::info($item->products->productMeasurement);
                 $flat_charges = $flat_charges + getVolumeMetricCalculation($item->products->productMeasurement->length ?? 0, $item->products->productMeasurement->width ?? 0, $item->products->productMeasurement->hight ?? 0);
