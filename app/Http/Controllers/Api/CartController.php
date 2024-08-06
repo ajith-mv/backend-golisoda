@@ -1497,13 +1497,16 @@ class CartController extends Controller
                 $item->update();
                 if ($old_shiprocket_order_number !== $unique_number && $old_brand_id === $item->brand_id) {
                     log::info("Shiprocket Order Number changed from $old_shiprocket_order_number to $unique_number for brand id $old_brand_id");
-                    $shiprocketOrder = CartShipment::where('cart_id', $item->id)->first();
+                    $shiprocketOrder = Cart::where('shiprocket_order_number', $old_shiprocket_order_number)
+                    ->join('cart_shipments', 'carts.id', '=', 'cart_shipments.cart_id')
+                    ->select('shiprocket_order_id')
+                    ->first();
                     if (isset($shiprocketOrder)) {
                         $shiprocketOrderId = $shiprocketOrder->shiprocket_order_id;
                         log::info("order id to be cancelled is $shiprocketOrderId");
                         $shiprocket_order_ids[] = $shiprocketOrderId;
                         // If only one cart is associated, cancel the Shiprocket order
-                        $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
+                        // $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
                         // $item->rocketResponse()->delete();
                         // $item->shipments()->delete();
                         // $brand_id = $shiprocketOrder->brand_id;
