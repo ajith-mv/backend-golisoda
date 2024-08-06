@@ -1497,7 +1497,7 @@ class CartController extends Controller
                 $item->update();
                 if ($old_shiprocket_order_number !== $unique_number && $old_brand_id === $item->brand_id) {
                     log::info("Shiprocket Order Number changed from $old_shiprocket_order_number to $unique_number for brand id $old_brand_id");
-                    $shiprocketOrder = Cart::where('shiprocket_order_number', $unique_number)
+                    $shiprocketOrder = Cart::where('shiprocket_order_number', $old_shiprocket_order_number)
                     ->join('cart_shipments', 'carts.id', '=', 'cart_shipments.cart_id')
                     ->select('shiprocket_order_id')
                     ->first();
