@@ -877,7 +877,7 @@ class CartController extends Controller
 
                 log::info('count of data ' . $count);
 
-                if ($count < 1) {
+                if ($count == 1) {
                     $shiprocket_order_ids[] = $shiprocketOrderId;
                     // If only one cart is associated, cancel the Shiprocket order
                     $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
