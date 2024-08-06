@@ -882,14 +882,15 @@ class CartController extends Controller
                     // If only one cart is associated, cancel the Shiprocket order
                     $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
                     $checkCart->rocketResponse()->delete();
+                    if (isset($shiprocketOrder)) {
+                        log::info('deleted entry from shipment' . $shiprocketOrder->id);
+                        $shiprocketOrder->delete();
+                    }
                 }
             } else {
                 log::info("no shiprocket id or brand id present");
             }
-            if (isset($shiprocketOrder)) {
-                log::info('deleted entry from shipment' . $shiprocketOrder->id);
-                $shiprocketOrder->delete();
-            }
+            
             $customer_id    = $checkCart->customer_id;
             $guest_token    = $checkCart->guest_token;
             $checkCart->delete();
