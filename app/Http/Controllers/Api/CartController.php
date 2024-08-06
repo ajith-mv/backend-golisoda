@@ -1468,18 +1468,25 @@ class CartController extends Controller
 
                     if (!$suffix) {
                         // Generate a new suffix if it does not exist for the brand
-                        $maxSuffix = $existingCarts->max('suffix');
+                        $maxSuffix = $existingCarts->max('suffix') ?? 0;
                         $suffix = str_pad($maxSuffix + 1, 2, '0', STR_PAD_LEFT); // Increment suffix and ensure it's two digits
-
-                        // Store the new suffix in the database
-                        $item->suffix = $suffix;
-                        $item->update();
+                    } else {
+                        $suffix = str_pad($suffix, 2, '0', STR_PAD_LEFT); // Ensure suffix is two digits
                     }
                 } else {
                     // If no existing carts, start suffix from '01'
                     $suffix = '01';
-                    $item->suffix = $suffix;
-                    $item->update();
+                }
+
+                // Update all relevant items with the correct suffix
+                foreach ($existingCarts as $existingItem) {
+                    if ($existingItem->brand_id == $brandId) {
+                        $existingItem->suffix = $suffix;
+                        $existingItem->update();
+
+                        // Increment suffix for the next item
+                        $suffix = str_pad($suffix + 1, 2, '0', STR_PAD_LEFT);
+                    }
                 }
 
                 // Generate the unique number
@@ -1500,7 +1507,6 @@ class CartController extends Controller
                 // Update item with the new unique number
                 $item->shiprocket_order_number = $unique_number;
                 $item->update();
-
                 // if ($old_shiprocket_order_number !== $unique_number && $old_brand_id === $item->brand_id) {
                 //     log::info("Shiprocket Order Number changed from $old_shiprocket_order_number to $unique_number for brand id $old_brand_id");
                 //     $shiprocketOrder = Cart::where('shiprocket_order_number', $old_shiprocket_order_number)
