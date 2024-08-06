@@ -877,7 +877,7 @@ class CartController extends Controller
 
                 log::info('count of data ' . $count);
 
-                if ($count <= 1) {
+                if ($count < 1) {
                     $shiprocket_order_ids[] = $shiprocketOrderId;
                     // If only one cart is associated, cancel the Shiprocket order
                     $this->rocketService->cancelShiprocketOrder($shiprocket_order_ids);
@@ -1490,8 +1490,8 @@ class CartController extends Controller
                 $unique_number = $suffix ? $base_unique_id . '-' . $suffix : $base_unique_id;
 
                 // Store the existing shiprocket_order_number and brand_id
-                $old_shiprocket_order_number = $item->shiprocket_order_number;
-                $old_brand_id = $item->brand_id;
+                // $old_shiprocket_order_number = $item->shiprocket_order_number;
+                // $old_brand_id = $item->brand_id;
 
                 // Ensure unique_number is unique across different brands
                 while (Cart::where('shiprocket_order_number', $unique_number)
