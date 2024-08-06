@@ -1463,19 +1463,24 @@ class CartController extends Controller
                     ->where('base_unique_id', $base_unique_id)
                     ->get();
 
-                if ($existingCarts->isNotEmpty()) {
-                    $suffix = $existingCarts->where('brand_id', $brandId)->first()->suffix ?? null;
+                if (!isset($brand_suffix_map[$brandId])) {
+                    if ($existingCarts->isNotEmpty()) {
+                        $suffix = $existingCarts->where('brand_id', $brandId)->first()->suffix ?? null;
 
-                    if (!$suffix) {
-                        // Generate a new suffix if it does not exist for the brand
-                        $maxSuffix = $existingCarts->max('suffix') ?? 0;
-                        $suffix = str_pad($maxSuffix + 1, 2, '0', STR_PAD_LEFT); // Increment suffix and ensure it's two digits
+                        if (!$suffix) {
+                            // Generate a new suffix if it does not exist for the brand
+                            $maxSuffix = $existingCarts->max('suffix') ?? 0;
+                            $suffix = str_pad($maxSuffix + 1, 2, '0', STR_PAD_LEFT); // Increment suffix and ensure it's two digits
+                        } else {
+                            $suffix = str_pad($suffix, 2, '0', STR_PAD_LEFT); // Ensure suffix is two digits
+                        }
                     } else {
-                        $suffix = str_pad($suffix, 2, '0', STR_PAD_LEFT); // Ensure suffix is two digits
+                        // If no existing carts, start suffix from '01'
+                        $suffix = '01';
                     }
+                    $brand_suffix_map[$brandId] = $suffix;
                 } else {
-                    // If no existing carts, start suffix from '01'
-                    $suffix = '01';
+                    $suffix = $brand_suffix_map[$brandId];
                 }
 
                 // Update all relevant items with the correct suffix
@@ -1483,9 +1488,6 @@ class CartController extends Controller
                     if ($existingItem->brand_id == $brandId) {
                         $existingItem->suffix = $suffix;
                         $existingItem->update();
-
-                        // Increment suffix for the next item
-                        $suffix = str_pad($suffix + 1, 2, '0', STR_PAD_LEFT);
                     }
                 }
 
