@@ -352,6 +352,7 @@ log::debug($order_id_goli);
                                         $shipment['shipping_amount'] = $flat_shipping * 50;
                                         $shipment['shipping_type'] = 'flat_shipping';
                                         $shipment['shipping_id'] = 3;
+                                        $shipment['shiprocket_order_id'] = null;
                                         $shipment['shiprocket_amount'] = $flat_shipping * 50;
 
                                         if (isset($brand_data) && ($brand_data->is_free_shipping == 1)) {
