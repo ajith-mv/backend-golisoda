@@ -871,7 +871,9 @@ class CartController extends Controller
                 log::info($shiprocketOrderId . ' shiprocket order id');
 
                 // Get count of carts associated with this shiprocket_order_id for the same customer and brand_id
-                $count = CartShipment::where('cart_id', $checkCart->id)->count();
+                $count = CartShipment::whereIn('cart_id', function ($query) use ($customer_id, $brand_id) {
+                    $query->select('id')->from('carts')->where('customer_id', $customer_id)->where('brand_id', $brand_id);
+                })->where('shiprocket_order_id', $shiprocketOrderId)->where('brand_id', $brand_id)->count();
 
                 log::info('count of data ' . $count);
 
@@ -1456,7 +1458,7 @@ class CartController extends Controller
                 Cart::where('customer_id', $customer_id)
                     ->where('brand_id', $brandId)
                     ->update(['base_unique_id' => $base_unique_id]);
-
+                    
                 // Determine suffix based on base_unique_id and ensure uniqueness
                 $existingCarts = Cart::where('customer_id', $customer_id)
                     ->where('base_unique_id', $base_unique_id)
