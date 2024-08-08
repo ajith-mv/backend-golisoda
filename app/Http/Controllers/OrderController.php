@@ -251,8 +251,8 @@ class OrderController extends Controller
 
                     $send_mail = new DynamicMail($templateMessage, $title);
                     // return $send_mail->render();
-                     $bccEmails = explode(',', env('BCC_EMAILS'));
-                     $bccRecipients = array_merge($bccEmails, [$info->billing_email]);
+                    //  $bccEmails = explode(',', env('BCC_EMAILS'));
+                    //  $bccRecipients = array_merge($bccEmails, [$info->billing_email]);
                     Mail::to($info->billing_email)->bcc($bccRecipients)->send($send_mail);
 
                     #send sms for notification
@@ -344,8 +344,8 @@ class OrderController extends Controller
                     $send_mail = new OrderMail($templateMessage, $title, $filePath);
 
                     // return $send_mail->render();
-                     $bccEmails = explode(',', env('BCC_EMAILS'));
-                     $bccRecipients = array_merge($bccEmails, [$info->billing_email]);
+                    //  $bccEmails = explode(',', env('BCC_EMAILS'));
+                    //  $bccRecipients = array_merge($bccEmails, [$info->billing_email]);
                     Mail::to($info->billing_email)->bcc($bccRecipients)->send($send_mail);
 
                     #send sms for notification
