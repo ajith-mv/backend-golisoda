@@ -29,8 +29,15 @@ class OrderMail extends Mailable
      */
     public function build()
     {
-        return $this->markdown('email.common.dynamicContent')->subject($this->title)
-        ->attach( public_path($this->filePath));
-        // return $this->markdown('email.testEmail');
+
+        if (file_exists(public_path($this->filePath))) {
+            return $this->markdown('email.common.dynamicContent')
+                 ->subject($this->title)
+                 ->attach(public_path($this->filePath));
+        } else {
+            // Send the email without the attachment
+            return $this->markdown('email.common.dynamicContent')
+                 ->subject($this->title);
+        }
     }
 }

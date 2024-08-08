@@ -338,6 +338,9 @@ class OrderController extends Controller
                     // $send_mail = new OrderMail($templateMessage, $title, $filePath);
                     //  $send_mail = new OrderMail($templateMessage, $title);
                     $filePath = 'storage/invoice_order/' . $info->order_no . '.pdf';
+                    if (!(file_exists(public_path($filePath)))) {
+                        $this->generateInvoice($order_id);
+                    }
                     $send_mail = new OrderMail($templateMessage, $title, $filePath);
 
                     // return $send_mail->render();
@@ -397,5 +400,18 @@ class OrderController extends Controller
             ->groupBy('orders.id')->get();
         $order_count = count($data);
         return $order_count;
+    }
+
+    public function generateInvoice($order_id)
+    {
+        $order_info = Order::find($order_id);
+        if ($order_info) {
+            $globalInfo = GlobalSettings::first();
+
+            $pdf = PDF::loadView('platform.invoice.index', compact('order_info', 'globalInfo'));
+            Storage::put('public/invoice_order/' . $order_info->order_no . '.pdf', $pdf->output());
+            return true;
+        }
+        return false;
     }
 }
