@@ -345,6 +345,7 @@ class CheckoutController extends Controller
                 log::debug($request);
                 if (isset($request['payment_method'])) {
                     $request['payment_method'] = 'cod';
+                    $request['sub_total'] = $request['sub_total'] + 50;
                 }
                 $this->rocketService->updateOrder($request);
             }
