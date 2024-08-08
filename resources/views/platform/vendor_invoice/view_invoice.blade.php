@@ -74,6 +74,7 @@
         .w-40 {
             width: 40% !important;
         }
+
         .w-10 {
             width: 10% !important;
         }
@@ -96,8 +97,9 @@
                                 <img src="{{ asset('assets/global_setting/logo/1707472536_logo.png') }}" alt=""
                                     height="75"></span> </td>
                         <td class="w-30">
-                            <div> Invoice Date: {{ date('d-m-Y')}}</div>
-                            <div> Date Range: {{ isset($end_date) ? $end_date : ''}} to {{ isset($start_date) ? $start_date : ''}}</div>
+                            <div> Invoice Date: {{ date('d-m-Y') }}</div>
+                            <div> Date Range: {{ isset($end_date) ? $end_date : '' }} to
+                                {{ isset($start_date) ? $start_date : '' }}</div>
 
                         </td>
 
@@ -129,8 +131,11 @@
                             <div><b> To: </b></div>
                             <h4><b>{{ isset($brand_location) ? $brand_location->brand_name : '' }}</b></h4>
 
-                            <div>{{ isset($brand_location) ? $brand_location->address_line1 : '' }}, {{ isset($brand_location) ? $brand_location->address_line2 : '' }}</div>
-                            <div>{{ isset($brand_location) ? $brand_location->city : '' }} ,{{ isset($brand_location) ? $brand_location->state : '' }} - {{ isset($brand_location) ? $brand_location->pincode : '' }}</div>
+                            <div>{{ isset($brand_location) ? $brand_location->address_line1 : '' }},
+                                {{ isset($brand_location) ? $brand_location->address_line2 : '' }}</div>
+                            <div>{{ isset($brand_location) ? $brand_location->city : '' }}
+                                ,{{ isset($brand_location) ? $brand_location->state : '' }} -
+                                {{ isset($brand_location) ? $brand_location->pincode : '' }}</div>
                             <div> Phone: {{ isset($brand_location) ? $brand_location->mobile_no : '' }}</div>
                             <div> Email: {{ isset($brand_location) ? $brand_location->email_id : '' }}</div>
                             <div> PAN:{{ isset($brand_location) ? $brand_location->pan_no : '' }}</div>
@@ -159,7 +164,8 @@
         </tr>
         <tr>
             <td>Total Shipments</td>
-            <td style="text-align:right">{{ isset($shipment_data->total_shipments) ? $shipment_data->total_shipments : '' }}</td>
+            <td style="text-align:right">
+                {{ isset($shipment_data->total_shipments) ? $shipment_data->total_shipments : '' }}</td>
         </tr>
         <tr>
             <td>Total Sales (Inclusive Tax)</td>
@@ -167,61 +173,80 @@
         </tr>
         <tr>
             <td> Total Sales (Exclusive Tax)</td>
-            <td style="text-align:right"> {{ isset($data->sale_amount_excluding_tax) ? $data->sale_amount_excluding_tax : '' }} </td>
+            <td style="text-align:right">
+                {{ isset($data->sale_amount_excluding_tax) ? $data->sale_amount_excluding_tax : '' }} </td>
         </tr>
         <tr>
-            <td> Commission(B) {{(isset($data->com_percentage) && ($data->com_percentage != '0.00')) ? '@ '.round($data->com_percentage). '%' :  '' }} </td>
-            <td style="text-align:right"> {{ isset($data->com_amount) ? number_format($data->com_amount, 2) :  '' }} </td>
+            <td> Commission(B)
+                {{ isset($data->com_percentage) && $data->com_percentage != '0.00' ? '@ ' . round($data->com_percentage) . '%' : '' }}
+            </td>
+            <td style="text-align:right"> {{ isset($data->com_amount) ? number_format($data->com_amount, 2) : '' }}
+            </td>
         </tr>
-        
+
         @php
-               $sale_amount = isset($data->sale_amount) ? $data->sale_amount : 0;
-               $tds_commission = $sale_amount * 0.01;
+            $sale_amount = isset($data->sale_amount) ? $data->sale_amount : 0;
+            $tds_commission = $sale_amount * 0.01;
 
             $commission_amount = $data->com_amount ?? 0;
             $shipping_bared_golisoda = $data->is_shipping_bared_golisoda;
             $is_free_shipping = $data->is_free_shipping;
-            if($shipping_bared_golisoda && $is_free_shipping){
+            if ($shipping_bared_golisoda && $is_free_shipping) {
                 $shipping_charge = 0;
-            }else{
+            } else {
                 $shipping_charge = $shipment_data->total_shipping_charge ?? 0;
             }
             $gst_calculation_amount = $commission_amount + $shipping_charge;
             $cgst_commission = $sgst_commission = $gst_calculation_amount * 0.09;
 
+            $brand_state_name = isset($brand_location) ? $brand_location->state : '';
+            $brand_state_name = strtolower(str_replace(' ', '', $brand_state_name));
         @endphp
         <tr>
             <td> Shipping Charges</td>
             <td style="text-align:right"> {{ $shipping_charge }} </td>
         </tr>
-        <tr>
-            <td> CGST on Commission + Shipping (9%) ©</td>
-            <td style="text-align:right"> {{ $cgst_commission }} </td>
-        </tr>
-        <tr>
-            <td> SGST on Commission + Shipping (9%) ©</td>
-            <td style="text-align:right"> {{ $sgst_commission }} </td>
-        </tr>
+        @if (empty($brand_state_name) || $brand_state_name == 'tamilnadu')
+            <tr>
+                <td> CGST on Commission + Shipping (9%) ©</td>
+                <td style="text-align:right"> {{ $cgst_commission }} </td>
+            </tr>
+            <tr>
+                <td> SGST on Commission + Shipping (9%) ©</td>
+                <td style="text-align:right"> {{ $sgst_commission }} </td>
+            </tr>
+        @else
+            <tr>
+                <td> IGST on Commission + Shipping (18%) ©</td>
+                <td style="text-align:right"> {{ $cgst_commission + $sgst_commission }} </td>
+            </tr>
+        @endif
         <tr>
             <td> TDS (1 %)</td>
             <td style="text-align:right"> {{ $tds_commission }} </td>
         </tr>
         <tr>
             <td><b>Net Payable Amount</b></td>
-           @php
-               $com_amount = isset($data->com_amount) ? $data->com_amount : 0;
-               $net_total = ($sale_amount) - ($com_amount) - ($cgst_commission) - ($sgst_commission) - ($shipping_charge) - ($tds_commission);
-           @endphp
+            @php
+                $com_amount = isset($data->com_amount) ? $data->com_amount : 0;
+                $net_total =
+                    $sale_amount -
+                    $com_amount -
+                    $cgst_commission -
+                    $sgst_commission -
+                    $shipping_charge -
+                    $tds_commission;
+            @endphp
             <td style="text-align:right"><b>{{ round($net_total) }}</b></td>
         </tr>
-        
+
     </table>
-    <br/>
+    <br />
     <table cellspacing="0" padding="0" class="w-100">
         <tr>
             <td>
                 <div><b>Terms & Conditions:</b></div>
-                <br/>
+                <br />
                 <div>All commissions are calculated based on product Selling prices (inclusive of taxes).</div>
                 <div>For any discrepancies or questions regarding this Invoice, please mail us on
                     info@golisodastore.com. Any discrepancy reported after 7 days is not admissible.</div>
@@ -230,7 +255,7 @@
             </td>
         </tr>
     </table>
-    <br/>
+    <br />
     <h1 style="text-align:center"> Order Summary </h1>
     <table cellspacing="0" padding="0" class="w-100 item-table">
 
@@ -249,10 +274,10 @@
             <tr>
                 <td>{{ $count }}</td>
                 <td>{{ date('d/m/Y', strtotime($order->created_at)) }}</td>
-                <td>{{ $order->order_no}}</td>
+                <td>{{ $order->order_no }}</td>
                 <td>{{ $order->payment_type }}</td>
-                <td>{{ $order->tracking_id}}</td>
-                <td style="text-align:right">{{ $order->vendor_order_amount}}</td>
+                <td>{{ $order->tracking_id }}</td>
+                <td style="text-align:right">{{ $order->vendor_order_amount }}</td>
             </tr>
             @php
                 $count++;

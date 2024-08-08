@@ -96,7 +96,7 @@
                             </div>
                             <div> {{ $brand_address->state . ', ' . $brand_address->pincode }} </div>
                             <!--<div> {{ $brand_address->site_mobile_no }} </div>-->
-
+                            
                         </td>
 
                     </tr>
@@ -170,6 +170,10 @@
         </tr>
 
     </table>
+   @php
+       $brand_state_name = isset($brand_address) ? $brand_address->state : '';
+       $brand_state_name = strtolower(str_replace(' ', '', $brand_state_name));
+   @endphp
     <table class="item-table" cellspacing="0" padding="0">
         <tr>
             <th style="width: 10px;" rowspan="2">S.No</th>
@@ -179,8 +183,10 @@
             <th rowspan="2" style="width: 30px;"> QTY</th>
             <th rowspan="2" style="width: 30px;"> RATE </th>
             <th rowspan="2" style="width: 40px;"> TAXABLE VALUE </th>
+    @if (empty($brand_state_name) && $brand_state_name == 'tamilnadu')
             <th colspan="2" style="width: 100px;"> CGST </th>
             <th colspan="2" style="width: 100px;"> SGST </th>
+
             <th rowspan="2" style="width: 40px;"> NET Amount </th>
         </tr>
         <tr>
@@ -189,6 +195,18 @@
             <th style="width: 40px;">%</th>
             <th style="width: 40px;">Amt</th>
         </tr>
+    @else
+        <th colspan="2" style="width: 100px;"> IGST </th>
+
+        <th rowspan="2" style="width: 40px;"> NET Amount </th>
+        </tr>
+        <tr>
+            <th style="width: 40px;">%</th>
+            <th style="width: 40px;">Amt</th>
+        </tr>
+    @endif
+
+
         @if (isset($order_info->orderItems) && !empty($order_info->orderItems))
             @php
                 $total = 0;
@@ -239,12 +257,20 @@
                         <td> {{ $item->quantity }} nos</td>
                         <td> {{ number_format($item->price, 2) }} </td>
                         <td>{{ number_format($item->price, 2) }}</td>
+                        @if (empty($brand_state_name) && $brand_state_name == 'tamilnadu')
                         <td>{{ $item->tax_percentage / 2 }}%</td>
                         <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
                         <td>{{ $item->tax_percentage / 2 }}%</td>
                         <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
+
                         <td style="text-align: right;">{{ number_format($item->sub_total, 2) }}</td>
                     </tr>
+                    @else
+                    <td>{{ $item->tax_percentage }}%</td>
+                        <td>{{ number_format($item->tax_amount, 2) }}</td>
+                        <td>{{ $item->tax_percentage }}%</td>
+                        <td style="text-align: right;">{{ number_format($item->sub_total, 2) }}</td>
+                    @endif
                     @php
                         $sub_total = (float) $item->sub_total;
                         $total = $total + $sub_total;

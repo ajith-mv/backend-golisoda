@@ -24,7 +24,8 @@ class ProductVariationController extends Controller
         $product_id             = $request->product_id;
         $info                   = Product::find($product_id);
         $attributes             = '';
-
+        $variationids = [];
+        
         $variationGroupdata = VariationGroup::where('status', 1)
             ->whereJsonContains('category_id', $category_id)
             ->get();
