@@ -13,6 +13,7 @@
             <th> Product Name </th>
             <th> No. of Qty Sold </th>
             <th> Amount </th>
+            <th> Order Status </th>
             
         </tr>
     </thead>
@@ -23,7 +24,8 @@
                 <td>{{ $item->category_name }}</td>
                 <td>{{ $item->product_name }}</td>
                 <td>{{ $item->order_quantity }}</td>
-                <td>{{ $item->prod_amount }}</td>                
+                <td>{{ $item->prod_amount }}</td>   
+                <td>{{ ucwords( str_replace("_", " ", $item->status) )  }}</td>            
             </tr>
             @endforeach
         @endif
