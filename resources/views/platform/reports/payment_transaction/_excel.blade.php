@@ -16,7 +16,7 @@
             <th>Order Amount</th>
             <th>Order Status</th>
             <th>Payment Status </th>
-            <th>RazorPay response </th>
+            {{-- <th>RazorPay response </th> --}}
         </tr>
     </thead>
     <tbody>
@@ -29,7 +29,7 @@
                 <td>{{ $item->order_amount }}</td>
                 <td>{{ $item->order_status_dd }}</td>
                 <td>{{ $item->payment_status }}</td>
-                <td>
+                {{-- <td>
                     @if( isset( $item->response ) && !empty( $item->response ) )
                         @foreach ( unserialize( $item->response ) as $itemkey => $itemvalue )
                             <div>
@@ -44,7 +44,7 @@
                             </div>
                         @endforeach
                     @endif
-                </td>  
+                </td>   --}}
             </tr>
             @endforeach
         @endif

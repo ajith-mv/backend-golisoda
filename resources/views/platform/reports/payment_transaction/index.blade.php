@@ -147,7 +147,7 @@
                 }
             });
             $.ajax({
-                url: "{{ route('payment.view') }}",
+                url: "{{ route('reports.payment.view') }}",
                 type: 'POST',
                 data: {id:id},
                 success: function(res) {
@@ -178,7 +178,7 @@ $.ajax({
     xhrFields: {
         responseType: 'blob',
     },
-    url: "{{ route('payment-reports.export.excel') }}",
+    url: "{{ route('reports.payment.export.excel') }}",
     type: 'POST',
     data: $('form#search-form').serialize(),
     success: function(result, status, xhr) {

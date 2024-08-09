@@ -50,7 +50,7 @@
                 <th>Payment Date </th>
                 <td>{{ date( 'd M Y H:i A', strtotime($payment_info->created_at)) }}</td>
             </tr>
-            @if( isset( $payment_info->response ) && !empty( $payment_info->response ) ) 
+            {{-- @if( isset( $payment_info->response ) && !empty( $payment_info->response ) ) 
             @foreach ( unserialize($payment_info->response) as $itemkey => $itemvalue)
                 <tr>
                     <th>{{ $itemkey }}</th>
@@ -67,7 +67,7 @@
                     </td>
                 </tr>
             @endforeach
-            @endif
+            @endif --}}
         </table>
     </div>
 </div>

@@ -134,7 +134,7 @@
                 xhrFields: {
                     responseType: 'blob',
                 },
-                url: "{{ route('reports.export.excel') }}",
+                url: "{{ route('reports.export.excel.customer') }}",
                 type: 'POST',
                 data: $('form#search-form').serialize(),
                 success: function(result, status, xhr) {

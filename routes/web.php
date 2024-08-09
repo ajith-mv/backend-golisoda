@@ -207,14 +207,14 @@ Route::middleware(['auth'])->group(function(){
 
     Route::prefix('reports')->middleware(['checkAccess:visible'])->group(function(){
         Route::get('/sale', [App\Http\Controllers\ReportProductController::class, 'index'])->name('reports.sale');
-        Route::post('/excel/export', [App\Http\Controllers\ReportProductController::class, 'exportExcel'])->name('reports.export.excel');
+        Route::post('/excel/export/sale', [App\Http\Controllers\ReportProductController::class, 'exportExcel'])->name('reports.export.excel.sale');
         Route::get('/productwisesale', [App\Http\Controllers\ProductwiseSaleReportController::class, 'index'])->name('reports.productwise');
         Route::post('/excel/export/product', [App\Http\Controllers\ProductwiseSaleReportController::class, 'exportExcel'])->name('reports.export.excel');
         Route::get('/customerwisesale', [App\Http\Controllers\CustomerwiseSaleReportController::class, 'index'])->name('reports.customerwise');
-        Route::post('/excel/export', [App\Http\Controllers\CustomerwiseSaleReportController::class, 'exportExcel'])->name('reports.export.excel');
+        Route::post('/excel/export/customer', [App\Http\Controllers\CustomerwiseSaleReportController::class, 'exportExcel'])->name('reports.export.excel.customer');
         Route::get('payment-report', [App\Http\Controllers\PaymentReportController::class, 'index'])->name('reports.payment');
-        Route::post('/payment-view', [App\Http\Controllers\PaymentReportController::class, 'paymentView'])->name('payment-reports.view');
-        Route::post('/export/excel', [App\Http\Controllers\PaymentReportController::class, 'export'])->name('payment-reports.export.excel');
+        Route::post('/payment-view', [App\Http\Controllers\PaymentReportController::class, 'paymentView'])->name('reports.payment.view');
+        Route::post('/export/excel', [App\Http\Controllers\PaymentReportController::class, 'export'])->name('reports.payment.export.excel');
         Route::get('/vendor-wise-sale', [App\Http\Controllers\VendorWiseSaleReportController::class, 'index'])->name('reports.vendor.wise');
         Route::post('/vendor-wise-sale/view', [App\Http\Controllers\VendorWiseSaleReportController::class, 'viewInvoice'])->name('reports.vendor_wise_sale.view');
         Route::get('/vendor-wise-sale/download', [App\Http\Controllers\VendorWiseSaleReportController::class, 'downloadInvoice'])->name('reports.vendor_wise_sale.download');
