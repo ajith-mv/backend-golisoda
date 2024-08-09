@@ -936,7 +936,9 @@ class CartController extends Controller
                 $q->where('guest_token', $guest_token);
             })->delete();
             $shipment_order_ids = $this->getShipmentOrderIds($cart_ids);
-            $this->rocketService->cancelShiprocketOrder($shipment_order_ids);
+            if(isset($shipment_order_ids)){
+                $this->rocketService->cancelShiprocketOrder($shipment_order_ids);
+            }
             $data = $this->getCartListAll($customer_id, $guest_token);
             $error = 0;
             $message = 'Cart Cleared successful';
@@ -1704,6 +1706,7 @@ class CartController extends Controller
 
     public function getShipmentOrderIds($cart_ids)
     {
+        $uniqueShiprocketOrderIds = null;
         if (!empty($cart_ids)) {
             $uniqueShiprocketOrderIds = CartShipment::whereIn('cart_id', $cart_ids)
                 ->pluck('shiprocket_order_id')
