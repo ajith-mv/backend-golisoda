@@ -81,7 +81,7 @@
     </style>
     <div style="text-align:center"> SALE ORDER </div>
     <table class="header-table" cellspacing="0" padding="0">
-        <tr>{{dd($brand_address)}}
+        <tr>
             <td colspan="2">
                 <table class="no-border" style="width: 100%">
                     <tr>
