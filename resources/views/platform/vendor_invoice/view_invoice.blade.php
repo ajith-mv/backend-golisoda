@@ -206,7 +206,7 @@
             <td> Shipping Charges</td>
             <td style="text-align:right"> {{ $shipping_charge }} </td>
         </tr>
-        @if (empty($brand_state_name) || $brand_state_name == 'tamilnadu')
+        @if ($brand_state_name == 'tamilnadu')
             <tr>
                 <td> CGST on Commission + Shipping (9%) ©</td>
                 <td style="text-align:right"> {{ $cgst_commission }} </td>
