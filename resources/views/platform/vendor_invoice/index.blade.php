@@ -257,7 +257,7 @@
                         <td> {{ $item->quantity }} nos</td>
                         <td> {{ number_format($item->price, 2) }} </td>
                         <td>{{ number_format($item->price, 2) }}</td>
-                        @if (empty($brand_state_name) && $brand_state_name == 'tamilnadu')
+                        @if (empty($brand_state_name) || $brand_state_name == 'tamilnadu')
                         <td>{{ $item->tax_percentage / 2 }}%</td>
                         <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
                         <td>{{ $item->tax_percentage / 2 }}%</td>
