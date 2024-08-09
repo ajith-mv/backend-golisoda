@@ -200,13 +200,13 @@
             $cgst_commission = $sgst_commission = $gst_calculation_amount * 0.09;
 
             $brand_state_name = isset($brand_location) ? $brand_location->state : '';
-            $brand_state_name = strtolower(str_replace(' ', '', $brand_state_name));
+            $brand_state_name = strtolower(str_replace(' ', '', trim($brand_state_name)));
         @endphp
         <tr>
             <td> Shipping Charges</td>
             <td style="text-align:right"> {{ $shipping_charge }} </td>
         </tr>
-        @if ($brand_state_name == 'tamilnadu')
+        @if (empty($brand_state_name) || $brand_state_name == 'tamilnadu')
             <tr>
                 <td> CGST on Commission + Shipping (9%) ©</td>
                 <td style="text-align:right"> {{ $cgst_commission }} </td>

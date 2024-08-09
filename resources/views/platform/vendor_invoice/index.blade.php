@@ -172,7 +172,7 @@
     </table>
    @php
        $brand_state_name = isset($brand_address) ? $brand_address->state : '';
-       $brand_state_name = strtolower(str_replace(' ', '', $brand_state_name));
+       $brand_state_name = strtolower(str_replace(' ', '', trim($brand_state_name)));
    @endphp
     <table class="item-table" cellspacing="0" padding="0">
         <tr>
@@ -268,7 +268,6 @@
                     @else
                     <td>{{ $item->tax_percentage }}%</td>
                         <td>{{ number_format($item->tax_amount, 2) }}</td>
-                        <td>{{ $item->tax_percentage }}%</td>
                         <td style="text-align: right;">{{ number_format($item->sub_total, 2) }}</td>
                     @endif
                     @php
