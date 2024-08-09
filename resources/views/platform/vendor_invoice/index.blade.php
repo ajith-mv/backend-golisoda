@@ -182,8 +182,8 @@
             <th rowspan="2" style="width: 40px;"> HSN</th>
             <th rowspan="2" style="width: 30px;"> QTY</th>
             <th rowspan="2" style="width: 30px;"> RATE </th>
-            <th rowspan="2" style="width: 40px;"> TAXABLE VALUE {{ $brand_state_name }} </th>
-    @if (empty($brand_state_name) && $brand_state_name == 'tamilnadu')
+            <th rowspan="2" style="width: 40px;"> TAXABLE VALUE </th>
+    @if (empty($brand_state_name) || $brand_state_name == 'tamilnadu')
             <th colspan="2" style="width: 100px;"> CGST </th>
             <th colspan="2" style="width: 100px;"> SGST </th>
 
