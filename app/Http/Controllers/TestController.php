@@ -391,7 +391,7 @@ class TestController extends Controller
 
     public function generateSiteMap(Request $request)
     {
-        $products = Product::all();
+        $products = Product::where('status', 'published')->get();
         $pages = array(
             'https://golisodastore.com',
             // 'https://golisodastore.com/about-us',
