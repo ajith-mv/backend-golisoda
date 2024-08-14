@@ -344,8 +344,12 @@ class CheckoutController extends Controller
                 $request = json_decode($shiprocket_response_data->rocket_order_request_data, true);
                 log::debug($request);
                 if (isset($request['payment_method'])) {
-                    $request['payment_method'] = 'cod';
-                    $request['transaction_charges'] = 50;
+                    if (isset($checkout_data['is_cod']) && $checkout_data['is_cod'] == 1) {
+                        if (isset($checkout_data['cod_amount'])) {
+                            $request['payment_method'] = 'cod';
+                            $request['transaction_charges'] = $checkout_data['cod_amount'];
+                        }
+                    }
                 }
                 $this->rocketService->updateOrder($request);
             }
