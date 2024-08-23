@@ -811,7 +811,7 @@ class CheckoutController extends Controller
             }
 
             if ($success) {
-
+                $start = microtime(true);
                 $delete_cart = Cart::where('customer_id', $customer_id)->get();
                 foreach ($delete_cart as $delete_data) {
                     $delete_data->variationOptions()->delete();
@@ -885,7 +885,8 @@ class CheckoutController extends Controller
                     $his['action'] = 'Order Placed';
                     $his['description'] = 'Order has been placed successfully';
                     OrderHistory::create($his);
-
+                    $time_taken = microtime(true) - $start;
+                    Log::info('Success code execution time: ' . $time_taken . ' seconds');
                     /****
                      * 1.send email for order placed
                      * 2.send sms for notification
