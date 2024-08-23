@@ -811,7 +811,6 @@ class CheckoutController extends Controller
             }
 
             if ($success) {
-                $start = microtime(true);
                 $delete_cart = Cart::where('customer_id', $customer_id)->get();
                 foreach ($delete_cart as $delete_data) {
                     $delete_data->variationOptions()->delete();
@@ -961,10 +960,12 @@ class CheckoutController extends Controller
                         }
                         $variations = Variation::whereIn('id', $variation_id)->get();
                     }
-                    $time_taken = microtime(true) - $start;
-                    Log::info('Success code execution time: ' . $time_taken . ' seconds');
+                    $start = microtime(true);
+                    
                     event(new OrderProcessed($order_info, $pickup_details, $variations));
                     event(new OrderCreated($brandIds, $order_info->id));
+                    $time_taken = microtime(true) - $start;
+                    Log::info('Success code execution time: ' . $time_taken . ' seconds');
                 }
             }
         } else {
