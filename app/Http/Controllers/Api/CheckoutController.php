@@ -946,8 +946,22 @@ class CheckoutController extends Controller
                     //     'mobile_no' => [$order_info->billing_mobile_no]
                     // );
                     // sendGBSSms('confirm_order', $sms_params);
-
-                    event(new OrderProcessed($order_info));
+                    $pickup_details = [];
+                    if (isset($order_info->pickup_store_id) && !empty($order_info->pickup_store_id) && !empty($order_info->pickup_store_details)) {
+                        $pickup = unserialize($order_info->pickup_store_details);
+        
+                        $pickup_details = $pickup;
+                    }
+                    $variation_id = [];
+                    $variations = [];
+                    if (isset($order_info->Variation) && !empty($order_info->Variation)) {
+                        $data = $order_info->Variation;
+                        foreach ($data as $value) {
+                            $variation_id[] = $value->variation_id;
+                        }
+                        $variations = Variation::whereIn('id', $variation_id)->get();
+                    }
+                    event(new OrderProcessed($order_info, $pickup_details, $variations));
                     event(new OrderCreated($brandIds, $order_info->id));
                 }
             }

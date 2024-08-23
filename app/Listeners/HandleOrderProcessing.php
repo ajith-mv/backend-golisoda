@@ -16,7 +16,9 @@ class HandleOrderProcessing
     public function handle(OrderProcessed $event)
     {
         $order_info = $event->order_info;
-               
+        $pickup_details = $event->pickup_details;
+        $variations = $event->variations;
+        
         // Generate PDF
         $globalInfo = GlobalSettings::first();
         $pdf = PDF::loadView('platform.invoice.index', compact('order_info', 'globalInfo', 'pickup_details', 'variations'));

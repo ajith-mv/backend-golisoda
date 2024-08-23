@@ -14,8 +14,10 @@ class OrderProcessed
     public $pickup_details;
     public $variations;
 
-    public function __construct(Order $order_info)
+    public function __construct(Order $order_info, $pickup_details, $variations)
     {
         $this->order_info = $order_info;
+        $this->pickup_details = $pickup_details;
+        $this->variations = $variations;
     }
 }
