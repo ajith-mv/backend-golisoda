@@ -26,6 +26,7 @@ use App\Models\OrderProductVariationOption;
 use App\Models\Product\ProductVariationOption;
 use App\Models\Warranty;
 use App\Events\OrderCreated;
+use App\Events\OrderProcessed;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -404,7 +405,6 @@ class CheckoutController extends Controller
             $his['description'] = 'Order has been placed successfully';
             OrderHistory::create($his);
             #generate invoice
-            $globalInfo = GlobalSettings::first();
             $pickup_details = [];
             if (isset($order_info->pickup_store_id) && !empty($order_info->pickup_store_id) && !empty($order_info->pickup_store_details)) {
                 $pickup = unserialize($order_info->pickup_store_details);
@@ -420,55 +420,8 @@ class CheckoutController extends Controller
                 }
                 $variations = Variation::whereIn('id', $variation_id)->get();
             }
-
-            $pdf = PDF::loadView('platform.invoice.index', compact('order_info', 'globalInfo', 'pickup_details', 'variations'));
-            Storage::put('public/invoice_order/' . $order_info->order_no . '.pdf', $pdf->output());
-            #send mail
-            $emailTemplate = EmailTemplate::select('email_templates.*')
-                ->join('sub_categories', 'sub_categories.id', '=', 'email_templates.type_id')
-                ->where('sub_categories.slug', 'new-order')->first();
-
-            $globalInfo = GlobalSettings::first();
-
-            $extract = array(
-                'name' => $order_info->billing_name,
-                'regards' => $globalInfo->site_name,
-                'company_website' => '',
-                'company_mobile_no' => $globalInfo->site_mobile_no,
-                'company_address' => $globalInfo->address,
-                'dynamic_content' => '',
-                'order_id' => $order_info->order_no
-            );
-            $templateMessage = $emailTemplate->message;
-            $templateMessage = str_replace("{", "", addslashes($templateMessage));
-            $templateMessage = str_replace("}", "", $templateMessage);
-            extract($extract);
-            eval("\$templateMessage = \"$templateMessage\";");
-
-            $title = $emailTemplate->title;
-            $title = str_replace("{", "", addslashes($title));
-            $title = str_replace("}", "", $title);
-            eval("\$title = \"$title\";");
-
-            $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
-            $send_mail = new OrderMail($templateMessage, $title, $filePath);
-            // return $send_mail->render();
-            try {
-                $bccEmails = explode(',', env('ORDER_EMAILS'));
-                Mail::to($order_info->billing_email)->bcc($bccEmails)->send($send_mail);
-            } catch (\Throwable $th) {
-                Log::info($th->getMessage());
-            }
+            event(new OrderProcessed($order_info, $pickup_details, $variations));
             event(new OrderCreated($brandIds, $order_info->id));
-            // $this->sendBrandVendorEmail($brandIds, $order_info->id); //email to brand vendor
-            #send sms for notification
-            $sms_params = array(
-                'company_name' => env('APP_NAME'),
-                'order_no' => $order_info->order_no,
-                'reference_no' => '',
-                'mobile_no' => [$order_info->billing_mobile_no]
-            );
-            sendGBSSms('confirm_order', $sms_params);
         }
         return  array('success' => true, 'message' => 'Order has been placed successfully');
     }

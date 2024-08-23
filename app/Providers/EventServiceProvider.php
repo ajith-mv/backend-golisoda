@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Events\OrderCreated;
+use App\Events\OrderProcessed;
+use App\Listeners\HandleOrderProcessing;
 use App\Listeners\SendBrandVendorEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -21,8 +23,11 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
         ],
         OrderCreated::class => [
-        SendBrandVendorEmail::class,
-    ],
+            SendBrandVendorEmail::class,
+        ],
+        OrderProcessed::class => [
+            HandleOrderProcessing::class,
+        ],
     ];
 
     /**
