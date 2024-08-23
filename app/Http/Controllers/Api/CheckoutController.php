@@ -960,12 +960,14 @@ class CheckoutController extends Controller
                         }
                         $variations = Variation::whereIn('id', $variation_id)->get();
                     }
-                    $start = microtime(true);
                     
                     event(new OrderProcessed($order_info, $pickup_details, $variations));
+                    $start = microtime(true);
+
+                   
+                    event(new OrderCreated($brandIds, $order_info->id));
                     $time_taken = microtime(true) - $start;
                     Log::info('Success code execution time: ' . $time_taken . ' seconds');
-                    event(new OrderCreated($brandIds, $order_info->id));
                     
                 }
             }
