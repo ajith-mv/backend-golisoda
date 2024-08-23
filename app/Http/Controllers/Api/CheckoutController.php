@@ -963,9 +963,10 @@ class CheckoutController extends Controller
                     $start = microtime(true);
                     
                     event(new OrderProcessed($order_info, $pickup_details, $variations));
-                    event(new OrderCreated($brandIds, $order_info->id));
                     $time_taken = microtime(true) - $start;
                     Log::info('Success code execution time: ' . $time_taken . ' seconds');
+                    event(new OrderCreated($brandIds, $order_info->id));
+                    
                 }
             }
         } else {
