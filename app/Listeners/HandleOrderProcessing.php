@@ -55,7 +55,7 @@ class HandleOrderProcessing
         $send_mail = new \App\Mail\OrderMail($templateMessage, $title, $filePath);
         try {
             $bccEmails = explode(',', env('ORDER_EMAILS'));
-            Mail::to($order_info->billing_email)->bcc($bccEmails)->send($send_mail);
+         //   Mail::to($order_info->billing_email)->bcc($bccEmails)->send($send_mail);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
         }
