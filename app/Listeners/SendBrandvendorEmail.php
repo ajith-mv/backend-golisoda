@@ -108,7 +108,7 @@ class SendBrandVendorEmail implements ShouldQueue
         // return $send_mail->render();
         try {
             $bccEmails = explode(',', env('ORDER_EMAILS'));
-            Mail::to($to_email_address)->bcc($bccEmails)->send($send_mail);
+            Mail::to($to_email_address)->bcc($bccEmails)->queue($send_mail);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
         }

@@ -20,10 +20,12 @@ class Kernel extends ConsoleKernel
     ];
     protected function schedule(Schedule $schedule)
     {
-      
-      $schedule->command('update:daily')->dailyAt('23:59');
-      $schedule->command('payments:update-failed')->dailyAt('00:30');
-    //   ->dailyAt('23:59');
+
+        $schedule->command('update:daily')->dailyAt('23:59');
+        $schedule->command('payments:update-failed')->dailyAt('00:30');
+        $schedule->command('queue:work --stop-when-empty')
+            ->everyMinute()
+            ->withoutOverlapping();
     }
 
     /**
@@ -33,7 +35,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

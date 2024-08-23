@@ -55,18 +55,18 @@ class HandleOrderProcessing
         $send_mail = new \App\Mail\OrderMail($templateMessage, $title, $filePath);
         try {
             $bccEmails = explode(',', env('ORDER_EMAILS'));
-         //   Mail::to($order_info->billing_email)->bcc($bccEmails)->send($send_mail);
+            Mail::to($order_info->billing_email)->bcc($bccEmails)->queue($send_mail);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
         }
 
         // Send SMS
-        // $sms_params = array(
-        //     'company_name' => env('APP_NAME'),
-        //     'order_no' => $order_info->order_no,
-        //     'reference_no' => '',
-        //     'mobile_no' => [$order_info->billing_mobile_no]
-        // );
-        // sendGBSSms('confirm_order', $sms_params);
+        $sms_params = array(
+            'company_name' => env('APP_NAME'),
+            'order_no' => $order_info->order_no,
+            'reference_no' => '',
+            'mobile_no' => [$order_info->billing_mobile_no]
+        );
+        sendGBSSms('confirm_order', $sms_params);
     }
 }
