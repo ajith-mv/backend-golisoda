@@ -19,7 +19,7 @@ use App\Models\Payment;
 use App\Models\Product\OrderProductAddon;
 use App\Models\Product\Product;
 use App\Models\CartShipment;
-Use App\Models\CartShiprocketResponse;
+use App\Models\CartShiprocketResponse;
 use App\Models\Master\CustomerAddress;
 use App\Models\Master\Variation;
 use App\Models\OrderProductVariationOption;
@@ -153,8 +153,6 @@ class CheckoutController extends Controller
             ->groupBy('sub.brand_id', 'sub.shipping_type')
             ->get();
 
-        Log::info($results);
-
         foreach ($results as $result) {
             $max_shipping_amount = floatval($result->total_shipment_amount);
             $shipping_amount += $result->total_shipment_amount;
@@ -163,11 +161,6 @@ class CheckoutController extends Controller
 
         // Determine the final shipping type based on the rules provided
         $shipping_name = $this->determineFinalShippingType($shippingTypes);
-
-        // Logging the total shipment amount and final shipping type
-        Log::info("Total Shipment Amount for carts with more than one unique brand: " . $shipping_amount);
-        Log::info("Final Shipping Type: " . $shipping_name);
-
 
 
         $order_ins['customer_id'] = $customer_id;
@@ -274,7 +267,7 @@ class CheckoutController extends Controller
                 $ins['shiprocket_order_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_order_id : '';
                 $ins['shiprocket_shipment_id'] = isset($cart_shipment) ? $cart_shipment->shiprocket_shipment_id : '';
                 $brand_order = BrandOrder::create($ins);
-               // $this->generateOrderNumbers();
+                // $this->generateOrderNumbers();
                 //insert variations
                 if (isset($item['chosen_variation_option_ids']) && !empty($item['chosen_variation_option_ids'])) {
                     foreach ($item['chosen_variation_option_ids'] as $variation_option_id) {
@@ -341,7 +334,7 @@ class CheckoutController extends Controller
         foreach ($delete_cart as $delete_data) {
             $delete_data->variationOptions()->delete();
             $shiprocket_response_data = CartShiprocketResponse::where('cart_token', $delete_data->shiprocket_order_number)->first();
-            if(isset($shiprocket_response_data)){
+            if (isset($shiprocket_response_data)) {
                 $request = json_decode($shiprocket_response_data->rocket_order_request_data, true);
                 log::debug($request);
                 if (isset($request['payment_method'])) {
@@ -354,7 +347,7 @@ class CheckoutController extends Controller
                 }
                 $this->rocketService->updateOrder($request);
             }
-            
+
             $delete_data->rocketResponse()->delete();
             $delete_data->shipments()->delete();
             $delete_data->delete();
@@ -871,7 +864,7 @@ class CheckoutController extends Controller
                         }
                     }
                     $orderDetails = Payment::where('payment_no', $razor_response['razorpay_payment_id'])->first();
-                    if(!isset($orderDetails)){
+                    if (!isset($orderDetails)) {
                         $pay_ins['order_id'] = $order_info->id;
                         $pay_ins['payment_no'] = $razor_response['razorpay_payment_id'];
                         $pay_ins['amount'] = $order_info->amount;
@@ -880,12 +873,12 @@ class CheckoutController extends Controller
                         $pay_ins['payment_mode'] = 'online';
                         $pay_ins['response'] = serialize($finalorder);
                         $pay_ins['status'] = $finalorder['status'];
-    
+
                         Payment::create($pay_ins);
-                    }else{
+                    } else {
                         Payment::where('payment_no', $razor_response['razorpay_payment_id'])->update(['response' => serialize($finalorder)]);
                     }
-                    
+
 
                     /**** order history */
                     $his['order_id'] = $order_info->id;
@@ -898,61 +891,64 @@ class CheckoutController extends Controller
                      * 2.send sms for notification
                      */
                     #generate invoice
-                    $globalInfo = GlobalSettings::first();
-                    $pickup_details = [];
-                    if (isset($order_info->pickup_store_id) && !empty($order_info->pickup_store_id) && !empty($order_info->pickup_store_details)) {
-                        $pickup = unserialize($order_info->pickup_store_details);
+                    // $globalInfo = GlobalSettings::first();
+                    // $pickup_details = [];
+                    // if (isset($order_info->pickup_store_id) && !empty($order_info->pickup_store_id) && !empty($order_info->pickup_store_details)) {
+                    //     $pickup = unserialize($order_info->pickup_store_details);
 
-                        $pickup_details = $pickup;
-                    }
-                    $pdf = PDF::loadView('platform.invoice.index', compact('order_info', 'globalInfo', 'pickup_details'));
-                    Storage::put('public/invoice_order/' . $order_info->order_no . '.pdf', $pdf->output());
-                    #send mail
-                    $emailTemplate = EmailTemplate::select('email_templates.*')
-                        ->join('sub_categories', 'sub_categories.id', '=', 'email_templates.type_id')
-                        ->where('sub_categories.slug', 'new-order')->first();
+                    //     $pickup_details = $pickup;
+                    // }
+                    // $pdf = PDF::loadView('platform.invoice.index', compact('order_info', 'globalInfo', 'pickup_details'));
+                    // Storage::put('public/invoice_order/' . $order_info->order_no . '.pdf', $pdf->output());
+                    // #send mail
+                    // $emailTemplate = EmailTemplate::select('email_templates.*')
+                    //     ->join('sub_categories', 'sub_categories.id', '=', 'email_templates.type_id')
+                    //     ->where('sub_categories.slug', 'new-order')->first();
 
-                    $globalInfo = GlobalSettings::first();
+                    // $globalInfo = GlobalSettings::first();
 
-                    $extract = array(
-                        'name' => $order_info->billing_name,
-                        'regards' => $globalInfo->site_name,
-                        'company_website' => '',
-                        'company_mobile_no' => $globalInfo->site_mobile_no,
-                        'company_address' => $globalInfo->address,
-                        'dynamic_content' => '',
-                        'order_id' => $order_info->order_no
-                    );
-                    $templateMessage = $emailTemplate->message;
-                    $templateMessage = str_replace("{", "", addslashes($templateMessage));
-                    $templateMessage = str_replace("}", "", $templateMessage);
-                    extract($extract);
-                    eval("\$templateMessage = \"$templateMessage\";");
+                    // $extract = array(
+                    //     'name' => $order_info->billing_name,
+                    //     'regards' => $globalInfo->site_name,
+                    //     'company_website' => '',
+                    //     'company_mobile_no' => $globalInfo->site_mobile_no,
+                    //     'company_address' => $globalInfo->address,
+                    //     'dynamic_content' => '',
+                    //     'order_id' => $order_info->order_no
+                    // );
+                    // $templateMessage = $emailTemplate->message;
+                    // $templateMessage = str_replace("{", "", addslashes($templateMessage));
+                    // $templateMessage = str_replace("}", "", $templateMessage);
+                    // extract($extract);
+                    // eval("\$templateMessage = \"$templateMessage\";");
 
-                    $title = $emailTemplate->title;
-                    $title = str_replace("{", "", addslashes($title));
-                    $title = str_replace("}", "", $title);
-                    eval("\$title = \"$title\";");
+                    // $title = $emailTemplate->title;
+                    // $title = str_replace("{", "", addslashes($title));
+                    // $title = str_replace("}", "", $title);
+                    // eval("\$title = \"$title\";");
 
-                    $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
-                    $send_mail = new OrderMail($templateMessage, $title, $filePath);
-                    // return $send_mail->render();
-                    try {
-                        $bccEmails = explode(',', env('ORDER_EMAILS'));
-                        Mail::to($order_info->billing_email)->bcc($bccEmails)->send($send_mail);
-                    } catch (\Throwable $th) {
-                        Log::info($th->getMessage());
-                    }
-                    // $this->sendBrandVendorEmail($brandIds, $order_info->id); //email to brand vendor
+                    // $filePath = 'storage/invoice_order/' . $order_info->order_no . '.pdf';
+                    // $send_mail = new OrderMail($templateMessage, $title, $filePath);
+                    // // return $send_mail->render();
+                    // try {
+                    //     $bccEmails = explode(',', env('ORDER_EMAILS'));
+                    //     Mail::to($order_info->billing_email)->bcc($bccEmails)->send($send_mail);
+                    // } catch (\Throwable $th) {
+                    //     Log::info($th->getMessage());
+                    // }
+                    // // $this->sendBrandVendorEmail($brandIds, $order_info->id); //email to brand vendor
+                    // event(new OrderCreated($brandIds, $order_info->id));
+                    // #send sms for notification
+                    // $sms_params = array(
+                    //     'company_name' => env('APP_NAME'),
+                    //     'order_no' => $order_info->order_no,
+                    //     'reference_no' => '',
+                    //     'mobile_no' => [$order_info->billing_mobile_no]
+                    // );
+                    // sendGBSSms('confirm_order', $sms_params);
+
+                    event(new OrderProcessed($order_info));
                     event(new OrderCreated($brandIds, $order_info->id));
-                    #send sms for notification
-                    $sms_params = array(
-                        'company_name' => env('APP_NAME'),
-                        'order_no' => $order_info->order_no,
-                        'reference_no' => '',
-                        'mobile_no' => [$order_info->billing_mobile_no]
-                    );
-                    sendGBSSms('confirm_order', $sms_params);
                 }
             }
         } else {
@@ -1104,7 +1100,8 @@ class CheckoutController extends Controller
         }
     }
 
-    public function sendEmailToVendors(Request $request){
+    public function sendEmailToVendors(Request $request)
+    {
         $order_no = $request->order_no;
         $order_info = Order::where('order_no', $order_no)->first();
         $brandIds = [];
@@ -1117,12 +1114,10 @@ class CheckoutController extends Controller
                     $brandIds[] = $product_info->brand_id;
                 }
             }
-            if(!empty($brandIds)){
+            if (!empty($brandIds)) {
                 event(new OrderCreated($brandIds, $order_info->id));
             }
-
         }
         return response()->json(array('error' => 1, 'status_code' => 200, 'message' => 'Success', 'status' => 'success', 'success' => []), 200);
-
     }
 }
