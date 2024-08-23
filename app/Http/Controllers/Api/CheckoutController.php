@@ -885,8 +885,7 @@ class CheckoutController extends Controller
                     $his['action'] = 'Order Placed';
                     $his['description'] = 'Order has been placed successfully';
                     OrderHistory::create($his);
-                    $time_taken = microtime(true) - $start;
-                    Log::info('Success code execution time: ' . $time_taken . ' seconds');
+                   
                     /****
                      * 1.send email for order placed
                      * 2.send sms for notification
@@ -962,6 +961,8 @@ class CheckoutController extends Controller
                         }
                         $variations = Variation::whereIn('id', $variation_id)->get();
                     }
+                    $time_taken = microtime(true) - $start;
+                    Log::info('Success code execution time: ' . $time_taken . ' seconds');
                     event(new OrderProcessed($order_info, $pickup_details, $variations));
                     event(new OrderCreated($brandIds, $order_info->id));
                 }
