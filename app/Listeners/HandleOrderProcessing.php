@@ -61,12 +61,12 @@ class HandleOrderProcessing
         }
 
         // Send SMS
-        $sms_params = array(
-            'company_name' => env('APP_NAME'),
-            'order_no' => $order_info->order_no,
-            'reference_no' => '',
-            'mobile_no' => [$order_info->billing_mobile_no]
-        );
-        sendGBSSms('confirm_order', $sms_params);
+        // $sms_params = array(
+        //     'company_name' => env('APP_NAME'),
+        //     'order_no' => $order_info->order_no,
+        //     'reference_no' => '',
+        //     'mobile_no' => [$order_info->billing_mobile_no]
+        // );
+        // sendGBSSms('confirm_order', $sms_params);
     }
 }
