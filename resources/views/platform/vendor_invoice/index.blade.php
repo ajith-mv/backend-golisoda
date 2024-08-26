@@ -86,8 +86,8 @@
                 <table class="no-border" style="width: 100%">
                     <tr>
                         <td class="w-30"> <span>
-                                <img src="{{ '/assets/global_setting/logo/1707472536_logo.png' }}" alt="{{ url('/').'/assets/global_setting/logo/1707472536_logo.png' }}"
-                                    height="75"></span> </td>
+                                <img src="{{ public_path('assets/global_setting/logo/1707472536_logo.png') }}"
+                                    alt="" height="75"></span> </td>
                         <td class="w-70">
                             <h2> Sold By <br /> {{ $brand_address->brand_name }} </h2>
                             <div>{{ $brand_address->branch_name }}</div>
@@ -96,7 +96,7 @@
                             </div>
                             <div> {{ $brand_address->state . ', ' . $brand_address->pincode }} </div>
                             <!--<div> {{ $brand_address->site_mobile_no }} </div>-->
-                            
+
                         </td>
 
                     </tr>
@@ -170,10 +170,10 @@
         </tr>
 
     </table>
-   @php
-       $brand_state_name = isset($brand_address) ? $brand_address->state : '';
-       $brand_state_name = strtolower(str_replace(' ', '', trim($brand_state_name)));
-   @endphp
+    @php
+        $brand_state_name = isset($brand_address) ? $brand_address->state : '';
+        $brand_state_name = strtolower(str_replace(' ', '', trim($brand_state_name)));
+    @endphp
     <table class="item-table" cellspacing="0" padding="0">
         <tr>
             <th style="width: 10px;" rowspan="2">S.No</th>
@@ -183,11 +183,14 @@
             <th rowspan="2" style="width: 30px;"> QTY</th>
             <th rowspan="2" style="width: 30px;"> RATE </th>
             <th rowspan="2" style="width: 40px;"> TAXABLE VALUE </th>
-    @if (empty($brand_state_name) || $brand_state_name == 'tamilnadu')
-            <th colspan="2" style="width: 100px;"> CGST </th>
-            <th colspan="2" style="width: 100px;"> SGST </th>
+            @if (empty($brand_state_name) || $brand_state_name == 'tamilnadu')
+                @php
+                    $colspan = 9;
+                @endphp
+                <th colspan="2" style="width: 100px;"> CGST </th>
+                <th colspan="2" style="width: 100px;"> SGST </th>
 
-            <th rowspan="2" style="width: 40px;"> NET Amount </th>
+                <th rowspan="2" style="width: 40px;"> NET Amount </th>
         </tr>
         <tr>
             <th style="width: 40px;">%</th>
@@ -196,6 +199,9 @@
             <th style="width: 40px;">Amt</th>
         </tr>
     @else
+        @php
+            $colspan = 7;
+        @endphp
         <th colspan="2" style="width: 100px;"> IGST </th>
 
         <th rowspan="2" style="width: 40px;"> NET Amount </th>
@@ -204,7 +210,7 @@
             <th style="width: 40px;">%</th>
             <th style="width: 40px;">Amt</th>
         </tr>
-    @endif
+        @endif
 
 
         @if (isset($order_info->orderItems) && !empty($order_info->orderItems))
@@ -258,25 +264,25 @@
                         <td> {{ number_format($item->price, 2) }} </td>
                         <td>{{ number_format($item->price, 2) }}</td>
                         @if (empty($brand_state_name) || $brand_state_name == 'tamilnadu')
-                        <td>{{ $item->tax_percentage / 2 }}%</td>
-                        <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
-                        <td>{{ $item->tax_percentage / 2 }}%</td>
-                        <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
+                            <td>{{ $item->tax_percentage / 2 }}%</td>
+                            <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
+                            <td>{{ $item->tax_percentage / 2 }}%</td>
+                            <td>{{ number_format($item->tax_amount / 2, 2) }}</td>
 
-                        <td style="text-align: right;">{{ number_format($item->sub_total, 2) }}</td>
+                            <td style="text-align: right;">{{ number_format($item->sub_total, 2) }}</td>
                     </tr>
-                    @else
+                @else
                     <td>{{ $item->tax_percentage }}%</td>
-                        <td>{{ number_format($item->tax_amount, 2) }}</td>
-                        <td style="text-align: right;">{{ number_format($item->sub_total, 2) }}</td>
-                    @endif
-                    @php
-                        $sub_total = (float) $item->sub_total;
-                        $total = $total + $sub_total;
-                        $i++;
-                    @endphp
+                    <td>{{ number_format($item->tax_amount, 2) }}</td>
+                    <td style="text-align: right;">{{ number_format($item->sub_total, 2) }}</td>
                 @endif
-            @endforeach
+                @php
+                    $sub_total = (float) $item->sub_total;
+                    $total = $total + $sub_total;
+                    $i++;
+                @endphp
+            @endif
+        @endforeach
         @endif
         @if (isset($order_info->orderAddons) && count($order_info->orderAddons))
             @foreach ($order_info->orderAddons as $item)
@@ -309,7 +315,7 @@
             @endforeach
         @endif
         <tr>
-            <td colspan="9" style="font-size:12px;">
+            <td colspan="{{ $colspan }}" style="font-size:12px;">
                 <div>
                     <label for="">Total in words </label>
                 </div>
