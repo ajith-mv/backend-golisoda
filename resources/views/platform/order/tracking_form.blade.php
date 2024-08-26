@@ -26,7 +26,7 @@
                     {{-- <a target="_blank" href="{{asset('storage/invoice_order/' . $info->id . '/'. $brandOrder->brand_id . '/' . $info->order_no . '.pdf')}}" tooltip="Download Invoice"  class="btn btn-icon btn-active-success btn-light-success mx-1 w-42px h-42px" > 
                         <i class="fa fa-download"></i>
                     </a> --}}
-                    <a target="_blank" href="{{route('order.vendor.invoice.download', ["order_id" => $info->id, "brand_id" => $brandOrder->brand_id, "order_no" => $info->order_no])}}" tooltip="Download Invoice"  class="btn btn-icon btn-active-success btn-light-success mx-1 w-42px h-42px" > 
+                    <a target="_self" href="{{route('order.vendor.invoice.download', ["order_id" => $info->id, "brand_id" => $brandOrder->brand_id, "order_no" => $info->order_no])}}" tooltip="Download Invoice"  class="btn btn-icon btn-active-success btn-light-success mx-1 w-42px h-42px" > 
                         <i class="fa fa-download"></i>
                     </a>
                 </div>
