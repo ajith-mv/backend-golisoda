@@ -23,7 +23,7 @@
             <div class="col-md-3">
                 <label>Download Invoice</label>
                 <div class="">
-                    <a target="_blank" href="{{asset('storage/invoice_order/' . $brandOrder->brand_id . '/' . $info->order_no . '.pdf')}}" tooltip="Download Invoice"  class="btn btn-icon btn-active-success btn-light-success mx-1 w-42px h-42px" > 
+                    <a target="_blank" href="{{asset('storage/invoice_order/' . $info->id . '/'. $brandOrder->brand_id . '/' . $info->order_no . '.pdf')}}" tooltip="Download Invoice"  class="btn btn-icon btn-active-success btn-light-success mx-1 w-42px h-42px" > 
                         <i class="fa fa-download"></i>
                     </a>
                 </div>
