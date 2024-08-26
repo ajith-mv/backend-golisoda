@@ -86,7 +86,7 @@
                 <table class="no-border" style="width: 100%">
                     <tr>
                         <td class="w-30"> <span>
-                                <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/global_setting/logo/1707472536_logo.png'))) }}" alt=""
+                                <img src="{{ public_path().'assets/global_setting/logo/1707472536_logo.png' }}" alt=""
                                     height="75"></span> </td>
                         <td class="w-70">
                             <h2> Sold By <br /> {{ $brand_address->brand_name }} </h2>
