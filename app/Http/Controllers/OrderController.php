@@ -8,6 +8,7 @@ use App\Mail\OrderMail;
 use App\Models\BrandOrder;
 use App\Models\GlobalSettings;
 use App\Models\Master\Brands;
+use App\Models\Master\BrandVendorLocation;
 use App\Models\Master\EmailTemplate;
 use App\Models\Master\OrderStatus;
 use App\Models\Order;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Mail;
 use Image;
+use PDF;
 use App\Models\Master\Pincode;
 class OrderController extends Controller
 {
@@ -413,5 +415,47 @@ class OrderController extends Controller
             return true;
         }
         return false;
+    }
+
+    public function downloadVendorInvoice(Request $request){
+        $order_id = $request->order_id;
+        $singleBrandId = $request->brand_id;
+        $order_no = $request->order_no;
+        $globalInfo = GlobalSettings::first();
+        
+        $order_info = Order::find($order_id);
+        $variations = $this->getVariations($order_info);
+        $brand_address = BrandVendorLocation::where([['brand_id', $singleBrandId], ['is_default', 1]])
+            ->join('brands', 'brand_vendor_locations.brand_id', '=', 'brands.id')
+            ->select('brand_vendor_locations.*', 'brands.brand_name')
+            ->first();
+        if (isset($brand_address) && (!empty($brand_address))) {
+            $pdf = PDF::loadView('platform.vendor_invoice.index', compact('brand_address', 'order_info', 'globalInfo', 'variations', 'singleBrandId'));
+            Storage::put('public/invoice_order/' . $order_id . '/' . $singleBrandId . '/' . $order_no . '.pdf', $pdf->output());
+            return $pdf->download($order_no. '.pdf');
+        }
+        
+
+    }
+
+    /**
+     * Method getVariations
+     *
+     * @param $order_info object
+     *
+     * @return array
+     */
+    public function getVariations($order_info)
+    {
+        $variation_id = [];
+        $variations = [];
+        if (isset($order_info->Variation) && !empty($order_info->Variation)) {
+            $data = $order_info->Variation;
+            foreach ($data as $value) {
+                $variation_id[] = $value->variation_id;
+            }
+            $variations = Variation::whereIn('id', $variation_id)->get();
+        }
+        return $variations;
     }
 }

@@ -203,6 +203,8 @@ Route::middleware(['auth'])->group(function(){
         Route::get('order-count', [App\Http\Controllers\OrderController::class, 'orderCountGolbal'])->name('order-count');
         Route::post('/change/order/status', [App\Http\Controllers\OrderController::class, 'changeOrderStatus'])->name('order.change.status');
         Route::post('/export/excel', [App\Http\Controllers\OrderController::class, 'export'])->name('order.export.excel')->middleware(['checkAccess:export']);
+        Route::get('/vendor/download', [App\Http\Controllers\OrderController::class, 'downloadVendorInvoice'])->name('order.vendor.invoice.download');
+
     });
 
     Route::prefix('reports')->middleware(['checkAccess:visible'])->group(function(){
