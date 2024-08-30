@@ -737,6 +737,11 @@ class FilterController extends Controller
                         ->orWhere('products.sku', 'like', "%{$search}%")
                         ->orWhere('products.hsn_code', 'like', "%{$search}%")
                         ->orWhere('products.price', 'like', "%{$search}%")
+                        ->orWhere(function ($qu) use ($search) {
+                            $qu->whereHas('productMeta', function ($q) use ($search) {
+                                $q->where('meta_keyword', 'like', '%' . $search . '%');
+                            });
+                        })
                         ->orWhere('product_categories.name', 'like', "%{$search}%")
                         ->orWhere('brands.brand_name', 'like', "%{$search}%");
                 });
