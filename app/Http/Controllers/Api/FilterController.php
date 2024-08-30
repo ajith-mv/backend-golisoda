@@ -25,6 +25,7 @@ class FilterController extends Controller
 
         $category_slug = $request->category_slug ?? '';
         $brand_slug = $request->brand_slug ?? '';
+        $exclusive = $request->exclusive ?? '';
         /**
          * top menu
          */
@@ -38,6 +39,8 @@ class FilterController extends Controller
                 $top_slide_menu['parent_id'] = $category->parent_id;
                 $top_slide_menu['slug'] = $category->slug;
                 $top_slide_menu['image'] = $category->image;
+                $top_slide_menu['category_name'] = '';
+                $top_slide_menu['category_slug'] = '';
                 $path = substr($category->banner_image, 0, -1);
                 $imagePath = storage_path($path);
                 if (file_exists($imagePath)) {
@@ -69,6 +72,8 @@ class FilterController extends Controller
                     $top_slide_menu['parent_id'] = $top_category->parent_id;
                     $top_slide_menu['slug'] = $top_category->slug;
                     $top_slide_menu['image'] = $top_category->image;
+                    $top_slide_menu['category_name'] = $category->name;
+                    $top_slide_menu['category_slug'] = $category->slug;
                     $path = substr($top_category->banner_image, 0, -1);
                     $imagePath = storage_path($path);
                     if (file_exists($imagePath)) {
@@ -87,7 +92,25 @@ class FilterController extends Controller
                     $top_slide_menu['child_category'] = $tmp_cat;
                 }
             }
-        } else if (isset($brand_slug) && !empty($brand_slug)) {
+        }else if (isset($exclusive) && !empty($exclusive)) {
+            $products=Product::where('label_id',20)                 
+             ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
+            ->where('product_categories.parent_id', '!=', 0)
+             ->groupBy('products.category_id')
+             ->distinct()
+             ->get();
+         foreach($products as $product){
+             if($product->productCategory){
+                 $child_data=$product->productCategory;
+             $tmp_cat[] = array('id' => $child_data->id, 'name' => $child_data->name, 'slug' => $child_data->slug);
+             } 
+            }
+ $serializedObjects = array_map('serialize', $tmp_cat);
+ $uniqueSerializedObjects = array_unique($serializedObjects);
+ $uniqueObjects = array_map('unserialize', $uniqueSerializedObjects);
+ $top_slide_menu['child_category']= array_values($uniqueObjects);
+           
+         } else if (isset($brand_slug) && !empty($brand_slug)) {
             $array = explode('_', $brand_slug);
             $brands = Brands::select('brands.id', 'brands.brand_name as name', 'brands.slug')->whereIn('slug', $array)->get();
             if (count($brands) > 0) {
@@ -304,7 +327,7 @@ class FilterController extends Controller
         $sort                   = $request->sort_by;
         $price                  = $request->prices;
         $size                   = $request->sizes;
-        $exclusive              = $request->exclusive ?? '';
+        $exclusive              = ($request->exclusive=='goli-soda') ? 20 : '';
         $search                 = $request->search ?? '';
 
         $not_in_attributes = array('page', 'search', 'take', 'categories', 'scategory', 'brands', 'discounts', 'sort_by', 'prices', 'sizes', 'size', 'customer_id', 'collection', 'handpicked', 'discount_collection', 'exclusive');
@@ -417,9 +440,9 @@ class FilterController extends Controller
                     return $query->where('product_categories.slug', $filter_category)->orWhere('parent.slug', $filter_category);
                 });
             })
-            ->when($exclusive == 'gbs', function ($q) {
-                $q->join('sub_categories', 'sub_categories.id', '=', 'products.label_id');
-                $q->where('sub_categories.slug', 'gbs');
+            ->when($exclusive, function ($q) use($exclusive) {
+                // $q->join('sub_categories', 'sub_categories.id', '=', 'products.label_id');
+                $q->where('label_id', $exclusive);
             })
             ->when($filter_sub_category != '', function ($q) use ($filter_sub_category) {
                 return $q->where('product_categories.slug', $filter_sub_category);
@@ -756,11 +779,15 @@ class FilterController extends Controller
         $searchData = [];
         $error = 0;
         if (!empty($query)) {
-
             $productInfo = Product::where(function ($qr) use ($query) {
                 $qr->where('product_name', 'like', "%{$query}%")
                     ->orWhere('hsn_code', 'like', "%{$query}%")
-                    ->orWhere('sku', 'like', "%{$query}%");
+                    ->orWhere('sku', 'like', "%{$query}%")
+                    ->orWhere(function ($qu) use ($query) {
+                            $qu->whereHas('productMeta', function ($q) use ($query) {
+                                $q->where('meta_keyword', 'like', '%' . $query . '%');
+                            });
+                        });
             })->where('status', 'published')->where('products.stock_status', 'in_stock')
                 ->skip(0)->take($take)->get();
             if (count($productInfo) == 0) {
