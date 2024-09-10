@@ -59,6 +59,7 @@ class ShipRocketService
                     CartShiprocketResponse::create($ins_params);
                 } else {
                     log::debug($response);
+                    return null;
                 }
             } else {
                 log::debug($e);
