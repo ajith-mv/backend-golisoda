@@ -99,7 +99,8 @@ class UserController extends Controller
                                 'user_name' => 'required|string',
                                 'user_email' => 'required|email|unique:users,email,' . $id . ',id',
                                 'user_role' => 'required',
-                                'mobile_no' => 'required|numeric|digits:10|unique:users,mobile_no,'. $id . ',id'
+                                'mobile_no' => 'required|numeric|digits:10|unique:users,mobile_no,'. $id . ',id',
+                                'password' => (isset($id)) ? 'nullable|' : 'required',
                             ]);
 
         if ($validator->passes()) {
@@ -123,7 +124,9 @@ class UserController extends Controller
             }
             $ins['name']            = $request->user_name;
             $ins['email']           = $request->user_email;
-            $ins['password']        = Hash::make($request->password);
+            if(isset($request->password) && (!empty($request->password))){
+                $ins['password']        = Hash::make($request->password);
+            }
             $ins['mobile_no']       = $request->mobile_no;
             $ins['country_code']    = $request->country_code;
             $ins['address']         = $request->address;

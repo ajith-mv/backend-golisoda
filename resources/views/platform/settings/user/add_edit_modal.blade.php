@@ -36,20 +36,20 @@
                             <input type="text" name="user_name" value="{{ $info->name ?? '' }}"
                                 class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Full name" />
                         </div>
-                        <input type="hidden" name="id" value="{{ $info->id ?? '' }}">
+                        <input type="hidden" id="user_id" name="id" value="{{ $info->id ?? '' }}">
 
                         <div class="fv-row mb-7">
                             <label class="required fw-bold fs-6 mb-2">Email</label>
                             <input type="email" name="user_email" class="form-control form-control-solid mb-3 mb-lg-0"
                                 placeholder="example@domain.com" value="{{ $info->email ?? '' }}" />
                         </div>
-                        @if (!isset($info->id))
+                        {{-- @if (!isset($info->id)) --}}
                             <div class="fv-row mb-7">
-                                <label class="required fw-bold fs-6 mb-2">Password</label>
+                                <label class="{{ (!isset($info->id)) ? 'required' : ''}} fw-bold fs-6 mb-2">Password</label>
                                 <input type="password" name="password"
                                     class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Password" />
                             </div>
-                        @endif
+                        {{-- @endif --}}
                         <div class="fv-row mb-7">
 
                             <label class="required fw-bold fs-6 mb-2">Mobile</label>
@@ -248,7 +248,7 @@
                                 }
                             }
                         },
-                        'password': {
+                        'password': (document.getElementById('user_id').value !== '') ? {} : {
                             validators: {
                                 notEmpty: {
                                     message: 'Password is required'
