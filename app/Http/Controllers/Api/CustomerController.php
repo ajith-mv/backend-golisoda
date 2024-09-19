@@ -422,7 +422,12 @@ class CustomerController extends Controller
 
     public function addUpdateCustomerAddress(Request $request)
     {
-
+        $request->validate([
+            'city' => 'required|string|max:30',
+        ], [
+            'city.max' => 'The city name must not exceed 30 characters.',
+        ]);
+        
         $ins['customer_id']     = $request->customer_id;
         $ins['address_type_id'] = $request->address_type_id;
         $ins['name']            = $request->name;
