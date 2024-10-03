@@ -21,7 +21,7 @@ class CustomerAddressesResource extends JsonResource
         $response['countryid'] = $this->countryid;
         $response['country'] = $this->countries->name;
         $response['stateid'] = $this->stateid;
-        $response['state'] = $this->states->state_name;
+        $response['state'] = isset($this->states) ? $this->states->state_name : '';
         $response['cityid'] = $this->cityid;
         $response['city'] = $this->city;
         $response['is_default'] = $this->is_default;
