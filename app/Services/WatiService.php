@@ -26,7 +26,7 @@ class WatiService
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                 ])
-                ->post($this->baseUrl . "/sendTemplateMessage/$phoneNumber", $params);
+                ->post($url, $params);
 
             log::info($response);
             return true;
