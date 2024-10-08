@@ -230,7 +230,7 @@ class OrderController extends Controller
                         ['name' => 'order_number', 'value' => $info->order_no],
                         ['name' => 'tracking_url', 'value' => 'test.com'],
                     ];
-                    $mobile_number = formatPhoneNumber($info->billing_mobile);
+                    $mobile_number = formatPhoneNumber($info->billing_mobile_no);
                     $this->watiService->sendMessage('917871896064', 'order_shipped_message', 'order_shipped_message',  $whatsapp_params);
 
                     /****

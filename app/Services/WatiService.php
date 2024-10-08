@@ -21,6 +21,9 @@ class WatiService
     public function sendMessage($phoneNumber, $template_name, $broadcast_name, $params = [])
     {
         $url = $this->baseUrl . "/sendTemplateMessage?WhatsAppNumber=$phoneNumber";
+        log::info($url);
+        log::info($params);
+
         try {
             $response = Http::withToken($this->token)
                 ->withHeaders([
@@ -31,7 +34,11 @@ class WatiService
                     'broadcast_name' => $broadcast_name,
                     'parameters' => $params
                 ]);
-
+log::info([
+    'template_name' => $template_name,
+    'broadcast_name' => $broadcast_name,
+    'parameters' => $params
+]);
             log::info($response);
             return true;
         } catch (\Exception $e) {
