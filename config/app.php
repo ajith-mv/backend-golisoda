@@ -185,6 +185,7 @@ return [
         Barryvdh\DomPDF\ServiceProvider::class,
 
         Softon\Indipay\IndipayServiceProvider::class,
+        App\Providers\WatiServiceProvider::class,
 
     ],
 

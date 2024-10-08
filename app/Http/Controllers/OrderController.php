@@ -25,8 +25,18 @@ use Mail;
 use Image;
 use PDF;
 use App\Models\Master\Pincode;
+use App\Services\WatiService;
+
 class OrderController extends Controller
 {
+    protected $watiService;
+
+    public function __construct(WatiService $watiService)
+    {
+        $this->watiService = $watiService;
+    }
+
+
     public function index(Request $request)
     {
         if ($request->ajax()) {
@@ -82,7 +92,7 @@ class OrderController extends Controller
                     $billing_info .= '<div class="font-weight-bold">' . $row['billing_name'] . '</div>';
                     $billing_info .= '<div class="">' . $row['billing_email'] . ',' . $row['billing_mobile_no'] . '</div>';
                     $billing_info .= '<div class="">' . $row['billing_address_line1'] . '</div>';
-                    $billing_info .= '<div class="">' . $row['billing_city'] . ','  . $row['billing_state'] . ','  . $row['billing_country'] . '-'  . $pincode->pincode?? '' .  '</div>';
+                    $billing_info .= '<div class="">' . $row['billing_city'] . ','  . $row['billing_state'] . ','  . $row['billing_country'] . '-'  . $pincode ? $pincode->pincode ?? '' : '' .  '</div>';
 
                     return $billing_info;
                 })
@@ -215,6 +225,12 @@ class OrderController extends Controller
                 case '4':
                     $action = 'Order Shipped';
                     $otp = generateOtp();
+                    $whatsapp_params = [
+                        ['name' => 'name', 'value' => $info->billing_name],
+                        ['name' => 'order_number', 'value' => $info->order_no],
+                        ['name' => 'tracking_url', 'value' => 'test tracking url'],
+                    ];
+                    $this->watiService->sendMessage('7871896064', 'order_shipped_message', 'order_shipped_message',  $whatsapp_params);
 
                     /****
                      * 1.send email for order placed
@@ -255,7 +271,7 @@ class OrderController extends Controller
                     // return $send_mail->render();
                      $bccEmails = explode(',', env('BCC_EMAILS'));
                      $bccRecipients = array_merge($bccEmails, [$info->billing_email]);
-                    Mail::to($info->billing_email)->bcc($bccRecipients)->send($send_mail);
+                    // Mail::to($info->billing_email)->bcc($bccRecipients)->send($send_mail);
 
                     #send sms for notification
                     $sms_params = array(
