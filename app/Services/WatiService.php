@@ -34,6 +34,15 @@ class WatiService
                     'broadcast_name' => $broadcast_name,
                     'parameters' => $params
                 ]);
+
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $this->token,
+                    'Content-Type' => 'application/json'
+                ])->post($url, [
+                    'template_name' => $template_name,
+                    'broadcast_name' => $broadcast_name,
+                    'parameters' => $params
+                ]);
 log::info([
     'template_name' => $template_name,
     'broadcast_name' => $broadcast_name,
