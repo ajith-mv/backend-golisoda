@@ -230,7 +230,7 @@ class OrderController extends Controller
                         ['name' => 'order_number', 'value' => $info->order_no],
                         ['name' => 'tracking_url', 'value' => 'test tracking url'],
                     ];
-                    $this->watiService->sendMessage('7871896064', 'order_shipped_message', 'order_shipped_message',  $whatsapp_params);
+                    $this->watiService->sendMessage('917871896064', 'order_shipped_message', 'order_shipped_message',  $whatsapp_params);
 
                     /****
                      * 1.send email for order placed
