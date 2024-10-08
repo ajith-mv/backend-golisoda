@@ -83,7 +83,7 @@ class HandleOrderProcessing
             ['name' => 'order_number', 'value' => $order_info->order_no]
         ];
         $mobile_number = formatPhoneNumber($order_info->billing_mobile_no);
-        $this->watiService->sendMessage('917871896064', 'order_placed_message', 'order_placed_message',  $whatsapp_params);
+        $this->watiService->sendMessage($mobile_number, 'order_success', 'order_success',  $whatsapp_params);
 
     }
 }

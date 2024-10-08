@@ -225,14 +225,7 @@ class OrderController extends Controller
                 case '4':
                     $action = 'Order Shipped';
                     $otp = generateOtp();
-                    $whatsapp_params = [
-                        ['name' => 'name', 'value' => $info->billing_name],
-                        ['name' => 'order_number', 'value' => $info->order_no],
-                        ['name' => 'tracking_url', 'value' => 'test.com'],
-                    ];
-                    $mobile_number = formatPhoneNumber($info->billing_mobile_no);
-                    $this->watiService->sendMessage('917871896064', 'order_shipped_message', 'order_shipped_message',  $whatsapp_params);
-
+                    
                     /****
                      * 1.send email for order placed
                      * 2.send sms for notification
@@ -286,6 +279,14 @@ class OrderController extends Controller
 
                     $info->status = 'shipped';
                     $info->delivery_otp = $otp;
+
+                    $whatsapp_params = [
+                        ['name' => 'name', 'value' => $info->billing_name],
+                        ['name' => 'order_number', 'value' => $info->order_no],
+                    ];
+                    $mobile_number = formatPhoneNumber($info->billing_mobile_no);
+                    $this->watiService->sendMessage($mobile_number, 'order_placed_message', 'order_placed_message',  $whatsapp_params);
+
 
                     break;
 
@@ -375,6 +376,14 @@ class OrderController extends Controller
                         'mobile_no' => [$info->billing_mobile_no]
                     );
                     // sendGBSSms('delivery_sms', $sms_params);
+
+                    $whatsapp_params = [
+                        ['name' => 'name', 'value' => $info->billing_name],
+                        ['name' => 'order_number', 'value' => $info->order_no],
+                        ['name' => 'tracking_url', 'value' => 'test.com'],
+                    ];
+                    $mobile_number = formatPhoneNumber($info->billing_mobile_no);
+                    $this->watiService->sendMessage($mobile_number, 'order_shipped_message', 'order_shipped_message',  $whatsapp_params);
 
                     break;
 
