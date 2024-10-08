@@ -20,7 +20,7 @@ class WatiService
 
     public function sendMessage($phoneNumber, $template_name, $broadcast_name, $params = [])
     {
-        $url = $this->baseUrl . "/sendTemplateMessage?WhatsAppNumber=$phoneNumber";
+        $url = $this->baseUrl . "/api/v1/sendTemplateMessage?WhatsAppNumber=$phoneNumber";
         log::info($url);
         log::info($params);
 
