@@ -25,15 +25,15 @@ class WatiService
         log::info($params);
 
         try {
-            // $response = Http::withToken($this->token)
-            //     ->withHeaders([
-            //         'Content-Type' => 'application/json',
-            //     ])
-            //     ->post($url, [
-            //         'template_name' => $template_name,
-            //         'broadcast_name' => $broadcast_name,
-            //         'parameters' => $params
-            //     ]);
+            $response = Http::withToken($this->token)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($url, [
+                    'template_name' => $template_name,
+                    'broadcast_name' => $broadcast_name,
+                    'parameters' => $params
+                ]);
 
             //     $response = Http::withHeaders([
             //         'Authorization' => 'Bearer ' . $this->token,
@@ -45,16 +45,16 @@ class WatiService
             //     ]);
             $client = new Client();
 
-$response = $client->request('POST', $url,  [
-                    'template_name' => $template_name,
-                    'broadcast_name' => $broadcast_name,
-                    'parameters' => $params
-                ]);
-log::info([
-    'template_name' => $template_name,
-    'broadcast_name' => $broadcast_name,
-    'parameters' => $params
-]);
+// $response = $client->request('POST', $url,  [
+//                     'template_name' => $template_name,
+//                     'broadcast_name' => $broadcast_name,
+//                     'parameters' => $params
+//                 ]);
+// log::info([
+//     'template_name' => $template_name,
+//     'broadcast_name' => $broadcast_name,
+//     'parameters' => $params
+// ]);
             log::info($response);
             return true;
         } catch (\Exception $e) {
