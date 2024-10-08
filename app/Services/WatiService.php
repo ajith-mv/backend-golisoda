@@ -20,16 +20,14 @@ class WatiService
 
     public function sendMessage($phoneNumber, $template_name, $broadcast_name, $params = [])
     {
-
+        $url = $this->baseUrl . "/sendTemplateMessage/$phoneNumber";
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->token,
-                'Content-Type' => 'application/json'
-            ])->post($this->baseUrl . "/sendTemplateMessage/$phoneNumber", [
-                'template_name' => $template_name,
-                'broadcast_name' => $broadcast_name,
-                'parameters' => $params
-            ]);
+            $response = Http::withToken($this->token)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->post($this->baseUrl . "/sendTemplateMessage/$phoneNumber", $params);
+
             log::info($response);
             return true;
         } catch (\Exception $e) {
