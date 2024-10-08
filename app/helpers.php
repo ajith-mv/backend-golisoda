@@ -1194,3 +1194,15 @@ function getVolumeMetricCalculation($length, $width, $height)
 {
     return ($length * $width * $height) / 5000; //it return weight in kg
 }
+
+function formatPhoneNumber($phoneNumber) {
+    // Remove spaces and any special characters including +
+    $phoneNumber = preg_replace('/[^\d]/', '', $phoneNumber);
+    
+    if (strpos($phoneNumber, '91') === 0) {
+        return $phoneNumber; // Already has the 91 prefix
+    } else {
+        return '91' . $phoneNumber; // Add 91 if missing
+    }
+}
+

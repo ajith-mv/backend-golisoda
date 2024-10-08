@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\OrderProcessed;
 use App\Models\GlobalSettings;
+use App\Services\WatiService;
 use App\Models\Master\EmailTemplate;
 use PDF;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,13 @@ use Illuminate\Support\Facades\Log;
 
 class HandleOrderProcessing
 {
+    protected $watiService;
+
+    public function __construct(WatiService $watiService)
+    {
+        $this->watiService = $watiService;
+    }
+
     public function handle(OrderProcessed $event)
     {
         $order_info = $event->order_info;
@@ -68,5 +76,14 @@ class HandleOrderProcessing
             'mobile_no' => [$order_info->billing_mobile_no]
         );
         sendGBSSms('confirm_order', $sms_params);
+
+        //send whatsapp notification
+        $whatsapp_params = [
+            ['name' => 'name', 'value' => $order_info->billing_name],
+            ['name' => 'order_number', 'value' => $order_info->order_no]
+        ];
+        $mobile_number = formatPhoneNumber($order_info->billing_mobile_no);
+        $this->watiService->sendMessage('917871896064', 'order_placed_message', 'order_placed_message',  $whatsapp_params);
+
     }
 }

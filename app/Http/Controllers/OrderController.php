@@ -228,8 +228,9 @@ class OrderController extends Controller
                     $whatsapp_params = [
                         ['name' => 'name', 'value' => $info->billing_name],
                         ['name' => 'order_number', 'value' => $info->order_no],
-                        ['name' => 'tracking_url', 'value' => 'test tracking url'],
+                        ['name' => 'tracking_url', 'value' => 'test.com'],
                     ];
+                    $mobile_number = formatPhoneNumber($info->billing_mobile);
                     $this->watiService->sendMessage('917871896064', 'order_shipped_message', 'order_shipped_message',  $whatsapp_params);
 
                     /****
@@ -271,7 +272,7 @@ class OrderController extends Controller
                     // return $send_mail->render();
                      $bccEmails = explode(',', env('BCC_EMAILS'));
                      $bccRecipients = array_merge($bccEmails, [$info->billing_email]);
-                    // Mail::to($info->billing_email)->bcc($bccRecipients)->send($send_mail);
+                    Mail::to($info->billing_email)->bcc($bccRecipients)->send($send_mail);
 
                     #send sms for notification
                     $sms_params = array(
