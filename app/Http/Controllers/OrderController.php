@@ -26,6 +26,7 @@ use Image;
 use PDF;
 use App\Models\Master\Pincode;
 use App\Services\WatiService;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -278,6 +279,7 @@ class OrderController extends Controller
 
                     $info->status = 'shipped';
                     $info->delivery_otp = $otp;
+                    log::info(config('wati.order_placed'));
                     if (!empty(config('wati.order_placed'))) {
                         $whatsapp_params = [
                             ['name' => 'name', 'value' => $info->billing_name],
