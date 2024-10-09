@@ -40,26 +40,26 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $order_by=$request->order[0]['column']?? 'orders.id';
-            $order_type=$request->order[0]['dir'] ?? 'desc';
-            if(isset($request->order[0]['column'])){
-            if($request->order[0]['column'] ==0){
-                $order_by='orders.created_at';
-            }else if($request->order[0]['column'] ==1){
-                $order_by='orders.order_no';
-            }else if($request->order[0]['column'] ==2){
-                $order_by='orders.billing_address_line1';
-            }else if($request->order[0]['column'] ==3){
-                $order_by='orders.amount';
-            }else if($request->order[0]['column'] ==4){
-                $order_by='order_quantity';
-            }else if($request->order[0]['column'] ==5){
-                $order_by='payment_type';
-            }else if($request->order[0]['column'] ==6){
-                $order_by='payment_status';
-            }else{
-                $order_by='orders.id';
-            }
+            $order_by = $request->order[0]['column'] ?? 'orders.id';
+            $order_type = $request->order[0]['dir'] ?? 'desc';
+            if (isset($request->order[0]['column'])) {
+                if ($request->order[0]['column'] == 0) {
+                    $order_by = 'orders.created_at';
+                } else if ($request->order[0]['column'] == 1) {
+                    $order_by = 'orders.order_no';
+                } else if ($request->order[0]['column'] == 2) {
+                    $order_by = 'orders.billing_address_line1';
+                } else if ($request->order[0]['column'] == 3) {
+                    $order_by = 'orders.amount';
+                } else if ($request->order[0]['column'] == 4) {
+                    $order_by = 'order_quantity';
+                } else if ($request->order[0]['column'] == 5) {
+                    $order_by = 'payment_type';
+                } else if ($request->order[0]['column'] == 6) {
+                    $order_by = 'payment_status';
+                } else {
+                    $order_by = 'orders.id';
+                }
             }
             $data = Order::selectRaw('gbs_payments.order_id,gbs_payments.payment_no,gbs_payments.status as payment_status,gbs_payments.payment_type,gbs_orders.status as order_status,gbs_orders.billing_address_line1 as billing_info,gbs_orders.*,sum(gbs_order_products.quantity) as order_quantity')
                 ->join('order_products', 'order_products.order_id', '=', 'orders.id')
@@ -87,7 +87,7 @@ class OrderController extends Controller
                 })
                 ->addIndexColumn()
                 ->editColumn('billing_info', function ($row) {
-                    $pincode=Pincode::find($row['billing_post_code']);
+                    $pincode = Pincode::find($row['billing_post_code']);
                     $billing_info = '';
                     $billing_info .= '<div class="font-weight-bold">' . $row['billing_name'] . '</div>';
                     $billing_info .= '<div class="">' . $row['billing_email'] . ',' . $row['billing_mobile_no'] . '</div>';
@@ -99,7 +99,7 @@ class OrderController extends Controller
 
                 ->editColumn('payment_status', function ($row) {
                     return ucwords($row->payment_status);
-                })  ->editColumn('payment_type', function ($row) {
+                })->editColumn('payment_type', function ($row) {
                     return strtoupper($row->payment_type ?? '');
                 })
                 ->editColumn('order_status', function ($row) {
@@ -161,8 +161,8 @@ class OrderController extends Controller
         // Get brand names for each brand_id
         foreach ($brandOrders as $brandOrder) {
             $brand = Brands::find($brandOrder->brand_id);
-            if(isset($brand))
-            $brandOrder->brand_name = $brand->brand_name;
+            if (isset($brand))
+                $brandOrder->brand_name = $brand->brand_name;
         }
 
         $order_status_info = OrderStatus::where('status', 'published')->get();
@@ -179,28 +179,27 @@ class OrderController extends Controller
         ]);
         if ($validator->passes()) {
 
-           
-                $trackingIds = $request->input('tracking_id');
-                $arrivalDates = $request->input('estimated_arrival_date');
-                            if(isset($trackingIds) || isset($arrivalDates)){
+
+            $trackingIds = $request->input('tracking_id');
+            $arrivalDates = $request->input('estimated_arrival_date');
+            if (isset($trackingIds) || isset($arrivalDates)) {
 
                 foreach ($trackingIds as $brandId => $trackingId) {
                     $brandOrders = BrandOrder::where([['order_id', $id], ['brand_id', $brandId]])->get();
-                    if(isset($brandOrders) && !empty($brandOrders)){
-                        foreach($brandOrders as $brandOrder){
+                    if (isset($brandOrders) && !empty($brandOrders)) {
+                        foreach ($brandOrders as $brandOrder) {
                             $brandOrder->tracking_id = $trackingId;
                             $brandOrder->estimated_arrival_date = $arrivalDates[$brandId];
                             $brandOrder->save();
                         }
                     }
-                    
                 }
-                            }
-            
+            }
 
-           if($request->order_status_id==6){
-               return response()->json(['error' => 1, 'message' => 'Admin cannot raise a cancel request as this will be raised by the website customers.']); 
-           }
+
+            if ($request->order_status_id == 6) {
+                return response()->json(['error' => 1, 'message' => 'Admin cannot raise a cancel request as this will be raised by the website customers.']);
+            }
             $info = Order::find($id);
             $info->notification_status = 'yes';
             $info->order_status_id = $request->order_status_id;
@@ -225,7 +224,7 @@ class OrderController extends Controller
                 case '4':
                     $action = 'Order Shipped';
                     $otp = generateOtp();
-                    
+
                     /****
                      * 1.send email for order placed
                      * 2.send sms for notification
@@ -248,7 +247,7 @@ class OrderController extends Controller
                         'company_address' => $globalInfo->address,
                         'customer_login_url' => env('WEBSITE_LOGIN_URL'),
                         'order_no' => $info->order_no,
-                        'description'=>$request->description??''
+                        'description' => $request->description ?? ''
                     );
                     $templateMessage = $emailTemplate->message;
                     $templateMessage = str_replace("{", "", addslashes($templateMessage));
@@ -263,8 +262,8 @@ class OrderController extends Controller
 
                     $send_mail = new DynamicMail($templateMessage, $title);
                     // return $send_mail->render();
-                     $bccEmails = explode(',', env('BCC_EMAILS'));
-                     $bccRecipients = array_merge($bccEmails, [$info->billing_email]);
+                    $bccEmails = explode(',', env('BCC_EMAILS'));
+                    $bccRecipients = array_merge($bccEmails, [$info->billing_email]);
                     Mail::to($info->billing_email)->bcc($bccRecipients)->send($send_mail);
 
                     #send sms for notification
@@ -279,15 +278,14 @@ class OrderController extends Controller
 
                     $info->status = 'shipped';
                     $info->delivery_otp = $otp;
-
-                    $whatsapp_params = [
-                        ['name' => 'name', 'value' => $info->billing_name],
-                        ['name' => 'order_number', 'value' => $info->order_no],
-                    ];
-                    $mobile_number = formatPhoneNumber($info->billing_mobile_no);
-                    $this->watiService->sendMessage($mobile_number, 'order_placed_message', 'order_placed_message',  $whatsapp_params);
-
-
+                    if (!empty(config('wati.order_placed'))) {
+                        $whatsapp_params = [
+                            ['name' => 'name', 'value' => $info->billing_name],
+                            ['name' => 'order_number', 'value' => $info->order_no],
+                        ];
+                        $mobile_number = formatPhoneNumber($info->billing_mobile_no);
+                        $this->watiService->sendMessage($mobile_number, 'order_placed_message', 'order_placed_message',  $whatsapp_params);
+                    }
                     break;
 
                 case '5':
@@ -339,7 +337,7 @@ class OrderController extends Controller
                         'dynamic_content' => '',
                         'customer_login_url' => env('WEBSITE_LOGIN_URL'),
                         'order_id' => $info->order_no,
-                        'description'=>$request->description??''
+                        'description' => $request->description ?? ''
                     );
                     $templateMessage = $emailTemplate->message;
                     $templateMessage = str_replace("{", "", addslashes($templateMessage));
@@ -353,7 +351,7 @@ class OrderController extends Controller
                     eval("\$title = \"$title\";");
 
                     // $filePath = 'storage/orderDocument/' . $info->order_no . '/document/' . $imagName;
-                    
+
                     // $filePath = "";
                     // $send_mail = new OrderMail($templateMessage, $title, $filePath);
                     //  $send_mail = new OrderMail($templateMessage, $title);
@@ -364,8 +362,8 @@ class OrderController extends Controller
                     $send_mail = new OrderMail($templateMessage, $title, $filePath);
 
                     // return $send_mail->render();
-                     $bccEmails = explode(',', env('BCC_EMAILS'));
-                     $bccRecipients = array_merge($bccEmails, [$info->billing_email]);
+                    $bccEmails = explode(',', env('BCC_EMAILS'));
+                    $bccRecipients = array_merge($bccEmails, [$info->billing_email]);
                     Mail::to($info->billing_email)->bcc($bccRecipients)->send($send_mail);
 
                     #send sms for notification
@@ -376,24 +374,35 @@ class OrderController extends Controller
                         'mobile_no' => [$info->billing_mobile_no]
                     );
                     // sendGBSSms('delivery_sms', $sms_params);
+                    if (!empty(config('wati.order_placed'))) {
+                        $brandOrders = BrandOrder::select('brand_id', 'tracking_id', 'estimated_arrival_date')
+                            ->where('order_id', $id)
+                            ->groupBy('brand_id') // Ensure unique brand_ids
+                            ->get();
+                        if (isset($brandOrders) && !empty($brandOrders)) {
+                            foreach ($brandOrders as $brandOrder) {
+                                $whatsapp_params = [
+                                    ['name' => 'name', 'value' => $info->billing_name],
+                                    ['name' => 'order_number', 'value' => $info->order_no],
+                                    ['name' => 'tracking_url', 'value' => $brandOrder->tracking_id],
+                                ];
+                                $mobile_number = formatPhoneNumber($info->billing_mobile_no);
+                                $this->watiService->sendMessage($mobile_number, config('wati.order_placed'), config('wati.order_placed'),  $whatsapp_params);
+                            }
+                        }
+                    }
 
-                    $whatsapp_params = [
-                        ['name' => 'name', 'value' => $info->billing_name],
-                        ['name' => 'order_number', 'value' => $info->order_no],
-                        ['name' => 'tracking_url', 'value' => 'test.com'],
-                    ];
-                    $mobile_number = formatPhoneNumber($info->billing_mobile_no);
-                    $this->watiService->sendMessage($mobile_number, 'order_shipped_message', 'order_shipped_message',  $whatsapp_params);
+
 
                     break;
 
                 default:
                     # code...
                     $orderStatus = OrderStatus::find($request->order_status_id);
-                    if(isset($orderStatus)){
+                    if (isset($orderStatus)) {
                         $action = $orderStatus->status_name;
                         $info->status = strtolower(str_replace(' ', '_', $action));
-                    }else{
+                    } else {
                         $action = '';
                     }
                     break;
@@ -443,12 +452,13 @@ class OrderController extends Controller
         return false;
     }
 
-    public function downloadVendorInvoice(Request $request){
+    public function downloadVendorInvoice(Request $request)
+    {
         $order_id = $request->order_id;
         $singleBrandId = $request->brand_id;
         $order_no = $request->order_no;
         $globalInfo = GlobalSettings::first();
-        
+
         $order_info = Order::find($order_id);
         $variations = $this->getVariations($order_info);
         $brand_address = BrandVendorLocation::where([['brand_id', $singleBrandId], ['is_default', 1]])
@@ -458,10 +468,8 @@ class OrderController extends Controller
         if (isset($brand_address) && (!empty($brand_address))) {
             $pdf = PDF::loadView('platform.vendor_invoice.index', compact('brand_address', 'order_info', 'globalInfo', 'variations', 'singleBrandId'));
             Storage::put('public/invoice_order/' . $order_id . '/' . $singleBrandId . '/' . $order_no . '.pdf', $pdf->output());
-            return $pdf->download($order_no. '.pdf');
+            return $pdf->download($order_no . '.pdf');
         }
-        
-
     }
 
     /**

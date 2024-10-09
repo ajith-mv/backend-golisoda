@@ -14,8 +14,8 @@ class WatiService
 
     public function __construct()
     {
-        $this->baseUrl = env('WATI_API_URL');
-        $this->token = env('WATI_API_KEY');
+        $this->baseUrl = config('wati.api_url');
+        $this->token = config('wati.api_key');
     }
 
     public function sendMessage($phoneNumber, $template_name, $broadcast_name, $params = [])

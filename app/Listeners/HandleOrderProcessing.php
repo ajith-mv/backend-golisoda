@@ -78,12 +78,14 @@ class HandleOrderProcessing
         sendGBSSms('confirm_order', $sms_params);
 
         //send whatsapp notification
+        if (!empty(config('wati.order_success'))) {
+
         $whatsapp_params = [
             ['name' => 'name', 'value' => $order_info->billing_name],
             ['name' => 'order_number', 'value' => $order_info->order_no]
         ];
         $mobile_number = formatPhoneNumber($order_info->billing_mobile_no);
-        $this->watiService->sendMessage($mobile_number, 'order_success', 'order_success',  $whatsapp_params);
-
+        $this->watiService->sendMessage($mobile_number, config('wati.order_success'), config('wati.order_success'),  $whatsapp_params);
+    }
     }
 }
