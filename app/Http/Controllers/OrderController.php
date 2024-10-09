@@ -291,7 +291,7 @@ class OrderController extends Controller
                                 $whatsapp_params = [
                                     ['name' => 'name', 'value' => $info->billing_name],
                                     ['name' => 'order_number', 'value' => $info->order_no],
-                                    ['name' => 'tracking_url', 'value' => $brandOrder->tracking_id],
+                                    ['name' => 'tracking_url', 'value' => $brandOrder->tracking_id?? 'Track data not available'],
                                 ];
                                 $mobile_number = formatPhoneNumber($info->billing_mobile_no);
                                 $this->watiService->sendMessage($mobile_number, config('wati.order_shipped'), config('wati.order_shipped'),  $whatsapp_params);
