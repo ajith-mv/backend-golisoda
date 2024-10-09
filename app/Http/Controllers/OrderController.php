@@ -280,14 +280,25 @@ class OrderController extends Controller
                     $info->status = 'shipped';
                     $info->delivery_otp = $otp;
                     log::info(config('wati.order_shipped'));
+
                     if (!empty(config('wati.order_shipped'))) {
-                        $whatsapp_params = [
-                            ['name' => 'name', 'value' => $info->billing_name],
-                            ['name' => 'order_number', 'value' => $info->order_no],
-                        ];
-                        $mobile_number = formatPhoneNumber($info->billing_mobile_no);
-                        $this->watiService->sendMessage($mobile_number, config('wati.order_shipped'), config('wati.order_shipped'),  $whatsapp_params);
+                        $brandOrders = BrandOrder::select('brand_id', 'tracking_id', 'estimated_arrival_date')
+                            ->where('order_id', $id)
+                            ->groupBy('brand_id') // Ensure unique brand_ids
+                            ->get();
+                        if (isset($brandOrders) && !empty($brandOrders)) {
+                            foreach ($brandOrders as $brandOrder) {
+                                $whatsapp_params = [
+                                    ['name' => 'name', 'value' => $info->billing_name],
+                                    ['name' => 'order_number', 'value' => $info->order_no],
+                                    ['name' => 'tracking_url', 'value' => $brandOrder->tracking_id],
+                                ];
+                                $mobile_number = formatPhoneNumber($info->billing_mobile_no);
+                                $this->watiService->sendMessage($mobile_number, config('wati.order_shipped'), config('wati.order_shipped'),  $whatsapp_params);
+                            }
+                        }
                     }
+
                     break;
 
                 case '5':
@@ -376,22 +387,14 @@ class OrderController extends Controller
                         'mobile_no' => [$info->billing_mobile_no]
                     );
                     // sendGBSSms('delivery_sms', $sms_params);
+                    
                     if (!empty(config('wati.order_delivered'))) {
-                        $brandOrders = BrandOrder::select('brand_id', 'tracking_id', 'estimated_arrival_date')
-                            ->where('order_id', $id)
-                            ->groupBy('brand_id') // Ensure unique brand_ids
-                            ->get();
-                        if (isset($brandOrders) && !empty($brandOrders)) {
-                            foreach ($brandOrders as $brandOrder) {
-                                $whatsapp_params = [
-                                    ['name' => 'name', 'value' => $info->billing_name],
-                                    ['name' => 'order_number', 'value' => $info->order_no],
-                                    ['name' => 'tracking_url', 'value' => $brandOrder->tracking_id],
-                                ];
-                                $mobile_number = formatPhoneNumber($info->billing_mobile_no);
-                                $this->watiService->sendMessage($mobile_number, config('wati.order_delivered'), config('wati.order_delivered'),  $whatsapp_params);
-                            }
-                        }
+                        $whatsapp_params = [
+                            ['name' => 'name', 'value' => $info->billing_name],
+                            ['name' => 'order_number', 'value' => $info->order_no],
+                        ];
+                        $mobile_number = formatPhoneNumber($info->billing_mobile_no);
+                        $this->watiService->sendMessage($mobile_number, config('wati.order_delivered'), config('wati.order_delivered'),  $whatsapp_params);
                     }
 
 
